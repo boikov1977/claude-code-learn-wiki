@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "poisk-mcp": {
+      "type": "stdio",
+      "command": "/home/andrei/mcp/poisk-mcp/venv/bin/python",
+      "args": [
+        "/home/andrei/mcp/poisk-mcp/server.py"
+      ],
+      "env": {
+        "ALL_PROXY": "",
+        "all_proxy": "",
+        "HTTP_PROXY": "http://127.0.0.1:2080/",
+        "HTTPS_PROXY": "http://127.0.0.1:2080/",
+        "http_proxy": "http://127.0.0.1:2080/",
+        "https_proxy": "http://127.0.0.1:2080/",
+        "NO_PROXY": "localhost,127.0.0.0/8,::1",
+        "no_proxy": "localhost,127.0.0.0/8,::1",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+        "HF_HUB_DISABLE_TELEMETRY": "1",
+        "HF_HUB_DISABLE_PROGRESS_BARS": "1",
+        "HF_HUB_ENABLE_HF_TRANSFER": "0"
+      }
+    }
+  }
+}
