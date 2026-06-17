@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Строим команду AI-агентов для разработки: от идеи до 11 субагентов</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: { useMaxWidth: false },
+      sequence: { useMaxWidth: false },
+      class: { useMaxWidth: false }
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e0e0e0;
+      --text: #2d3436;
+      --text-muted: #636e72;
+      --accent: #6c5ce7;
+      --accent-light: #f0edfc;
+      --code-bg: #f6f8fa;
+      --green: #00b894;
+      --orange: #e17055;
+      --red: #d63031;
+      --purple: #6c5ce7;
+      --teal: #008080;
+      --yellow: #fdcb6e;
+      --blue: #0984e3;
+      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container { max-width: 1060px; margin: 0 auto; padding: 40px 0 80px; }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), #a29bfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    h4 {
+      font-size: 1.05em;
+      margin: 20px 0 8px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: var(--shadow);
+    }
+
+    .card-accent { border-left: 4px solid var(--accent); }
+    .card-green { border-left: 4px solid var(--green); background: #f0fff4; }
+    .card-orange { border-left: 4px solid var(--orange); background: #fff5f0; }
+    .card-purple { border-left: 4px solid var(--purple); background: #f8f4ff; }
+    .card-red { border-left: 4px solid var(--red); background: #fff5f5; }
+    .card-teal { border-left: 4px solid var(--teal); background: #f0fffa; }
+    .card-blue { border-left: 4px solid var(--blue); background: #f0f8ff; }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.88em;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      margin: 16px 0;
+      line-height: 1.6;
+    }
+    .code-block code {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .inline-code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.88em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    th {
+      background: var(--accent-light);
+      font-weight: 600;
+      color: var(--text);
+    }
+    tr:nth-child(even) { background: #f9fafb; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #fff;
+      vertical-align: middle;
+    }
+    .badge-new { background: var(--green); }
+    .badge-existing { background: var(--accent); }
+    .badge-model { background: var(--orange); }
+    .badge-pattern { background: var(--teal); }
+
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 20px 0;
+    }
+    @media (max-width: 860px) { .agent-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 540px) { .agent-grid { grid-template-columns: 1fr; } }
+
+    .agent-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .agent-card:hover {
+      box-shadow: 0 6px 24px rgba(108,92,231,0.12);
+      transform: translateY(-2px);
+    }
+    .agent-card .agent-emoji { font-size: 1.8rem; margin-bottom: 8px; }
+    .agent-card h4 { margin: 0 0 4px; color: var(--text); font-size: 1rem; }
+    .agent-card .agent-model {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      margin-bottom: 6px;
+    }
+    .agent-card p { font-size: 0.88rem; color: var(--text-muted); margin: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    .callout {
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+    .callout-info { background: #e8f4fd; border-left: 4px solid var(--blue); }
+    .callout-warn { background: #fff8e1; border-left: 4px solid var(--yellow); }
+    .callout-tip { background: #e8f8f0; border-left: 4px solid var(--green); }
+    .callout-danger { background: #fde8e8; border-left: 4px solid var(--red); }
+
+    ul, ol { margin: 10px 0 14px 24px; }
+    li { margin-bottom: 6px; }
+
+    .phase-label {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+    <h1>Строим команду AI-агентов для разработки</h1>
+    <p class="subtitle">От идеи до 11 субагентов: coding-агенты, архитекторы-дебатёры, специалисты. Полный разбор архитектуры, моделей, промптов и workflow-паттернов.</p>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 1: Зачем это нужно -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">🎯</span> Зачем строить команду агентов</h2>
+
+    <p>Классический Claude Code &mdash; это один агент, который делает всё. Он пишет код, ревьюит, тестирует, документирует. Но есть нюанс: один агент, который делает всё, делает всё <strong>одинаково</strong>. Он не может одновременно быть скептическим ревьюером и смелым инноватором.</p>
+
+    <p>Идея простая: <strong>разбить разработку на роли</strong>. Каждая роль &mdash; это отдельный субагент со своей моделью, своими инструментами, своими ограничениями и своим промптом. Родительская сессия Claude Code выступает оркестратором, который решает, кого вызвать и когда.</p>
+
+    <div class="callout callout-info">
+      <strong>Ключевой инсайт:</strong> Субагенты в Claude Code &mdash; это не просто разные промпты. Это полностью изолированные сессии со своими MCP-серверами, скиллами и наборами инструментов. Родительская сессия их не видит.
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 2: Архитектура команды -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">🏗️</span> Архитектура команды: 3 яруса</h2>
+
+    <p>Мы построили трёхуровневую систему из 11 субагентов. Каждый уровень имеет свою зону ответственности:</p>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart TB
+    subgraph orchestrator["Оркестратор: Claude Code"]
+        direction LR
+        main["Основная сессия<br/>(родительский агент)"]
+    end
+
+    subgraph tier1["Ярус 1: Coding-агенты (4)"]
+        direction LR
+        pyback["🐍 py-backend-coder<br/><code>deepseek-v4-flash</code>"]
+        frontend["🎨 frontend-coder<br/><code>deepseek-v4-flash</code>"]
+        reviewer["🔍 code-reviewer<br/><code>deepseek-v4-pro</code>"]
+        tester["🧪 tester-agent<br/><code>mimo-v2.5</code>"]
+    end
+
+    subgraph tier2["Ярус 2: Архитекторы (3)"]
+        direction LR
+        innovator["🚀 innovator<br/><code>minimax-m3</code>"]
+        pragmatist["⚖️ pragmatist<br/><code>deepseek-v4-pro</code>"]
+        conservative["🛡️ conservative<br/><code>qwen3.7-plus</code>"]
+    end
+
+    subgraph tier3["Ярус 3: Специалисты (4)"]
+        direction LR
+        writer["✍️ writer-agent<br/><code>mimo-v2.5</code>"]
+        explorer["🔎 explorer<br/><code>inherit</code>"]
+        openspec["📋 openspec-manager<br/><code>inherit</code>"]
+        statusline["🔧 statusline-setup<br/><code>inherit</code>"]
+    end
+
+    orchestrator --> tier1
+    orchestrator --> tier2
+    orchestrator --> tier3
+
+    tier1 -.-> tier2
+    tier1 -.-> tier3
+
+    style orchestrator fill:#f0edfc,stroke:#6c5ce7,stroke-width:2px
+    style tier1 fill:#e8f8f0,stroke:#00b894,stroke-width:2px
+    style tier2 fill:#fff5f0,stroke:#e17055,stroke-width:2px
+    style tier3 fill:#f0f8ff,stroke:#0984e3,stroke-width:2px
+      </pre>
+    </div>
+
+    <h3>Почему именно 3 яруса</h3>
+
+    <table>
+      <thead>
+        <tr><th>Ярус</th><th>Роль</th><th>Модели</th><th>Инструменты</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Coding</strong></td>
+          <td>Пишут код, тестируют, ревьюят</td>
+          <td>deepseek-v4-flash (кодинг), deepseek-v4-pro (ревью), mimo-v2.5 (тесты)</td>
+          <td>Read, Write, Edit, Bash + context7 MCP</td>
+        </tr>
+        <tr>
+          <td><strong>Architect</strong></td>
+          <td>Проектируют решения через дебаты</td>
+          <td>minimax-m3, deepseek-v4-pro, qwen3.7-plus</td>
+          <td>Read, Write, Edit, Bash + context7 MCP</td>
+        </tr>
+        <tr>
+          <td><strong>Specialist</strong></td>
+          <td>Документация, поиск, спецификации</td>
+          <td>mimo-v2.5, inherit (базовая модель)</td>
+          <td>Read, Write, Edit, Bash + кастомные MCP/скиллы</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 3: Coding-агенты (детально) -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">💻</span> Coding-агенты: 4 специалиста по коду</h2>
+
+    <p>Это главная рабочая лошадка системы. Четыре агента, каждый со своей специализацией, единым форматом workflow и общим подходом к качеству.</p>
+
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-emoji">🐍</div>
+        <h4>py-backend-coder <span class="badge badge-new">NEW</span></h4>
+        <div class="agent-model">model: claude-go-deepseek-v4-flash</div>
+        <p>Универсальный Python + backend: FastAPI, SQLAlchemy, Pydantic, Celery, скрипты, CLI, тесты.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-emoji">🎨</div>
+        <h4>frontend-coder <span class="badge badge-new">NEW</span></h4>
+        <div class="agent-model">model: claude-go-deepseek-v4-flash</div>
+        <p>React 18+, TypeScript, Next.js 14+, Vue 3, Tailwind. Доступность и производительность.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-emoji">🔍</div>
+        <h4>code-reviewer <span class="badge badge-new">NEW</span></h4>
+        <div class="agent-model">model: claude-go-deepseek-v4-pro</div>
+        <p>Только чтение. Security, корректность, производительность. Severity: BLOCKER &rarr; NIT.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-emoji">🧪</div>
+        <h4>tester-agent <span class="badge badge-new">NEW</span></h4>
+        <div class="agent-model">model: claude-go-mimo-v2.5</div>
+        <p>pytest, vitest, playwright. 4-фазовый workflow: Analyze &rarr; Generate &rarr; Run &rarr; Report.</p>
+      </div>
+    </div>
+
+    <h3>Единый формат: 3-фазовый workflow</h3>
+
+    <p>Все coding-агенты (кроме tester) используют одинаковую структуру workflow, вдохновлённую VoltAgent и wshobson/agents:</p>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart LR
+    subgraph phase1["Фаза 1: Анализ"]
+        direction TB
+        s1a["Прочитать структуру проекта"]
+        s1b["Определить стек и зависимости"]
+        s1c["Проверить CLAUDE.md"]
+        s1d["Оценить объём задачи"]
+        s1a --> s1b --> s1c --> s1d
+    end
+
+    subgraph phase2["Фаза 2: Реализация"]
+        direction TB
+        s2a["Написать интерфейсы и типы"]
+        s2b["Реализовать бизнес-логику"]
+        s2c["Проверить API через context7"]
+        s2d["Написать тесты"]
+        s2a --> s2b --> s2c --> s2d
+    end
+
+    subgraph phase3["Фаза 3: Контроль качества"]
+        direction TB
+        s3a["Линтинг (ruff/eslint)"]
+        s3b["Типизация (mypy/typescript)"]
+        s3c["Тесты (pytest/vitest)"]
+        s3d["Формат ответа"]
+        s3a --> s3b --> s3c --> s3d
+    end
+
+    phase1 --> phase2 --> phase3
+
+    style phase1 fill:#e8f4fd,stroke:#0984e3
+    style phase2 fill:#f0fff4,stroke:#00b894
+    style phase3 fill:#f8f4ff,stroke:#6c5ce7
+      </pre>
+    </div>
+
+    <h3>py-backend-coder vs frontend-coder</h3>
+
+    <p>Вместо двух пересекающихся Python-агентов сделали одного универсального &mdash; объединили python-coder и backend-coder. Теперь контраст чище:</p>
+
+    <table>
+      <thead>
+        <tr><th>Аспект</th><th>py-backend-coder</th><th>frontend-coder</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Фокус</strong></td>
+          <td>Всё, что Python: серверы, API, CLI, скрипты, БД, воркеры, тесты</td>
+          <td>Веб-интерфейсы: компоненты, стили, роутинг, доступность</td>
+        </tr>
+        <tr>
+          <td><strong>Фреймворки</strong></td>
+          <td>FastAPI, SQLAlchemy 2.0, Pydantic v2, Celery, Alembic, Django</td>
+          <td>React, Next.js, Vue, Tailwind, Vite, CSS Modules</td>
+        </tr>
+        <tr>
+          <td><strong>Чек-лист</strong></td>
+          <td>Pydantic v2, async всё, DI, миграции, > 85% покрытие</td>
+          <td>TypeScript strict, семантика, ARIA, memo/useMemo</td>
+        </tr>
+        <tr>
+          <td><strong>context7</strong></td>
+          <td><code>npx ctx7 docs sqlalchemy "selectinload async"</code></td>
+          <td><code>npx ctx7 docs next.js "server actions"</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>code-reviewer: read-only ревьюер</h3>
+
+    <p>Самый строгий агент в команде. У него <strong>нет доступа к Write/Edit</strong> &mdash; он не может случайно «помочь» кодом. Только читает и выносит вердикт.</p>
+
+    <div class="callout callout-warn">
+      <strong>Важно:</strong> code-reviewer использует deepseek-v4-pro (более мощную модель), потому что ревью требует глубокого понимания контекста, а не скорости генерации кода.
+    </div>
+
+    <p>Система severity в ревью:</p>
+    <ul>
+      <li><strong>BLOCKER</strong> (красный) &mdash; критическая проблема, блокирует деплой</li>
+      <li><strong>CRITICAL</strong> (оранжевый) &mdash; серьёзная проблема, требует исправления</li>
+      <li><strong>MAJOR</strong> (жёлтый) &mdash; значимая проблема, стоит исправить</li>
+      <li><strong>NIT</strong> (серый) &mdash; мелочь, рекомендация</li>
+    </ul>
+
+    <h3>tester-agent: 4-фазовый QA</h3>
+
+    <p>tester-agent имеет расширенный workflow из 4 фаз (а не 3), потому что тестирование требует циклической работы:</p>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart LR
+    A["1. Analyzе<br/>Прочитать код<br/>Найти зависимости<br/>Определить кейсы"] --> B["2. Generate<br/>Happy path<br/>Edge cases<br/>Error cases<br/>Regression"]
+    B --> C["3. Run<br/>Запустить тесты<br/>При падении &mdash; починить тест<br/>При баге &mdash; сообщить"]
+    C --> D["4. Report<br/>Покрытие &gt;85%<br/>Нет flaky<br/>Нет print/console.log"]
+    D -.-> C
+
+    style A fill:#e8f4fd,stroke:#0984e3
+    style B fill:#f0fff4,stroke:#00b894
+    style C fill:#fff5f0,stroke:#e17055
+    style D fill:#f8f4ff,stroke:#6c5ce7
+      </pre>
+    </div>
+
+    <div class="callout callout-tip">
+      <strong>Правило tester-agent:</strong> Если тест упал из-за бага в продакшн-коде &mdash; агент НЕ чинит код. Он сообщает о баге. Тесты &mdash; его зона, продакшн &mdash; чужая.
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 4: Архитекторы-дебатёры -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">🏛️</span> Архитекторы: 3 агента для дебатов</h2>
+
+    <p>Самый нестандартный элемент системы. Три архитектора не просто предлагают решения &mdash; они <strong>спорят друг с другом</strong> через файлы в <code>.triage/</code>.</p>
+
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-emoji">🚀</div>
+        <h4>innovator</h4>
+        <div class="agent-model">model: claude-go-minimax-m3</div>
+        <p>Смелые решения. Новые технологии. Смотрит на 2-3 шага вперёд. Не боится ломать устаревшее.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-emoji">⚖️</div>
+        <h4>pragmatist</h4>
+        <div class="agent-model">model: claude-go-deepseek-v4-pro</div>
+        <p>Баланс. Cost-benefit анализ. Инкрементальные улучшения. Таблицы сравнения &mdash; его конёк.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-emoji">🛡️</div>
+        <h4>conservative</h4>
+        <div class="agent-model">model: claude-go-qwen3.7-plus</div>
+        <p>Стабильность. Проверенные решения. Указывает на риски и подводные камни новых подходов.</p>
+      </div>
+    </div>
+
+    <h3>Mechanism: 2 раунда дебатов</h3>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+sequenceDiagram
+    participant O as Оркестратор
+    participant I as 🚀 Innovator
+    participant P as ⚖️ Pragmatist
+    participant C as 🛡️ Conservative
+
+    rect rgb(232, 244, 253)
+    Note over O,C: Раунд 1: Proposal (каждый независимо)
+    O->>I: Задача: innovator, round-1
+    I-->>O: .triage/task/round-1/01-innovator.md
+    O->>P: Задача: pragmatist, round-1
+    P-->>O: .triage/task/round-1/02-pragmatist.md
+    O->>C: Задача: conservative, round-1
+    C-->>O: .triage/task/round-1/03-conservative.md
+    end
+
+    rect rgb(248, 244, 255)
+    Note over O,C: Раунд 2: Rebuttal (каждый читает чужие предложения)
+    O->>I: Задача: innovator, round-2
+    I->>I: Читает round-1/*.md
+    I-->>O: .triage/task/round-2/01-innovator-rebuttal.md
+    O->>P: Задача: pragmatist, round-2
+    P->>P: Читает round-1/*.md + round-2/01-innovator-rebuttal.md
+    P-->>O: .triage/task/round-2/02-pragmatist-rebuttal.md
+    O->>C: Задача: conservative, round-2
+    C->>C: Читает round-1/*.md + round-2/*.md
+    C-->>O: .triage/task/round-2/03-conservative-rebuttal.md
+    end
+
+    Note over O: Синтез вердикта из round-2
+      </pre>
+    </div>
+
+    <p>Все общение идёт через файлы: <code>.triage/&lt;task-name&gt;/round-1/</code> и <code>.triage/&lt;task-name&gt;/round-2/</code>. Это обеспечивает:</p>
+    <ul>
+      <li><strong>Изоляцию</strong> &mdash; каждый агент не видит других во время раунда 1</li>
+      <li><strong>Аудит</strong> &mdash; каждое предложение записано в файл</li>
+      <li><strong>Ограничение длины</strong> &mdash; раунд 1: до 300 слов, раунд 2: до 200 слов</li>
+    </ul>
+
+    <div class="callout callout-purple card-purple">
+      <strong>Зачем разные модели?</strong> Каждый архитектор использует свою модель, чтобы гарантировать разнообразие взглядов. Minimax-m3 генерирует смелые идеи, deepseek-v4-pro балансирует, qwen3.7-plus консерватична. Это не баг &mdash; это фича.
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 5: Специалисты -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">🔧</span> Специалисты: 4 узких эксперта</h2>
+
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-emoji">✍️</div>
+        <h4>writer-agent</h4>
+        <div class="agent-model">model: claude-go-mimo-v2.5</div>
+        <p>Документация в HTML. README, CHANGELOG, docstrings. Пишет для людей.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-emoji">🔎</div>
+        <h4>explorer</h4>
+        <div class="agent-model">model: inherit</div>
+        <p>Read-only поиск по коду. Быстро находит файлы, модули, зависимости. Не меняет код.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-emoji">📋</div>
+        <h4>openspec-manager</h4>
+        <div class="agent-model">model: inherit</div>
+        <p>Spec-driven разработка. Proposal &rarr; Design &rarr; Tasks &rarr; Apply &rarr; Sync &rarr; Archive.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-emoji">🔧</div>
+        <h4>statusline-setup</h4>
+        <div class="agent-model">model: inherit</div>
+        <p>Настройка статус-строки Claude Code. Простая утилита, но удобно.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 6: Технические решения -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">⚙️</span> Технические решения, которые стоят за системой</h2>
+
+    <h3>1. Изоляция агентов через frontmatter</h3>
+
+    <p>Каждый агент &mdash; это Markdown-файл в <code>~/.claude/agents/</code> с YAML-frontmatter. MCP-серверы, скиллы и инструменты объявляются в frontmatter, и <strong>родительская сессия их не видит</strong>.</p>
+
+    <div class="code-block"><code>---
+name: py-backend-coder
+description: >
+  Use this agent when you need to write, refactor, or debug Python and
+  backend code (FastAPI, SQLAlchemy, Celery).
+tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+model: claude-go-deepseek-v4-flash
+mcpServers:
+  - name: context7
+    type: remote
+    url: https://mcp.context7.com/mcp
+    headers:
+      CONTEXT7_API_KEY: ctx7sk-...
+skills:
+  - fewer-permission-prompts
+permissionMode: auto
+---</code></div>
+
+    <p>Ключевые поля:</p>
+    <table>
+      <thead>
+        <tr><th>Поле</th><th>Назначение</th><th>Пример</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>model</code></td>
+          <td>Какую модель использовать</td>
+          <td><code>claude-go-deepseek-v4-flash</code></td>
+        </tr>
+        <tr>
+          <td><code>mcpServers</code></td>
+          <td>MCP-серверы, доступные только этому агенту</td>
+          <td>context7 для документации API</td>
+        </tr>
+        <tr>
+          <td><code>tools</code></td>
+          <td>Разрешённые инструменты</td>
+          <td>Read, Write, Edit, Bash, Glob, Grep</td>
+        </tr>
+        <tr>
+          <td><code>disallowedTools</code></td>
+          <td>Запрещённые инструменты (для read-only)</td>
+          <td>Write, Edit (у code-reviewer)</td>
+        </tr>
+        <tr>
+          <td><code>skills</code></td>
+          <td>Скиллы, доступные агенту</td>
+          <td><code>fewer-permission-prompts</code></td>
+        </tr>
+        <tr>
+          <td><code>permissionMode</code></td>
+          <td>Режим прав</td>
+          <td><code>auto</code> (автоматическое подтверждение)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>2. context7: единый источник правды для API</h3>
+
+    <p>Все coding-агенты и архитекторы используют context7 для проверки актуальных API библиотек. Это критично, потому что китайские модели могут «галлюцинировать» API, которого нет.</p>
+
+    <div class="code-block"><code># FastAPI: dependency injection
+npx ctx7 docs fastapi "dependency injection with async SQLAlchemy session"
+
+# SQLAlchemy 2.0: async patterns
+npx ctx7 docs sqlalchemy "selectinload vs joinedload async"
+
+# Pydantic v2: computed fields
+npx ctx7 docs pydantic "v2 computed fields serialization"
+
+# React: hooks
+npx ctx7 docs react "useTransition with Suspense"
+
+# Playwright: patterns
+npx ctx7 docs playwright "page.waitForResponse pattern"</code></div>
+
+    <div class="callout callout-danger">
+      <strong>Проблема, которую решает context7:</strong> Модели deepseek/mimo/qwen иногда генерируют API из Flask 1.x для FastAPI-задач, или используют Pydantic v1 syntax для v2. Context7 даёт актуальную документацию из первых рук.
+    </div>
+
+    <h3>3. Выбор моделей</h3>
+
+    <p>Все модели китайские, работают через OpenCode-прокси. Прокси просто передаёт model ID в OpenCode Go &mdash; сам не решает, какую модель использовать.</p>
+
+    <table>
+      <thead>
+        <tr><th>Модель</th><th>Роль</th><th>Почему именно она</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>deepseek-v4-flash</code></td>
+          <td>Кодинг (python, frontend, backend)</td>
+          <td>Быстрая, хорошая в генерации кода, дешёвая для частых вызовов</td>
+        </tr>
+        <tr>
+          <td><code>deepseek-v4-pro</code></td>
+          <td>Code review + pragmatist</td>
+          <td>Более мощная, лучше анализирует и находит проблемы</td>
+        </tr>
+        <tr>
+          <td><code>mimo-v2.5</code></td>
+          <td>Тесты + документация</td>
+          <td>Хороша в структурированном выводе и detail-oriented задачах</td>
+        </tr>
+        <tr>
+          <td><code>minimax-m3</code></td>
+          <td>Инноватор</td>
+          <td>Креативная, генерирует нестандартные решения</td>
+        </tr>
+        <tr>
+          <td><code>qwen3.7-plus</code></td>
+          <td>Консерватор</td>
+          <td>Осторожная, акцентирует на рисках</td>
+        </tr>
+        <tr>
+          <td><code>inherit</code></td>
+          <td>explorer, openspec, statusline</td>
+          <td>Наследует базовую модель (deepseek-v4-flash) &mdash; достаточно для простых задач</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>4. permissionMode: auto</h3>
+
+    <p>Все coding-агенты используют <code>permissionMode: auto</code>. Это значит, что агент может свободно читать и писать файлы, не спрашивая разрешения у пользователя. Без этого каждый вызов субагента превращался бы в цепочку промптов «Allow Read? Allow Write? Allow Bash?».</p>
+
+    <h3>5. fewer-permission-prompts</h3>
+
+    <p>Скилл, который уменьшает количество запросов на подтверждение. Используется на всех coding-агентах в дополнение к <code>permissionMode: auto</code>.</p>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 7: Workflow-паттерны из индустрии -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">📐</span> Workflow-паттерны: что взяли из индустрии</h2>
+
+    <p>Перед тем как строить систему, мы изучили 5 основных паттернов мульти-агентных workflow (из MindStudio) и 7-фазовый pipeline из Superpowers/obra (89k stars на GitHub).</p>
+
+    <h3>5 паттернов из индустрии</h3>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart TB
+    subgraph p1["1. Sequential (Pipeline)"]
+        A1["Задача"] --> A2["Агент A"] --> A3["Агент B"] --> A4["Агент C"] --> A5["Результат"]
+    end
+
+    subgraph p2["2. Operator (Orchestrator)"]
+        B1["Оркестратор"] --> B2["Воркер 1"]
+        B1 --> B3["Воркер 2"]
+        B1 --> B4["Воркер 3"]
+    end
+
+    subgraph p3["3. Split-and-Merge"]
+        C1["Задача"] --> C2["Ветка A"]
+        C1 --> C3["Ветка B"]
+        C1 --> C4["Ветка C"]
+        C2 --> C5["Мёрж"]
+        C3 --> C5
+        C4 --> C5
+        C5 --> C6["Результат"]
+    end
+
+    subgraph p4["4. Agent Teams"]
+        D1["Менеджер"] <--> D2["Разработчик"]
+        D1 <--> D3["Ревьюер"]
+        D1 <--> D4["Тестер"]
+    end
+
+    subgraph p5["5. Headless"]
+        E1["Вход"] --> E2["Полная автономия<br/>без человека"] --> E3["Выход"]
+    end
+
+    style p1 fill:#e8f4fd,stroke:#0984e3
+    style p2 fill:#f0fff4,stroke:#00b894
+    style p3 fill:#fff5f0,stroke:#e17055
+    style p4 fill:#f8f4ff,stroke:#6c5ce7
+    style p5 fill:#fde8e8,stroke:#d63031
+      </pre>
+    </div>
+
+    <h3>7-фазовый pipeline из Superpowers (obra)</h3>
+
+    <p>Главный референс &mdash; репозиторий obra/superpowers с 89k stars. Там описан идеальный workflow:</p>
+
+    <div class="code-block"><code>1. Brainstorming    — определение задачи и подхода
+2. Design Document  — архитектурное решение
+3. Writing Plans    — декомпозиция на конкретные задачи
+4. TDD              — тесты до кода (или параллельно)
+5. Subagent Dev     — реализация через субагентов
+6. Code Review      — ревью через отдельного агента
+7. Done             — деплой</code></div>
+
+    <h3>Что взяли мы</h3>
+
+    <p>Наша система &mdash; это гибрид <strong>Operator</strong> (оркестратор + воркеры) и <strong>Agent Teams</strong> (команда специализированных ролей):</p>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart TB
+    user["Пользователь"] --> main["Claude Code<br/>(оркестратор)"]
+
+    main -->|"Написать backend"| pyback["py-backend-coder"]
+    main -->|"Написать фронт"| frontend["frontend-coder"]
+
+    pyback -->|"Готово"| reviewer["code-reviewer<br/>(read-only)"]
+    frontend -->|"Готово"| reviewer
+
+    reviewer -->|"Нашёл проблемы"| fixer["Тот же coder<br/>исправляет"]
+    fixer -->|"Исправлено"| tester["tester-agent"]
+
+    tester -->|"Все тесты зелёные"| writer["writer-agent<br/>(документация)"]
+    writer -->|"Документация готова"| main
+    main -->|"Готово"| user
+
+    main -->|"Архитектурный вопрос"| triage["Triage<br/>(3 архитектора)"]
+    triage -->|"Вердикт"| main
+
+    style main fill:#f0edfc,stroke:#6c5ce7,stroke-width:3px
+    style reviewer fill:#fde8e8,stroke:#d63031
+    style tester fill:#e8f8f0,stroke:#00b894
+    style writer fill:#e8f4fd,stroke:#0984e3
+    style triage fill:#fff5f0,stroke:#e17055
+      </pre>
+    </div>
+
+    <div class="callout callout-info">
+      <strong>Рабочий процесс (реализовано):</strong> Перед каждым коммитом код проходит через <strong>code-reviewer</strong> &mdash; read-only агента, который проверяет изменения по severity-оценкам (BLOCKER → CRITICAL → MAJOR → NIT). Это не жёсткая блокировка, а обязательный процесс &mdash; Андрей как техлид решает, коммитить или нет после ревью.
+    </div>
+    <div class="callout callout-tip">
+      <strong>Следующий шаг:</strong> Склеить coding → review → test → docs в автоматический pipeline через Workflow tool.
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 8: Frontmatter anatomy -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">📄</span> Анатомия агента: разбор frontmatter</h2>
+
+    <p>Покажем реальные frontmatter всех трёх ярусов и объясним каждое поле.</p>
+
+    <h3>Пример: code-reviewer (read-only)</h3>
+
+    <div class="code-block"><code>---
+name: code-reviewer
+description: >
+  Use this agent when you need to review code for correctness bugs, security
+  vulnerabilities, performance issues, and best practices.
+tools:
+  - Read
+  - Bash
+  - Glob
+  - Grep
+disallowedTools:       # ← ЗАПРЕЩЁННЫЕ инструменты
+  - Write              #    Ревьюер не может писать код
+  - Edit               #    Только читает и анализирует
+model: claude-go-deepseek-v4-pro  # ← Более мощная модель для анализа
+mcpServers:
+  - name: context7
+    type: remote
+    url: https://mcp.context7.com/mcp
+    headers:
+      CONTEXT7_API_KEY: ctx7sk-...
+skills:
+  - fewer-permission-prompts
+permissionMode: auto
+---</code></div>
+
+    <h3>Пример: tester-agent (расширенный workflow)</h3>
+
+    <div class="code-block"><code>---
+name: tester-agent
+description: >
+  Use this agent to write, run, and fix tests. Generates unit and integration
+  tests, analyses coverage, finds edge cases, and fixes flaky tests.
+tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Grep
+model: claude-go-mimo-v2.5       # ← mimo хороша в detail-oriented задачах
+mcpServers:
+  - name: context7
+    type: remote
+    url: https://mcp.context7.com/mcp
+    headers:
+      CONTEXT7_API_KEY: ctx7sk-...
+skills:
+  - fewer-permission-prompts
+permissionMode: auto
+---</code></div>
+
+    <h3>Пример: openspec-manager (кастомные скиллы)</h3>
+
+    <div class="code-block"><code>---
+name: openspec-manager
+description: >
+  Управляет spec-driven development (SDD) воркфлоу OpenSpec.
+tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Glob
+  - Skill              # ← Skill tool нужен для вызова скиллов
+skills:                 # ← 11 OpenSpec-скиллов
+  - openspec-propose
+  - openspec-explore
+  - openspec-new-change
+  - openspec-continue-change
+  - openspec-apply-change
+  - openspec-ff-change
+  - openspec-sync-specs
+  - openspec-archive-change
+  - openspec-bulk-archive-change
+  - openspec-verify-change
+  - openspec-onboard
+mcpServers:
+  - name: openspec-mcp
+    command: uvx
+    args: ["openspec-mcp"]       # ← Кастомный MCP-сервер
+permissionMode: auto
+model: inherit                    # ← Наследует модель родителя
+---</code></div>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 9: Как построить свою команду -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">🛠️</span> How-to: построй свою команду</h2>
+
+    <p>Пошаговый рецепт для разработчика, который хочет повторить наш подход.</p>
+
+    <h3>Шаг 1: Определи роли</h3>
+
+    <p>Не создавай агентов «на всякий случай». Начни с 2-3 и расти по мере потребности. Минимальный набор:</p>
+
+    <div class="card card-green">
+      <h4>Must-have (старт)</h4>
+      <ul>
+        <li><strong>Coder</strong> &mdash; пишет код (выбери стек: Python, JS, или оба)</li>
+        <li><strong>Reviewer</strong> &mdash; ревьюит код (read-only, строгая модель)</li>
+      </ul>
+    </div>
+
+    <div class="card card-blue">
+      <h4>Nice-to-have (рост)</h4>
+      <ul>
+        <li><strong>Tester</strong> &mdash; пишет и запускает тесты</li>
+        <li><strong>Explorer</strong> &mdash; быстрый поиск по коду</li>
+        <li><strong>Writer</strong> &mdash; документация</li>
+      </ul>
+    </div>
+
+    <div class="card card-orange">
+      <h4>Advanced (команда)</h4>
+      <ul>
+        <li><strong>Architect cluster</strong> (2-3 архитектора для дебатов)</li>
+        <li><strong>Spec manager</strong> (spec-driven workflow)</li>
+        <li><strong>Frontend/Backend split</strong> (когда проекты становятся большими)</li>
+      </ul>
+    </div>
+
+    <h3>Шаг 2: Выбери модели</h3>
+
+    <p>Принцип: <strong>кодинг &mdash; быстрая модель, анализ &mdash; мощная модель, специалисты &mdash; inherit</strong>.</p>
+
+    <div class="callout callout-info">
+      <strong>Совет:</strong> Если нет бюджета на разные модели &mdash; все на inherit. Качество промпта важнее модели. Хороший промпт на дешёвой модели лучше плохого промпта на дорогой.
+    </div>
+
+    <h3>Шаг 3: Напиши промпт</h3>
+
+    <p>Структура промпта для coding-агента (после frontmatter):</p>
+
+    <div class="code-block"><code># Название роли — Должность
+
+Ты — [роль]. Твоя задача — [что делаешь].
+
+## Контекст
+- Ты не додумываешь API. Если не знаешь — используй context7.
+- Ты пишешь код, а не рассуждаешь.
+- Ты даёшь код в работу.
+
+## Когда тебя вызывают
+1. Прочитай структуру проекта
+2. Определи стек и зависимости
+3. Реализуй с чек-листом качества
+4. Напиши тесты
+5. Проверь что всё проходит
+
+## Чек-лист качества
+- [конкретные пункты для стека]
+
+## Рабочий процесс
+### Фаза 1: Анализ
+### Фаза 2: Реализация
+### Фаза 3: Контроль качества
+
+## Формат ответа
+**Сделано:** ...
+**Файлы:** ...
+**Тесты:** ...</code></div>
+
+    <h3>Шаг 4: Настрой изоляцию</h3>
+
+    <ul>
+      <li>Каждый агент &mdash; отдельный файл в <code>~/.claude/agents/</code></li>
+      <li>MCP-серверы &mdash; в frontmatter, не в <code>~/.claude.json</code> (иначе все агенты увидят)</li>
+      <li><code>permissionMode: auto</code> на всех coding-агентах</li>
+      <li>Read-only агенты: <code>disallowedTools: [Write, Edit]</code></li>
+    </ul>
+
+    <h3>Шаг 5: Протестируй</h3>
+
+    <p>Вызови каждого агента на реальной задаче и проверь:</p>
+
+    <div class="code-block"><code># В Claude Code:
+Agent(name="py-backend-coder", prompt="Напиши REST API для управления задачами")
+Agent(name="code-reviewer", prompt="Проведи ревью изменений в git diff")
+Agent(name="tester-agent", prompt="Напиши тесты для src/tasks.py")
+Agent(name="explorer", prompt="Найди все файлы, которые используют SQLAlchemy")</code></div>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 10: Ограничения и антипаттерны -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">⚠️</span> Ограничения и антипаттерны</h2>
+
+    <h3>Что не работает</h3>
+
+    <table>
+      <thead>
+        <tr><th>Антипаттерн</th><th>Почему плохо</th><th>Что делать</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Дублирующие MCP в родителе и агенте</td>
+          <td>Конфликты scope, лишние промпты подтверждения</td>
+          <td>MCP только в frontmatter агента</td>
+        </tr>
+        <tr>
+          <td>10+ coding-агентов</td>
+          <td>Сложно поддерживать, дублирование промптов</td>
+          <td>3 coding + 1 reviewer + 1 tester &mdash; оптимум</td>
+        </tr>
+        <tr>
+          <td>Все агенты на inherit</td>
+          <td>Нет диверсификации взглядов</td>
+          <td>Хотя бы reviewer на другой модели</td>
+        </tr>
+        <tr>
+          <td>Агент без чек-листа</td>
+          <td>Качество зависит от «настроения» модели</td>
+          <td>Конкретные пункты проверки в каждом агенте</td>
+        </tr>
+        <tr>
+          <td>Один агент и пишет, и ревьюит</td>
+          <td>Конфликт интересов</td>
+          <td>Отдельный reviewer с disallowedTools</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Что работает хорошо</h3>
+
+    <ul>
+      <li><strong>context7 на каждом coding-агенте</strong> &mdash; убирает 80% галлюцинаций API</li>
+      <li><strong>permissionMode: auto</strong> &mdash; агенты не застревают на промптах</li>
+      <li><strong>Формат ответа</strong> в конце промпта &mdash; структурированный output</li>
+      <li><strong>Разные модели для архитекторов</strong> &mdash; настоящая диверсификация мнений</li>
+      <li><strong>read-only reviewer</strong> &mdash; не может «помочь» кодом</li>
+      <li><strong>Review перед коммитом</strong> &mdash; обязательный гейт качества</li>
+      <li><strong>3-фазовый workflow</strong> &mdash; баланс между структурой и гибкостью</li>
+    </ul>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 11: Ресурсы -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">📚</span> Ресурсы и референсы</h2>
+
+    <table>
+      <thead>
+        <tr><th>Проект</th><th>Stars</th><th>Что взяли</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>obra/superpowers</strong></td>
+          <td>89k</td>
+          <td>7-фазовый pipeline: Brainstorming &rarr; Design &rarr; Plans &rarr; TDD &rarr; Subagent Dev &rarr; Code Review &rarr; Done</td>
+        </tr>
+        <tr>
+          <td><strong>wshobson/agents</strong></td>
+          <td>37k</td>
+          <td>192 специализированных агента, структура промптов, чек-листы</td>
+        </tr>
+        <tr>
+          <td><strong>0xfurai/claude-code-subagents</strong></td>
+          <td>&mdash;</td>
+          <td>Примеры isolation через frontmatter, tool restrictions</td>
+        </tr>
+        <tr>
+          <td><strong>VoltAgent</strong></td>
+          <td>&mdash;</td>
+          <td>3-4 фазовый workflow с чек-листами качества</td>
+        </tr>
+        <tr>
+          <td><strong>MindStudio</strong></td>
+          <td>&mdash;</td>
+          <td>5 паттернов workflow: Sequential, Operator, Split-and-Merge, Teams, Headless</td>
+        </tr>
+        <tr>
+          <td><strong>Anthropic Docs</strong></td>
+          <td>&mdash;</td>
+          <td>Официальная документация Claude Code: agents, MCP, skills</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ============================================================ -->
+    <!-- Раздел 12: Следующие шаги -->
+    <!-- ============================================================ -->
+    <h2><span class="emoji">🚀</span> Следующие шаги</h2>
+
+    <div class="card card-purple">
+      <h4>Что дальше</h4>
+      <ol>
+        <li><strong>Workflow-скрипты</strong> &mdash; склеить coding &rarr; review &rarr; test &rarr; docs в автоматический pipeline через Workflow tool</li>
+        <li><strong>Budget management</strong> &mdash; лимиты токенов на каждого агента, чтобы дешёвые модели не обжирались</li>
+        <li><strong>Адаптивный вызов</strong> &mdash; родитель сам решает, какого coding-агента вызвать по типу задачи</li>
+        <li><strong>Архивация результатов</strong> &mdash; логировать каждый вызов агента: кто, что, сколько стоило</li>
+      </ol>
+    </div>
+
+  </div>
+
+  <footer style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.85em;text-align:center;">
+      Создано <strong>writer-agent</strong> через Workflow tool.
+      <br>Актуально на 2026-06-17.
+      <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+  </footer>
+
+</body>
+</html>
