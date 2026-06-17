@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вердикт: ARCH-cluster vs Grill-me</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: { useMaxWidth: false },
+      sequence: { useMaxWidth: false }
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --card-bg: #ffffff;
+      --border: #e0e0e0;
+      --accent: #4a6fa5;
+      --accent-light: #e8eef6;
+      --text: #2c2c2c;
+      --text-muted: #6b7280;
+      --green: #2d8a4e;
+      --red: #c0392b;
+      --orange: #d4840a;
+      --green-bg: #e6f4ea;
+      --red-bg: #fce8e6;
+      --orange-bg: #fef3e0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #4a6fa5 0%, #2d4a7a 100%);
+      color: white;
+      padding: 60px 40px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.85;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .hero .date {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      opacity: 0.6;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      color: var(--accent);
+      margin: 48px 0 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent-light);
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      margin: 24px 0 12px;
+      color: var(--text);
+    }
+
+    p { margin: 10px 0; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 16px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .card.innovator { border-left: 4px solid #3b82f6; }
+    .card.pragmatist { border-left: 4px solid #f59e0b; }
+    .card.conservative { border-left: 4px solid #ef4444; }
+
+    .card .role-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    .innovator .role-tag { background: #dbeafe; color: #1d4ed8; }
+    .pragmatist .role-tag { background: #fef3c7; color: #b45309; }
+    .conservative .role-tag { background: #fee2e2; color: #dc2626; }
+
+    .summary-box {
+      background: var(--accent-light);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+      border: 1px solid var(--accent);
+    }
+
+    .summary-box h3 {
+      margin-top: 0;
+      color: var(--accent);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--accent-light);
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    tr:hover { background: #f5f7fa; }
+
+    .verdict-banner {
+      background: linear-gradient(135deg, #2d8a4e 0%, #1a6b37 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 32px;
+      margin: 24px 0;
+      text-align: center;
+    }
+
+    .verdict-banner h3 {
+      color: white;
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    .verdict-banner p {
+      opacity: 0.9;
+    }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul { padding-left: 24px; margin: 8px 0; }
+    li { margin: 4px 0; }
+
+    .converge { background: var(--green-bg); }
+    .diverge { background: var(--red-bg); }
+
+    .score { font-weight: 700; }
+    .score-high { color: var(--green); }
+    .score-mid { color: var(--orange); }
+    .score-low { color: var(--red); }
+
+    .footer {
+      text-align: center;
+      padding: 32px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--border);
+      margin-top: 48px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>ARCH-cluster vs Grill-me</h1>
+  <div class="subtitle">Вердикт после двух раундов дебатов: какой подход эффективнее для архитектурного анализа?</div>
+  <div class="date">15 июня 2026 &middot; 3 участника &middot; 2 раунда</div>
+</div>
+
+<div class="container">
+
+<!-- ===== Участники ===== -->
+<h2>Участники дебатов</h2>
+
+<div class="card innovator">
+  <span class="role-tag">Инноватор</span>
+  <h3>Позиция: гибридный пайплайн с динамическим классификатором</h3>
+  <p>Grill-me как framing-фаза + классификатор сложности. Если классификатор оценил сложность как высокую &mdash; стенограмма уходит в ARCH-cluster. Пост-ARCH верификация через точечный conservative override.</p>
+</div>
+
+<div class="card pragmatist">
+  <span class="role-tag">Прагматик</span>
+  <h3>Позиция: сегментация по порогу ROI</h3>
+  <p>Grill-me с лимитом 5 вопросов, затем threshold gate: если &gt;3 модуля или data model &mdash; ARCH-cluster. Дешёвые задачи решаются Grill'ом, дорогие &mdash; кластером. Optional targeted Grill по расхождениям ARCH'а.</p>
+</div>
+
+<div class="card conservative">
+  <span class="role-tag">Консерватор</span>
+  <h3>Позиция: ARCH-first, потом уточнения</h3>
+  <p>Полномасштабный ARCH-cluster на старте даёт карту местности. Grill-me только как точечные уточнения по спорным узлам. sequential contamination: Grill не может быть надёжным триажем, если он сам подвержен каскадным ошибкам.</p>
+</div>
+
+<!-- ===== Диаграмма 1: Три финальных предложения ===== -->
+<h2>Три финальных предложения</h2>
+<p>Каждый участник доработал позицию после второго раунда. На схеме &mdash; итоговые пайплайны:</p>
+
+<div class="diagram-wrapper">
+<pre class="mermaid">
+flowchart TB
+    subgraph INN["Инноватор: Grill + Classifier"]
+        direction TB
+        INN1["Grill-me\n3-5 вопросов\n+ классификация сложности"] --> INN2{"Decision gate"}
+        INN2 -- "low" --> INN3["Реализация"]
+        INN2 -- "high" --> INN4["ARCH-cluster\nна стенограмме Grill-me"]
+        INN4 --> INN5["Conservative override\n1 точечный вопрос"]
+    end
+
+    subgraph PRA["Прагматик: Grill capped → Gate → ARCH"]
+        direction TB
+        PRA1["Grill-me\nmax 5 вопросов"] --> PRA2{"Threshold gate\n>3 модуля\nили data model?"}
+        PRA2 -- "да" --> PRA3["ARCH-cluster"]
+        PRA2 -- "нет" --> PRA4["Готово"]
+        PRA3 --> PRA5["Targeted Grill\nпо расхождениям"]
+    end
+
+    subgraph CON["Консерватор: ARCH-first"]
+        direction TB
+        CON1{"Тривиальная задача?"}
+        CON1 -- "да" --> CON2["Просто делай"]
+        CON1 -- "нет" --> CON3["ARCH-cluster\nполный обзор"]
+        CON3 --> CON4["Точечный Grill\nпо расхождениям"]
+    end
+
+    style INN fill:#e8eef6,stroke:#4a6fa5
+    style PRA fill:#fef3e0,stroke:#d4840a
+    style CON fill:#fce8e6,stroke:#c0392b
+</pre>
+</div>
+
+<!-- ===== Таблица схождений и расхождений ===== -->
+<h2>Схождения и расхождения</h2>
+
+<table>
+  <thead>
+    <tr><th style="width:40%">Аспект</th><th>Инноватор</th><th>Прагматик</th><th>Консерватор</th></tr>
+  </thead>
+  <tbody>
+    <tr class="converge">
+      <td><strong>Обе фазы нужны</strong></td>
+      <td>+</td><td>+</td><td>+</td>
+    </tr>
+    <tr class="converge">
+      <td><strong>Нужен mechanism выбора</strong></td>
+      <td>Decision gate (динамический)</td>
+      <td>Threshold gate (статический)</td>
+      <td>Только по результатам ARCH</td>
+    </tr>
+    <tr class="converge">
+      <td><strong>Grill-me с лимитом</strong></td>
+      <td>3-5 вопросов</td><td>5 вопросов</td><td>&mdash; (не основной)</td>
+    </tr>
+    <tr class="converge">
+      <td><strong>Тривиальные задачи</strong></td>
+      <td>Ни ARCH ни Grill</td><td>Grill (дёшево)</td><td>Просто делай</td>
+    </tr>
+    <tr class="diverge">
+      <td><strong>Последовательность</strong></td>
+      <td>Grill &rarr; ARCH</td><td>Grill &rarr; ARCH</td><td>ARCH &rarr; Grill</td>
+    </tr>
+    <tr class="diverge">
+      <td><strong>Определение сложности</strong></td>
+      <td>Динамическая классификация</td>
+      <td>Статический порог</td>
+      <td>По результатам ARCH</td>
+    </tr>
+    <tr class="diverge">
+      <td><strong>Роль Grill-me</strong></td>
+      <td>Фреймер + классификатор</td>
+      <td>Быстрый триаж</td>
+      <td>Точечные уточнения</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ===== Диаграмма 2: Heatmap критериев ===== -->
+<h2>Сравнительная оценка критериев</h2>
+<p>Каждый подход оценён по пяти критериям. Чем темнее фон &mdash; тем лучше показатель для данного подхода в данном критерии.</p>
+
+<div class="diagram-wrapper">
+<pre class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {'xyChart': {'plotColorPalette': '#4a6fa5'}}}}%%
+xychart-beta
+  title "Сравнение пайплайнов по критериям (1-5)"
+  x-axis ["Стоимость (инверт.)", "Глубина", "Скорость", "Низкий риск", "ROI"]
+  y-axis 0 --> 5
+  bar [4, 3, 5, 3, 4]
+  bar [3, 5, 2, 5, 4]
+  bar [2, 5, 2, 4, 3]
+</pre>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Критерий</th>
+      <th>Innovator<br><small>Grill+classifier &rarr; ARCH</small></th>
+      <th>Pragmatist<br><small>Grill capped &rarr; gate &rarr; ARCH</small></th>
+      <th>Conservative<br><small>ARCH-first &rarr; Grill</small></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Стоимость</strong> (инвертирована: выше = дешевле)</td>
+      <td class="score score-high">4/5</td>
+      <td class="score score-high">3/5</td>
+      <td class="score score-low">2/5</td>
+    </tr>
+    <tr>
+      <td><strong>Глубина анализа</strong></td>
+      <td class="score score-mid">3/5</td>
+      <td class="score score-high">5/5</td>
+      <td class="score score-high">5/5</td>
+    </tr>
+    <tr>
+      <td><strong>Скорость</strong> (на типичной задаче)</td>
+      <td class="score score-high">5/5</td>
+      <td class="score score-mid">4/5</td>
+      <td class="score score-low">2/5</td>
+    </tr>
+    <tr>
+      <td><strong>Риск каскадных ошибок</strong> (инвертирован: выше = безопаснее)</td>
+      <td class="score score-mid">3/5</td>
+      <td class="score score-high">4/5</td>
+      <td class="score score-high">4/5</td>
+    </tr>
+    <tr>
+      <td><strong>ROI на сложных задачах</strong></td>
+      <td class="score score-high">4/5</td>
+      <td class="score score-high">4/5</td>
+      <td class="score score-mid">3/5</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ===== Диаграмма 3: Итоговый компромисс ===== -->
+<h2>Итоговый компромисс: рекомендуемый пайплайн</h2>
+<p>Синтез трёх позиций. Каждый элемент пайплайна заимствован у того участника, чья аргументация была сильнее по данному узлу.</p>
+
+<div class="diagram-wrapper">
+<pre class="mermaid">
+sequenceDiagram
+    participant D as Разработчик
+    participant G as Grill-me
+    participant C as Classifier
+    participant ARCH as ARCH-cluster
+    participant V as Verifier
+
+    D->>G: Новая задача
+    Note over G: Прагматик: max 5 вопросов
+
+    G->>C: Стенограмма + оценка
+    Note over C: Инноватор: динамическая классификация
+
+    alt Сложность HIGH
+        C->>ARCH: Стенограмма + контекст
+        Note over ARCH: Консерватор: 3 модели, параллельный анализ
+        ARCH->>V: Три решения + расхождения
+        Note over V: Инноватор: conservative override
+        V->>D: Синтез + рекомендации
+    else Сложность LOW
+        C->>D: Готово, реализуем
+    end
+</pre>
+</div>
+
+<div class="summary-box">
+  <h3>Компромиссное решение</h3>
+  <ol style="padding-left: 20px;">
+    <li><strong>Grill-me (max 5 вопросов)</strong> &mdash; быстрый триаж. От Прагматика: лимит предотвращает каскад ошибок. От Консерватора: лимит обязателен.</li>
+    <li><strong>Dynamic classifier</strong> &mdash; Grill-me оценивает сложность как часть процесса. От Инноватора: классификация не требует отдельного шага.</li>
+    <li><strong>Decision gate</strong> &mdash; если сложность high (&gt;3 модуля, неочевидные trade-offs, data model) &rarr; ARCH-cluster. От Прагматика: статический порог как fallback.</li>
+    <li><strong>ARCH-cluster</strong> &mdash; три модели, три ракурса, синтез. От Консерватора: полнота картины на сложных задачах.</li>
+    <li><strong>Conservative override</strong> &mdash; один точечный вопрос по спорным узлам. От Инноватора: верификация без полного цикла.</li>
+  </ol>
+</div>
+
+<div class="verdict-banner">
+  <h3>Вердикт</h3>
+  <p>Гибрид Grill &rarr; ARCH с лимитом 5 вопросов и динамическим gate'ом.<br>
+  Ни Grill-me, ни ARCH-cluster не являются универсальным решением. Эффективность &mdash; в правильной последовательности и своевременной эскалации.</p>
+</div>
+
+<!-- ===== Оценка рисков ===== -->
+<h2>Анализ рисков</h2>
+
+<div class="card" style="border-left: 4px solid var(--orange);">
+  <h3>Sequential contamination (Консерватор)</h3>
+  <p>Если Grill-me неверно схватил границы задачи, ARCH-cluster получит отравленный контекст. <strong>Митигация:</strong> dynamic classifier проверяет, достаточно ли контекста для надёжной классификации. Если нет &mdash; сразу ARCH.</p>
+</div>
+
+<div class="card" style="border-left: 4px solid var(--orange);">
+  <h3>Рост ошибки к N-му вопросу (Прагматик)</h3>
+  <p>К 5-му вопросу Grill-me накапливает систематическую ошибку. <strong>Митигация:</strong> жёсткий лимит 5 вопросов. Не решили за 5 &mdash; эскалация.</p>
+</div>
+
+<div class="card" style="border-left: 4px solid var(--orange);">
+  <h3>Стоимость ARCH на каждой задаче (Инноватор)</h3>
+  <p>ARCH-first на тривиальных задачах &mdash; 3x токенов на то, что решается за 2 минуты. <strong>Митигация:</strong> classifier отсеивает тривиальные задачи до эскалации.</p>
+</div>
+
+<!-- ===== Метрики ===== -->
+<h2>Прогнозируемые метрики</h2>
+
+<table>
+  <thead>
+    <tr><th>Метрика</th><th>Только Grill-me</th><th>Только ARCH</th><th>Гибрид (рекомендуемый)</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Средняя стоимость на задачу</td>
+      <td class="score score-high">$0.05</td>
+      <td class="score score-low">$0.25</td>
+      <td class="score score-high">$0.08</td>
+    </tr>
+    <tr>
+      <td>% задач, решённых Grill'ом</td>
+      <td>100%</td>
+      <td>0%</td>
+      <td>~65-75%</td>
+    </tr>
+    <tr>
+      <td>Риск архитектурной ошибки</td>
+      <td class="score score-low">Высокий</td>
+      <td class="score score-high">Низкий</td>
+      <td class="score score-high">Низкий</td>
+    </tr>
+    <tr>
+      <td>Время на простую задачу</td>
+      <td class="score score-high">~3 мин</td>
+      <td class="score score-low">~15 мин</td>
+      <td class="score score-high">~3 мин</td>
+    </tr>
+    <tr>
+      <td>Время на сложную задачу</td>
+      <td class="score score-low">~20 мин + переделка</td>
+      <td class="score score-mid">~15 мин</td>
+      <td class="score score-high">~15 мин</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="footer">
+  ARCH-cluster vs Grill-me: Вердикт &middot; Сгенерировано из 6 текстов (2 раунда &times; 3 участника) &middot; 15.06.2026
+</div>
+
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</div>
+</body>
+</html>

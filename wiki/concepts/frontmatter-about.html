@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontmatter у субагентов Claude Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .field-tag {
+      display: inline-block;
+      background: var(--accent-light);
+      color: var(--accent);
+      border: 1px solid #c6ddf8;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin: 2px 4px 2px 0;
+    }
+
+    .field-tag.required {
+      background: #ffeef0;
+      color: var(--red);
+      border-color: #f9c5ce;
+    }
+
+    .field-tag.optional {
+      background: #f6fff8;
+      color: var(--green);
+      border-color: #c3e6cb;
+    }
+
+    .priority-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      font-weight: 600;
+    }
+
+    .priority-badge.high { background: #ffeef0; color: var(--red); }
+    .priority-badge.medium { background: #fff8e1; color: var(--yellow); }
+    .priority-badge.low { background: #f6fff8; color: var(--green); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>Frontmatter у субагентов Claude Code</h1>
+  <p class="subtitle">Полное руководство по YAML-шапке, которая превращает .md-файл в настоящего агента</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое Frontmatter?</a></li>
+      <li><a href="#structure">Структура: как выглядит</a></li>
+      <li><a href="#fields">Все поля по порядку</a></li>
+      <li><a href="#priority">Цепочка приоритетов</a></li>
+      <li><a href="#our-agents">Наши агенты и их конфигурации</a></li>
+      <li><a href="#tips">Хитрости и лайфхаки</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ FRONTMATTER -->
+  <h2 id="what"><span class="emoji">📌</span> Что такое Frontmatter?</h2>
+
+  <p>
+    Представь: ты создаёшь нового сотрудника. Ему нужно дать <strong>имя</strong>, объяснить
+    <strong>чем занимается</strong>, дать <strong>инструменты</strong> и ограничить, чего делать
+    <strong>нельзя</strong>. Именно это и делает <strong>frontmatter</strong> — YAML-шапка в самом начале
+    .md-файла агента.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> Frontmatter — это блок между двумя тройными дефисами (<code>---</code>)
+    в начале Markdown-файла. Claude Code читает его первым делом и понимает, с кем имеет дело.</p>
+  </div>
+
+  <div class="code-block">
+    <code><span class="yaml-comment">---</span>
+<span class="yaml-key">name</span>: <span class="yaml-val">my-agent</span>
+<span class="yaml-key">description</span>: <span class="yaml-val">Делает полезные штуки</span>
+<span class="yaml-key">model</span>: <span class="yaml-val">inherit</span>
+<span class="yaml-comment">---</span>
+
+<span class="yaml-comment"># Вот тут начинается системный промпт агента</span>
+<span class="yaml-comment">Ты — агент, который...</span></code>
+  </div>
+
+  <p>Когда ты вызываешь агента через <code>/agents</code> или Claude сам решает делегировать задачу,
+  он сначала парсит frontmatter, а потом уже передаёт управление агенту с учётом его конфигурации.</p>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. СТРУКТУРА -->
+  <h2 id="structure"><span class="emoji">🏗️</span> Структура: как выглядит</h2>
+
+  <p>Вот полный скелет агента со всеми возможными полями. Не все обязательны — большинство
+  подхватываются из окружения:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TB
+    subgraph FM["📄 Frontmatter (YAML между ---)"]
+        direction TB
+        A["<b>name</b> — имя агента"]
+        B["<b>description</b> — когда вызывать"]
+        C["<b>tools</b> — доступные инструменты"]
+        D["<b>disallowedTools</b> — запрещённые"]
+        E["<b>model</b> — какая LLM"]
+        F["<b>effort</b> — уровень усилий"]
+        G["<b>permissionMode</b> — режим пермишенов"]
+        H["<b>mcpServers</b> — MCP-серверы"]
+        I["<b>skills</b> — предзагруженные скиллы"]
+        J["<b>hooks</b> — агентские хуки"]
+        K["<b>maxTurns</b> — лимит шагов"]
+        L["<b>memory</b> — своя память"]
+        M["<b>isolation</b> — worktree изоляция"]
+        N["<b>color</b> — цвет в UI"]
+    end
+
+    subgraph BODY["📝 Тело файла (Markdown)"]
+        O["Системный промпт / инструкции"]
+    end
+
+    FM --> BODY
+
+    style FM fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style BODY fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span>Если поле не указано — Claude Code берёт значение из сессии или дефолт.
+    Единственное, что <em>реально</em> нужно для работающего агента — это системный промпт в теле файла.
+    Всё остальное — опциональная настройка.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ВСЕ ПОЛЯ -->
+  <h2 id="fields"><span class="emoji">📋</span> Все поля по порядку</h2>
+
+  <!-- name -->
+  <h3><span class="field-tag required">обязательное</span> name</h3>
+  <p>Уникальный идентификатор агента. Используется в вызовах и логах. Без пробелов, латиницей,
+  через дефис.</p>
+  <div class="code-block">
+    <code><span class="yaml-key">name</span>: <span class="yaml-val">writer-agent</span>
+<span class="yaml-key">name</span>: <span class="yaml-val">innovator</span>
+<span class="yaml-key">name</span>: <span class="yaml-val">explorer</span></code>
+  </div>
+
+  <!-- description -->
+  <h3><span class="field-tag required">обязательное</span> description</h3>
+  <p>Описание <strong>когда делегировать</strong> задачу этому агенту. Claude Code использует его для
+  принятия решения: «Кому отдать эту задачу?». Пиши action-oriented.</p>
+  <div class="code-block">
+    <code><span class="yaml-key">description</span>: <span class="yaml-val">></span>
+  Быстрый поиск и анализ кода. Использовать когда нужно
+  найти файлы, изучить структуру, понять как устроен модуль.
+  Read-only — ничего не меняет.</code>
+  </div>
+
+  <!-- tools -->
+  <h3><span class="field-tag optional">опциональное</span> tools</h3>
+  <p>Список инструментов, которые агенту <strong>разрешено</strong> использовать. Если не указать —
+  агент наследует <strong>все</strong> инструменты родительской сессии, включая MCP.</p>
+  <div class="code-block">
+    <code><span class="yaml-key">tools</span>:
+  - <span class="yaml-val">Read</span>
+  - <span class="yaml-val">Write</span>
+  - <span class="yaml-val">Edit</span>
+  - <span class="yaml-val">Bash</span>
+  - <span class="yaml-val">Glob</span>
+  - <span class="yaml-val">Grep</span></code>
+  </div>
+  <p><strong>Важно:</strong> <code>Skill</code> и <code>Agent</code> тоже нужно перечислить явно,
+  если агенту нужны скиллы или вызов других агентов!</p>
+
+  <!-- disallowedTools -->
+  <h3><span class="field-tag optional">опциональное</span> disallowedTools</h3>
+  <p>Что агенту <strong>категорически нельзя</strong>, даже если инструмент наследован. Идеально для
+  read-only агентов.</p>
+  <div class="code-block">
+    <code><span class="yaml-comment"># Explorer: только читать, писать нельзя</span>
+<span class="yaml-key">disallowedTools</span>:
+  - <span class="yaml-val">Write</span>
+  - <span class="yaml-val">Edit</span>
+  - <span class="yaml-val">NotebookEdit</span>
+  - <span class="yaml-val">Skill</span>
+  - <span class="yaml-val">Agent</span></code>
+  </div>
+
+  <!-- model -->
+  <h3><span class="field-tag optional">опциональное</span> model</h3>
+  <p>Какую LLM использовать. Три варианта:</p>
+  <ul>
+    <li><code>inherit</code> — наследовать модель из текущей сессии (экономия!)</li>
+    <li>Короткое имя: <code>sonnet</code>, <code>opus</code>, <code>haiku</code></li>
+    <li>Полный ID: <code>claude-go-mimo-v2.5</code>, <code>claude-go-deepseek-v4-pro</code></li>
+  </ul>
+
+  <!-- effort -->
+  <h3><span class="field-tag optional">опциональное</span> effort</h3>
+  <p>Насколько глубоко агент должен «думать». Влияет на количество токенов и время ответа.</p>
+  <table>
+    <tr><th>Значение</th><th>Когда использовать</th></tr>
+    <tr><td><code>low</code></td><td>Быстрые ответы, рутинные задачи</td></tr>
+    <tr><td><code>medium</code></td><td>Стандартная работа</td></tr>
+    <tr><td><code>high</code></td><td>Сложные задачи, нужен тщательный анализ</td></tr>
+    <tr><td><code>xhigh</code></td><td>Максимальная глубина (writer-agent так работает!)</td></tr>
+  </table>
+
+  <!-- permissionMode -->
+  <h3><span class="field-tag optional">опциональное</span> permissionMode</h3>
+  <p>Как агент работает с пермишенами:</p>
+  <ul>
+    <li><code>auto</code> — делает всё без вопросов (если разрешено инструментами)</li>
+    <li><code>accept</code> — каждый шаг на подтверждении</li>
+    <li><code>bypass</code> — обходит все проверки (опасно!)</li>
+    <li><code>plan</code> — только планирует, не выполняет</li>
+  </ul>
+
+  <!-- mcpServers -->
+  <h3><span class="field-tag optional">опциональное</span> mcpServers</h3>
+  <p>MCP-серверы, которые поднимаются <strong>только когда этот агент активен</strong>.
+  Это изоляция! Сервер не жрёт ресурсы, пока агент не вызван.</p>
+  <div class="code-block">
+    <code><span class="yaml-key">mcpServers</span>:
+  - <span class="yaml-key">name</span>: <span class="yaml-val">context7</span>
+    <span class="yaml-key">type</span>: <span class="yaml-val">remote</span>
+    <span class="yaml-key">url</span>: <span class="yaml-val">https://mcp.context7.com/mcp</span>
+    <span class="yaml-key">headers</span>:
+      <span class="yaml-key">CONTEXT7_API_KEY</span>: <span class="yaml-val">ctx7sk-...</span>
+
+  <span class="yaml-comment"># Или локальный:</span>
+  - <span class="yaml-key">name</span>: <span class="yaml-val">poisk-mcp</span>
+    <span class="yaml-key">command</span>: <span class="yaml-val">python</span>
+    <span class="yaml-key">args</span>: [<span class="yaml-val">server.py</span>]</code>
+  </div>
+
+  <!-- skills -->
+  <h3><span class="field-tag optional">опциональное</span> skills</h3>
+  <p>Скиллы, которые предзагружаются агенту. Он сможет вызывать их через инструмент <code>Skill</code>.</p>
+  <div class="code-block">
+    <code><span class="yaml-key">skills</span>:
+  - <span class="yaml-val">openspec-propose</span>
+  - <span class="yaml-val">openspec-explore</span>
+  - <span class="yaml-val">deep-research</span></code>
+  </div>
+
+  <!-- hooks, maxTurns, memory, isolation, color -->
+  <h3><span class="field-tag optional">остальные</span> hooks, maxTurns, memory, isolation, color</h3>
+  <table>
+    <tr><th>Поле</th><th>Тип</th><th>Описание</th></tr>
+    <tr><td><code>hooks</code></td><td>object</td><td>Хуки, специфичные для агента (PreToolUse, PostToolUse и т.д.)</td></tr>
+    <tr><td><code>maxTurns</code></td><td>number</td><td>Лимит шагов. Защита от зацикливания (например, <code>maxTurns: 30</code>)</td></tr>
+    <tr><td><code>memory</code></td><td>string</td><td>Своя память агента. Редко используется.</td></tr>
+    <tr><td><code>isolation</code></td><td>object</td><td>Worktree изоляция — агент работает в отдельном checkout</td></tr>
+    <tr><td><code>color</code></td><td>string</td><td>Цвет агента в интерфейсе для визуального отличия</td></tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ПРИОРИТЕТЫ -->
+  <h2 id="priority"><span class="emoji">⚖️</span> Цепочка приоритетов</h2>
+
+  <p>Откуда Claude Code берёт значение для каждого параметра? Всёочень просто по принципу:
+  <strong>конкретное побеждает общее</strong>.</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TB
+    A["📄 Frontmatter агента<br><small>(самый приоритет)</small>"] -->|нет значения| B["🧠 Сессия родителя<br><small>(откуда вызван)</small>"]
+    B -->|нет значения| C["⚙️ Дефолт Claude Code<br><small>(финальный fallback)</small>"]
+
+    A -.- A1["model: claude-go-mimo-v2.5<br>effort: xhigh<br>permissionMode: auto"]
+    B -.- B1["model: claude-go-deepseek-v4-flash<br>effort: medium"]
+    C -.- C1["model: sonnet<br>effort: medium<br>permissionMode: auto"]
+
+    style A fill:#ffeef0,stroke:#d73a49,stroke-width:2px
+    style B fill:#fff8e1,stroke:#b08800,stroke-width:2px
+    style C fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="card card-green">
+    <strong>Пример:</strong> Наш <code>writer-agent</code> имеет в frontmatter
+    <code>model: claude-go-mimo-v2.5</code> и <code>effort: xhigh</code>.
+    Значит он <strong>всегда</strong> работает на mimo и с максимальным effort — даже если основная
+    сессия на другой модели.<br><br>
+    А <code>explorer</code> имеет <code>model: inherit</code> — значит он берёт модель из текущей сессии.
+    Запустил из DeepSeek? Explorer тоже на DeepSeek.
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. НАШИ АГЕНТЫ -->
+  <h2 id="our-agents"><span class="emoji">🤖</span> Наши агенты и их конфигурации</h2>
+
+  <p>Все агенты живут в <code>~/.claude/agents/</code>. Вот что в каждом прописано:</p>
+
+  <div style="overflow-x: auto;">
+  <table>
+    <tr>
+      <th>Агент</th>
+      <th>Модель</th>
+      <th>Tools</th>
+      <th>MCP</th>
+      <th>Skills</th>
+      <th>Другое</th>
+    </tr>
+    <tr>
+      <td><strong>explorer</strong></td>
+      <td><code>inherit</code></td>
+      <td>Read, Glob, Grep, Bash<br><em style="color:var(--red)">нет Write/Edit</em></td>
+      <td>—</td>
+      <td>—</td>
+      <td>maxTurns: 30</td>
+    </tr>
+    <tr>
+      <td><strong>writer-agent</strong></td>
+      <td><code>claude-go-mimo-v2.5</code></td>
+      <td>Read, Write, Edit, Bash, Glob, Grep</td>
+      <td>poisk-mcp</td>
+      <td>deep-research</td>
+      <td>effort: xhigh</td>
+    </tr>
+    <tr>
+      <td><strong>innovator</strong></td>
+      <td><code>claude-go-minimax-m3</code></td>
+      <td>Read, Write, Edit, Bash, Glob, Grep</td>
+      <td>context7 (remote)</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>pragmatist</strong></td>
+      <td><code>claude-go-deepseek-v4-pro</code></td>
+      <td>Read, Write, Edit, Bash, Glob, Grep</td>
+      <td>context7 (remote)</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>conservative</strong></td>
+      <td><code>claude-go-qwen3.7-plus</code></td>
+      <td>Read, Write, Edit, Bash, Glob, Grep</td>
+      <td>context7 (remote)</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>openspec-manager</strong></td>
+      <td><code>inherit</code></td>
+      <td>Read, Write, Edit, Bash, Glob, Skill</td>
+      <td>openspec-mcp (uvx)</td>
+      <td>11 openspec-* скиллов</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>statusline-setup</strong></td>
+      <td><code>inherit</code></td>
+      <td>Read, Write, Edit, Bash, Glob</td>
+      <td>—</td>
+      <td>—</td>
+      <td>maxTurns: 15</td>
+    </tr>
+  </table>
+  </div>
+
+  <div class="card card-purple">
+    <strong>Заметь паттерн:</strong> Агенты Triage (innovator, pragmatist, conservative) используют
+    <strong>разные модели</strong> — это нарочно. Каждый «архитектор» мыслит по-своему:
+    минимакс генерирует смелые идеи, DeepSeek оценивает прагматично, Qwen фокусируется на рисках.
+    А <code>context7</code> поднят у всех троих — чтобы проверять актуальность библиотек.
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. ХИТРОСТИ -->
+  <h2 id="tips"><span class="emoji">🎯</span> Хитрости и лайфхаки</h2>
+
+  <div class="card card-green">
+    <h3>1. description — самое важное поле</h3>
+    <p>Claude Code решает, кому делегировать, именно по description. Пиши <strong>action-oriented</strong>:</p>
+    <ul>
+      <li>✅ <em>«Использовать когда нужно найти файлы, изучить структуру, понять как устроен модуль»</em></li>
+      <li>❌ <em>«Агент для поиска»</em> — слишком размыто</li>
+    </ul>
+  </div>
+
+  <div class="card card-orange">
+    <h3>2. Если не указать tools — агент получает ВСЁ</h3>
+    <p>Включая MCP-серверы, скиллы, Write, Bash — всё подряд. Это удобно, но опасно:
+    агент может случайно удалить файлы. Лучше всегда явно указывать.</p>
+  </div>
+
+  <div class="card card-accent">
+    <h3>3. model: inherit — экономия на подписке</h3>
+    <p>Если не нужно, чтобы агент работал наопределённыйной модели — ставь <code>inherit</code>.
+    Он подхватит модель из текущей сессии. Не платишь за лишние API-вызовы на дорогой модели.</p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>4. MCP-серверы изолированы по агенту</h3>
+    <p>MCP-серверы из frontmatter поднимаются <strong>только когда этот агент активен</strong>.
+    Это значит, что <code>context7</code> у innovator не жрёт память, пока работает writer-agent.
+    Серверы из глобального <code>.claude.json</code> подняты всегда.</p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">⚡</span>
+    <span><strong>maxTurns</strong> — твой друг. Без лимита агент может зациклиться и потратить кучу
+    токенов. Для простых агентов 15–30 шагов достаточно. Для сложных workflows (openspec-manager)
+    лучше не ставить лимит — он сам знает, когда остановиться.</span>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">🔒</span>
+    <span><strong>disallowedTools</strong> надёжнее, чем просто не включать в tools.
+    Если агент наследует все инструменты (не указан tools), то <code>disallowedTools</code>
+    — единственный способ заблокировать Write/Edit. Как у explorer.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Frontmatter — это не магия, а просто конфиг.
+      Заполнил шапку → получил агента. Не заполнил — получил дефолтного.
+      Всё просто, но мощно. 🚀
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+</body>
+</html>

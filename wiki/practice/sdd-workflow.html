@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spec-Driven Development (SDD) через OpenSpec</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>Spec-Driven Development (SDD) через OpenSpec</h1>
+  <p class="subtitle">Пиши спецификацию перед кодом &mdash; и никогда не теряйся в том, что делал и зачем</p>
+
+  <div class="card card-accent" style="margin-bottom: 32px;">
+    <p style="margin:0;">
+      OpenSpec &mdash; это <a href="https://www.npmjs.com/package/@fission-ai/openspec">реально существующий npm-пакет</a>,
+      а не самодельный рецепт. Его можно установить через npm и использовать в любом проекте.
+      <a href="https://github.com/Fission-AI/OpenSpec">GitHub</a> &middot;
+      <a href="https://openspec.dev/">Сайт</a>
+    </p>
+  </div>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое SDD и зачем это нужно</a></li>
+      <li><a href="#openspec">OpenSpec &mdash; npm-пакет и структура</a></li>
+      <li><a href="#cycle">Полный цикл: Propose &rarr; Apply &rarr; Sync &rarr; Archive</a></li>
+      <li><a href="#diagram">Диаграмма: жизненный цикл изменения</a></li>
+      <li><a href="#example">Пример: добавляем тёмную тему</a></li>
+      <li><a href="#best-practices">Best practices</a></li>
+      <li><a href="#mistakes">Типичные ошибки</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ SDD -->
+  <h2 id="what"><span class="emoji">&#x1f4d6;</span> Что такое SDD и зачем это нужно</h2>
+
+  <p>
+    Открываешь Claude Code, говоришь &laquo;сделай тёмную тему&raquo; &mdash;
+    агент кивает, пишет 200 строк, и ты уже не понимаешь, что там и зачем.
+    Это <strong>vibe-coding</strong>: быстро, весело, и потом неприятно.
+    <strong>Spec-Driven Development (SDD)</strong> &mdash; подход, где перед кодом
+    создаётся <em>спецификация</em>: что меняется, почему, как устроено
+    и из каких задач состоит реализация. Код &mdash; следствие спеки, а не наоборот.
+  </p>
+
+  <div class="comparison-grid">
+    <div class="card card-red">
+      <h3>Vibe-coding</h3>
+      <ul>
+        <li>Скажи Claude &laquo;сделай X&raquo; и надейся</li>
+        <li>Код появляется без плана</li>
+        <li>Через неделю непонятно, что и зачем</li>
+        <li>Изменение на 30 файлов за один промпт</li>
+        <li>Ревью &mdash; это мучение</li>
+      </ul>
+    </div>
+
+    <div class="card card-green">
+      <h3>Spec-Driven Development</h3>
+      <ul>
+        <li>Сначала описываешь что и зачем</li>
+        <li>Потом &mdash; как именно</li>
+        <li>Потом &mdash; конкретные задачи</li>
+        <li>Код &mdash; следствие трёх предыдущих шагов</li>
+        <li>Ревью &mdash; сверка с документом</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card card-accent">
+    <p><strong>Коротко:</strong> SDD &mdash; это когда ты <em>сначала</em> пишешь документ
+    &laquo;что я буду делать и зачем&raquo;, а <em>потом</em> Claude пишет код по этому
+    документу. Не наоборот. Результат &mdash; осмысленный код с историей, которую можно
+    найти в спеке, а не в куче git-коммитов.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. OPENSPEC -->
+  <h2 id="openspec"><span class="emoji">&#x1f4e6;</span> OpenSpec &mdash; npm-пакет и структура</h2>
+
+  <p>
+    <a href="https://www.npmjs.com/package/@fission-ai/openspec"><strong>@fission-ai/openspec</strong></a>
+    &mdash; это npm-пакет, который даёт CLI и MCP-сервер для управления спецификациями.
+    Он не просто хранит документы &mdash; он <em>управляет жизненным циклом изменений</em>:
+    от proposal до архивации.
+  </p>
+
+  <div class="card card-purple">
+    <h3>Установка</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Глобально</span>
+npm install -g @fission-ai/openspec
+
+<span class="yaml-comment"># Или в проекте</span>
+npm install --save-dev @fission-ai/openspec</code>
+    </div>
+  </div>
+
+  <h3>Структура проекта</h3>
+  <p>
+    OpenSpec создаёт директорию <code>openspec/</code> с тремя ключевыми зонами:
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    Root["openspec/"] --> Specs["specs/"]
+    Root --> Changes["changes/"]
+    Root --> Config[".openspec.yaml"]
+
+    Specs --> Domain["&lt;domain&gt;/"]
+    Domain --> SpecMd["spec.md &mdash; source of truth"]
+
+    Changes --> Active["&lt;change-name&gt;/"]
+    Changes --> Archive["archive/"]
+
+    Active --> Proposal["proposal.md"]
+    Active --> Design["design.md"]
+    Active --> Tasks["tasks.md"]
+    Active --> DeltaSpecs["specs/ &mdash; дельта-спеки"]
+
+    Archive --> Archived["YYYY-MM-DD-&lt;name&gt;/"]
+
+    style Root fill:#0366d6,color:#fff,stroke:none,font-weight:700
+    style Specs fill:#6f42c1,color:#fff,stroke:none
+    style Changes fill:#6f42c1,color:#fff,stroke:none
+    style Archive fill:#28a745,color:#fff,stroke:none
+    style Active fill:#e36209,color:#fff,stroke:none
+    style Config fill:#e8ecf4,stroke:none
+    style Domain fill:#e8ecf4,stroke:none
+    style SpecMd fill:#e8ecf4,stroke:none
+    style Proposal fill:#e8ecf4,stroke:none
+    style Design fill:#e8ecf4,stroke:none
+    style Tasks fill:#e8ecf4,stroke:none
+    style DeltaSpecs fill:#e8ecf4,stroke:none
+    style Archived fill:#e8ecf4,stroke:none
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <th>Директория</th>
+      <th>Назначение</th>
+    </tr>
+    <tr>
+      <td><code>specs/</code></td>
+      <td>Source of truth. Актуальные спецификации по доменам. Сюда вливаются дельта-спеки после синхронизации.</td>
+    </tr>
+    <tr>
+      <td><code>changes/</code></td>
+      <td>Активные изменения. Каждое &mdash; отдельная директория с proposal, design, tasks и дельта-спеками.</td>
+    </tr>
+    <tr>
+      <td><code>changes/archive/</code></td>
+      <td>Архив завершённых изменений. Формат: <code>YYYY-MM-DD-name/</code>.</td>
+    </tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Файл <code>.openspec.yaml</code></strong> в корне проекта определяет
+    конфигурацию: какие артефакты нужны, какие артефакты обязательны перед реализацией,
+    и какой workflow используется (например, <code>spec-driven</code>).</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ПОЛНЫЙ ЦИКЛ -->
+  <h2 id="cycle"><span class="emoji">&#x1f504;</span> Полный цикл: Propose &rarr; Apply &rarr; Sync &rarr; Archive</h2>
+
+  <p>
+    Любой фича-рефакторинг-багфикс в OpenSpec проходит четыре этапа.
+    Каждый этап &mdash; это не формальность, а осмысленный шаг:
+  </p>
+
+  <h3>1. Propose &mdash; определяем что и зачем</h3>
+
+  <div class="card card-accent">
+    <p><strong>Суть:</strong> Создаём директорию изменения и генерируем артефакты:
+    proposal.md, design.md, tasks.md и дельта-спеки.</p>
+  </div>
+
+  <p>Ключевые артефакты этапа:</p>
+
+  <table>
+    <tr>
+      <th>Файл</th>
+      <th>Отвечает на вопрос</th>
+      <th>Содержимое</th>
+    </tr>
+    <tr>
+      <td><code>proposal.md</code></td>
+      <td><strong>Что</strong> и <strong>зачем</strong></td>
+      <td>Описание изменения, мотивация, ожидаемый результат. Для ревью &mdash; именно proposal читают первым.</td>
+    </tr>
+    <tr>
+      <td><code>design.md</code></td>
+      <td><strong>Как</strong> делаем</td>
+      <td>Технический дизайн: какие файлы меняются, какие API затрагиваются, архитектурные решения.</td>
+    </tr>
+    <tr>
+      <td><code>tasks.md</code></td>
+      <td><strong>Какие</strong> конкретные шаги</td>
+      <td>Чеклист задач в формате <code>- [ ] Задача</code>. Каждая задача &mdash; один файл или осмысленная группировка.</td>
+    </tr>
+    <tr>
+      <td><code>specs/</code></td>
+      <td><strong>Что</strong> меняется в поведении системы</td>
+      <td>Дельта-спеки: секции ADDED, MODIFIED, REMOVED, RENAMED. Описывают изменения требований.</td>
+    </tr>
+  </table>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Пример: tasks.md</span>
+
+<span class="yaml-key">## Задачи</span>
+
+<span class="yaml-key">- [ ]</span> <span class="yaml-val">Создать CSS-переменные для тёмной темы</span>
+<span class="yaml-key">- [ ]</span> <span class="yaml-val">Добавить переключатель в header</span>
+<span class="yaml-key">- [ ]</span> <span class="yaml-val">Перевести компоненты на переменные</span>
+<span class="yaml-key">- [ ]</span> <span class="yaml-val">Сохранять выбор в localStorage</span>
+<span class="yaml-key">- [ ]</span> <span class="yaml-val">Добавить системную тему (prefers-color-scheme)</span></code>
+  </div>
+
+  <h3>2. Apply &mdash; реализуем задачи</h3>
+
+  <div class="card card-purple">
+    <p><strong>Суть:</strong> Читаем tasks.md и последовательно выполняем задачи.
+    Каждая задача &mdash; мини-коммит. По завершении &mdash; отмечаем <code>- [x]</code>.</p>
+  </div>
+
+  <p>Ключевые принципы этапа Apply:</p>
+  <ul>
+    <li>Сначала читаем все контекстные файлы (proposal, design, specs, tasks)</li>
+    <li>Выполняем задачи последовательно, не пропускаем</li>
+    <li>Если задача неясна &mdash; останавливаемся и уточняем, не гадаем</li>
+    <li>Каждая задача &mdash; минимальное, сфокусированное изменение</li>
+    <li>По завершении задачи &mdash; сразу отмечаем в tasks.md</li>
+  </ul>
+
+  <h3>3. Sync &mdash; синхронизируем спеки</h3>
+
+  <div class="card card-green">
+    <p><strong>Суть:</strong> Дельта-спеки из <code>changes/name/specs/</code> вливаются
+    в основные <code>specs/</code>. Это не копирование &mdash; это интеллектуальное слияние.</p>
+  </div>
+
+  <p>Формат дельта-спек:</p>
+  <div class="code-block">
+    <code><span class="yaml-key">## ADDED Requirements</span>
+<span class="yaml-key">### Requirement:</span> <span class="yaml-val">Dark Theme Support</span>
+Система SHALL предоставлять переключатель тёмной темы.
+
+<span class="yaml-key">## MODIFIED Requirements</span>
+<span class="yaml-key">### Requirement:</span> <span class="yaml-val">Header Navigation</span>
+<span class="yaml-key">#### Scenario:</span> <span class="yaml-val">Add theme toggle</span>
+<span class="yaml-comment">- WHEN пользователь нажимает на иконку темы</span>
+<span class="yaml-comment">- THEN тема переключается и сохраняется</span>
+
+<span class="yaml-key">## REMOVED Requirements</span>
+<span class="yaml-key">### Requirement:</span> <span class="yaml-val">Legacy Color System</span></code>
+  </div>
+
+  <p>
+    При синхронизации ADDED требования добавляются в основную спеку,
+    MODIFIED &mdash; интеллектуально мержатся (не заменяют целиком),
+    REMOVED &mdash; удаляют соответствующие блоки.
+  </p>
+
+  <h3>4. Archive &mdash; архивируем завершённое</h3>
+
+  <div class="card card-orange">
+    <p><strong>Суть:</strong> Изменение перемещается в <code>archive/YYYY-MM-DD-name/</code>.
+    Все артефакты сохраняются &mdash; потом можно вернуться и посмотреть, что делали.</p>
+  </div>
+
+  <p>Перед архивацией OpenSpec проверяет:</p>
+  <ul>
+    <li>Все ли артефакты в статусе <code>done</code></li>
+    <li>Все ли задачи в tasks.md отмечены как <code>- [x]</code></li>
+    <li>Нужно ли синхронизировать дельта-спеки (предлагает опцию)</li>
+  </ul>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Архив &mdash; это не мусорка.</strong> Это журнал истории проекта.
+    Через полгода ты можешь открыть архив и точно вспомнить, что делал, почему,
+    и какие решения принял. Попробуй сделать это с vibes-coding.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ДИАГРАММА -->
+  <h2 id="diagram"><span class="emoji">&#x1f4ca;</span> Диаграмма: жизненный цикл изменения</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    P["&#x1f4dd; Propose"] --> A["&#x1f680; Apply"] --> S["&#x1f504; Sync"] --> AR["&#x1f4e6; Archive"]
+
+    P -.- P1["proposal.md<br/>Что и зачем"]
+    P -.- P2["design.md<br/>Как делаем"]
+    P -.- P3["tasks.md<br/>Чеклист задач"]
+    P -.- P4["specs/<br/>Дельта-спеки"]
+
+    A -.- A1["Выполнение задач<br/>из tasks.md"]
+    A -.- A2["Отметка прогресса<br/>- [x]"]
+
+    S -.- S1["Слияние дельта-спек<br/>в specs/"]
+
+    AR -.- AR1["Перемещение в<br/>archive/"]
+
+    style P fill:#0366d6,color:#fff,stroke:none,font-weight:700
+    style A fill:#6f42c1,color:#fff,stroke:none,font-weight:700
+    style S fill:#28a745,color:#fff,stroke:none,font-weight:700
+    style AR fill:#e36209,color:#fff,stroke:none,font-weight:700
+    </div>
+  </div>
+
+  <p>На практике это выглядит так:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+sequenceDiagram
+    participant U as &#x1f464; Разработчик
+    participant CLI as &#x1f4bb; openspec CLI
+    participant FS as &#x1f4c1; Файловая система
+
+    rect rgb(240, 248, 255)
+        Note over U,FS: 1. PROPOSE
+        U->>CLI: openspec new change "add-dark-theme"
+        CLI->>FS: Создание changes/add-dark-theme/
+        U->>CLI: openspec instructions proposal
+        CLI-->>U: Шаблон + инструкции
+        U->>FS: Запись proposal.md
+        U->>FS: Запись design.md
+        U->>FS: Запись tasks.md
+        U->>FS: Запись specs/dark-theme/spec.md
+    end
+
+    rect rgb(248, 245, 255)
+        Note over U,FS: 2. APPLY
+        loop Каждая задача
+            U->>FS: Чтение tasks.md
+            U->>FS: Реализация задачи
+            U->>FS: Отметка - [x]
+        end
+    end
+
+    rect rgb(240, 255, 244)
+        Note over U,FS: 3. SYNC
+        U->>CLI: openspec sync
+        CLI->>FS: Чтение delta specs
+        CLI->>FS: Запись в specs/
+    end
+
+    rect rgb(255, 248, 240)
+        Note over U,FS: 4. ARCHIVE
+        U->>CLI: openspec archive
+        CLI->>FS: mv changes/name -> archive/
+    end
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ПРИМЕР -->
+  <h2 id="example"><span class="emoji">&#x1f525;</span> Пример: добавляем тёмную тему</h2>
+
+  <p>
+    Полный walkthrough &mdash; от идеи до архивации. Чтобы было наглядно.
+  </p>
+
+  <h3>Шаг 1: Создаём изменение</h3>
+  <div class="code-block">
+    <code>$ openspec new change <span class="yaml-val">"add-dark-theme"</span>
+
+<span class="yaml-comment">Created: openspec/changes/add-dark-theme/</span>
+<span class="yaml-comment">Schema: spec-driven</span></code>
+  </div>
+
+  <h3>Шаг 2: Пишем proposal.md</h3>
+  <div class="code-block">
+    <code><span class="yaml-key"># Proposal: Add Dark Theme</span>
+
+<span class="yaml-key">## Problem</span>
+Пользователи работают ночью и в тёмных помещениях.
+Белый интерфейс слепит глаза и вызывает усталость.
+
+<span class="yaml-key">## Solution</span>
+Добавить переключатель тёмной темы с сохранением выбора
+в localStorage и поддержкой системных настроек.
+
+<span class="yaml-key">## Success Criteria</span>
+- Переключатель виден в header
+- Тема сохраняется между сессиями
+- Автоматически определяется системная тема
+- Все компоненты корректно отображаются в обеих темах</code>
+  </div>
+
+  <h3>Шаг 3: Пишем design.md</h3>
+  <div class="code-block">
+    <code><span class="yaml-key"># Design: Dark Theme</span>
+
+<span class="yaml-key">## Approach</span>
+CSS-переменные (custom properties) на корневом элементе.
+Два набора: <code>:root</code> (светлая) и <code>[data-theme="dark"]</code> (тёмная).
+
+<span class="yaml-key">## Files to Modify</span>
+- <span class="yaml-val">src/styles/variables.css</span> &mdash; добавить тёмные переменные
+- <span class="yaml-val">src/components/Header.tsx</span> &mdash; добавить переключатель
+- <span class="yaml-val">src/hooks/useTheme.ts</span> &mdash; новый хук для управления темой
+- <span class="yaml-val">src/styles/components.css</span> &mdash; перевести на переменные
+
+<span class="yaml-key">## Architecture Decisions</span>
+- Хранение: localStorage + data-атрибут на &lt;html&gt;
+- Фоллбэк: <code>prefers-color-scheme</code> media query
+- Переключение: без перезагрузки страницы</code>
+  </div>
+
+  <h3>Шаг 4: Пишем tasks.md</h3>
+  <div class="code-block">
+    <code><span class="yaml-key">## Tasks</span>
+
+<span class="yaml-key">- [x]</span> <span class="yaml-val">Создать variables.css с набором CSS-переменных для обеих тем</span>
+<span class="yaml-key">- [x]</span> <span class="yaml-val">Добавить хук useTheme с логикой переключения и localStorage</span>
+<span class="yaml-key">- [x]</span> <span class="yaml-val">Добавить кнопку-переключатель в Header.tsx</span>
+<span class="yaml-key">- [x]</span> <span class="yaml-val">Перевести components.css на CSS-переменные</span>
+<span class="yaml-key">- [x]</span> <span class="yaml-val">Добавить media query для системной темы</span>
+<span class="yaml-key">- [x]</span> <span class="yaml-val">Проверить все компоненты в обеих темах</span></code>
+  </div>
+
+  <h3>Шаг 5: Пишем дельта-спеку</h3>
+  <div class="code-block">
+    <code><span class="yaml-comment"># openspec/changes/add-dark-theme/specs/ui/spec.md</span>
+
+<span class="yaml-key">## ADDED Requirements</span>
+
+<span class="yaml-key">### Requirement:</span> <span class="yaml-val">Dark Theme Support</span>
+Система SHALL предоставлять визуальный переключатель
+между светлой и тёмной темами.
+
+<span class="yaml-key">#### Scenario:</span> <span class="yaml-val">User toggles theme</span>
+- <span class="yaml-comment">WHEN пользователь нажимает кнопку переключения темы</span>
+- <span class="yaml-comment">THEN тема меняется мгновенно без перезагрузки</span>
+- <span class="yaml-comment">AND выбор сохраняется в localStorage</span>
+
+<span class="yaml-key">#### Scenario:</span> <span class="yaml-val">System theme detection</span>
+- <span class="yaml-comment">WHEN пользователь открывает страницу впервые</span>
+- <span class="yaml-comment">THEN система определяет предпочтение через prefers-color-scheme</span>
+
+<span class="yaml-key">## MODIFIED Requirements</span>
+
+<span class="yaml-key">### Requirement:</span> <span class="yaml-val">Header Navigation</span>
+<span class="yaml-key">#### Scenario:</span> <span class="yaml-val">Theme toggle in header</span>
+- <span class="yaml-comment">WHEN пользователь смотрит на header</span>
+- <span class="yaml-comment">THEN он видит иконку переключения темы справа от навигации</span></code>
+  </div>
+
+  <h3>Шаг 6: Реализуем задачи</h3>
+  <div class="card card-purple">
+    <p>
+      Claude (или ты) читает tasks.md и последовательно реализует каждую задачу.
+      По завершении каждой &mdash; отмечает <code>- [x]</code> в tasks.md.
+      Код пишется по design.md, а не &laquo;на ощупь&raquo;.
+    </p>
+  </div>
+
+  <h3>Шаг 7: Синхронизируем спеки</h3>
+  <div class="code-block">
+    <code>$ openspec sync
+
+<span class="yaml-comment">Synced delta specs for add-dark-theme:</span>
+<span class="yaml-comment">  ui: Added "Dark Theme Support", Modified "Header Navigation"</span>
+<span class="yaml-comment">Main specs updated.</span></code>
+  </div>
+
+  <h3>Шаг 8: Архивируем</h3>
+  <div class="code-block">
+    <code>$ openspec archive
+
+<span class="yaml-comment">Archived: add-dark-theme</span>
+<span class="yaml-comment">Location: openspec/changes/archive/2026-06-17-add-dark-theme/</span>
+<span class="yaml-comment">Specs: synced</span>
+<span class="yaml-comment">Tasks: 6/6 complete</span></code>
+  </div>
+
+  <div class="card card-green">
+    <p><strong>Итого:</strong> От идеи до архивации &mdash; 8 шагов. В каждом
+    я точно знаю, что делаю и зачем. Никакого vibe-coding.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. BEST PRACTICES -->
+  <h2 id="best-practices"><span class="emoji">&#x2705;</span> Best practices</h2>
+
+  <div class="card card-accent">
+    <h3>Пиши spec перед кодом</h3>
+    <p>
+      Самый главный принцип. Если ты не можешь описать изменение в proposal и tasks &mdash;
+      ты не понимаешь, что делаешь. А если не понимаешь &mdash; зачем писать код?
+      Спека &mdash; это способ заставить себя подумать перед действием.
+    </p>
+  </div>
+
+  <div class="card card-green">
+    <h3>Дроби на мелкие изменения</h3>
+    <p>
+      Одно изменение = одна осмысленная фича или один рефакторинг.
+      Не &laquo;переделать весь фронт&raquo;, а &laquo;добавить тёмную тему&raquo;.
+      Если tasks.md больше 10 задач &mdash; возможно, стоит разбить на два изменения.
+    </p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Обновляй spec если передумал</h3>
+    <p>
+      Реализация показала, что дизайн неправильный? Не пиши код &laquo;как получится&raquo; &mdash;
+      обнови design.md и tasks.md. OpenSpec поддерживает fluid workflow:
+      можно вернуться к редактированию артефактов на любом этапе.
+    </p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Читай proposal перед review</h3>
+    <p>
+      Когда делаешь code review или вернулся к проекту через месяц &mdash;
+      начни с proposal.md. Там написано <em>зачем</em> всё это делалось.
+      Git-коммиты говорят тебе <em>что</em> изменилось, proposal &mdash; <em>почему</em>.
+    </p>
+  </div>
+
+  <div class="card card-yellow">
+    <h3>Используй дельта-спеки для коммуникации</h3>
+    <p>
+      Дельта-спеки &mdash; это язык общения между разработчиком и системой.
+      Формат ADDED/MODIFIED/REMOVED читается и человеком, и Claude.
+      Это не бюрократия &mdash; это точность.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ТИПИЧНЫЕ ОШИБКИ -->
+  <h2 id="mistakes"><span class="emoji">&#x26a0;&#xfe0f;</span> Типичные ошибки</h2>
+
+  <div class="card card-red">
+    <h3>&laquo;Напишу spec потом, а то теряю поток&raquo;</h3>
+    <p>
+      Потом = никогда. А потом выясняется, что ты сделал не то, потому что
+      не подумал. И тратишь 2 часа на переделку вместо 20 минут на spec.
+      <strong>Поток &mdash; это иллюзия. Spec &mdash; это реальность.</strong>
+    </p>
+  </div>
+
+  <div class="card card-red">
+    <h3>&laquo;Одно изменение на 30 файлов&raquo;</h3>
+    <p>
+      Если tasks.md похож на роман, ты сделал слишком много.
+      Разбей на отдельные изменения. Каждое &mdash; одна осмысленная единица.
+      Архивировать роман &mdash; мучение. Архивировать абзац &mdash; pleasure.
+    </p>
+  </div>
+
+  <div class="card card-red">
+    <h3>&laquo;Сделал по design, а он оказался неправильным&raquo;</h3>
+    <p>
+      Не молчи и не коди &laquo;как получится&raquo;. Обнови design.md и tasks.md.
+      Скажи Claude: &laquo;Обнови артефакты, вот что изменилось&raquo;.
+      Это не провал &mdash; это процесс. Spec живой, не каменный.
+    </p>
+  </div>
+
+  <div class="card card-red">
+    <h3>&laquo;Синхронизирую спеки после каждого коммита&raquo;</h3>
+    <p>
+      Не надо. Синхронизация &mdash; это один раз после завершения всех задач.
+      Дельта-спеки живут в changes/name/specs/ и спокойно ждут своего часа.
+      Не торопись сливать до того, как всё заработает.
+    </p>
+  </div>
+
+  <div class="card card-red">
+    <h3>&laquo;Archive &mdash; это лишнее, я и так помню&raquo;</h3>
+    <p>
+      Через месяц &mdash; помнишь. Через полгода &mdash; нет.
+      Архив не для тебя сегодня. Архив для тебя через полгода.
+      И для тиммейта, который пришёл и спрашивает &laquo;зачем мы это сделали&raquo;.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ИТОГО -->
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> SDD через OpenSpec &mdash; это не бюрократия, а инструмент
+      ясного мышления. Proposal (что и зачем) &rarr; Design (как) &rarr; Tasks (шаги)
+      &rarr; Apply (код) &rarr; Sync (спеки) &rarr; Archive (история).
+      Каждый этап даёт ответ на конкретный вопрос.
+      Результат &mdash; код с документацией, документация с историей,
+      история с мотивацией. А не кучка коммитов &laquo;fix bug&raquo;.
+    </p>
+  </div>
+
+<footer style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.85em;text-align:center;">
+    Создано <strong>writer-agent</strong> через Workflow tool.
+    <br>Актуально на 2026-06-17.
+    <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+</footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+</body>
+</html>

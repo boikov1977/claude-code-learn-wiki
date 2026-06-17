@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Tool — todo-лист внутри Claude Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #2d3436;
+      --text-muted: #636e72;
+      --accent: #6c5ce7;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #00b894;
+      --orange: #e17055;
+      --red: #d73a49;
+      --purple: #6c5ce7;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      margin: 16px 0;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.95em;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background: var(--accent-light);
+    }
+
+    ul, ol {
+      margin: 12px 0 16px 24px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.78em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #fff;
+    }
+
+    .badge-tool { background: var(--accent); }
+    .badge-status { background: var(--green); }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      margin: 16px 0;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9em;
+      flex-shrink: 0;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-content strong {
+      color: var(--accent);
+    }
+
+    footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85em;
+      text-align: center;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>Task Tool — todo-лист внутри Claude Code</h1>
+  <p class="subtitle">Встроенный инструмент для отслеживания прогресса в рамках одной сессии</p>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Что это такое                          -->
+  <!-- ═══════════════════════════════════════ -->
+  <h2><span class="emoji">&#x1F4CB;</span> Что такое Task</h2>
+
+  <p>
+    <strong>Task</strong> — это встроенный инструмент Claude Code, который работает как todo-лист прямо в коде.
+    Не про под-агентов, не про Workflow tool — просто чек-лист для отслеживания прогресса
+    внутри одной сессии.
+  </p>
+
+  <div class="card card-accent">
+    <strong>Зачем нужен:</strong> когда задача многошаговая и легко потерять нить —
+    что уже сделано, что в работе, что осталось. Task фиксирует это и показывает
+    прямо в интерфейсе.
+  </div>
+
+  <p>
+    Полезен, когда я создаю задачи, отмечаю прогресс, а ты видишь что сделано и что в работе.
+    Никакого кода, никаких запросов — только фиксация состояния.
+  </p>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Три основных метода                     -->
+  <!-- ═══════════════════════════════════════ -->
+  <h2><span class="emoji">&#x1F527;</span> Что умеет Task</h2>
+
+  <p>Task предоставляет три операции:</p>
+
+  <div class="card card-green">
+    <h3>TaskCreate</h3>
+    <p>Создать задачу. Указываешь название, описание — статус автоматически ставится <code>pending</code>.</p>
+    <div class="code-block"><code>TaskCreate({
+  "name": "Настроить хуки",
+  "description": "Добавить PreToolUse хуки для бэкапов"
+})
+// Статус: pending</code></div>
+  </div>
+
+  <div class="card card-orange">
+    <h3>TaskUpdate</h3>
+    <p>Обновить статус задачи или отредактировать её. Переключаешь между <code>in_progress</code>, <code>completed</code>, <code>cancelled</code>.</p>
+    <div class="code-block"><code>TaskUpdate({
+  "id": "task-1",
+  "status": "in_progress"
+})</code></div>
+  </div>
+
+  <div class="card card-purple">
+    <h3>TaskList</h3>
+    <p>Посмотреть все активные задачи. Полезно, когда нужно вспомнить контекст после перерыва.</p>
+    <div class="code-block"><code>TaskList()
+// Возвращает список всех задач с их статусами</code></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Где видно                               -->
+  <!-- ═══════════════════════════════════════ -->
+  <h2><span class="emoji">&#x1F441;</span> Где видно</h2>
+
+  <p>
+    Задачи отображаются <strong>снизу в интерфейсе</strong> — панель с активными задачами и их статусами.
+    Можно также вызвать список вручную командой <code>/tasks</code>.
+  </p>
+
+  <div class="card">
+    <p><strong>Визуально:</strong></p>
+    <ul>
+      <li><span class="badge badge-status">pending</span> — ожидает выполнения</li>
+      <li><span class="badge badge-tool">in_progress</span> — в работе</li>
+      <li><span class="badge" style="background:#28a745;">completed</span> — выполнено</li>
+      <li><span class="badge" style="background:#636e72;">cancelled</span> — отменено</li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Жизненный цикл (Mermaid)               -->
+  <!-- ═══════════════════════════════════════ -->
+  <h2><span class="emoji">&#x1F504;</span> Жизненный цикл задачи</h2>
+
+  <p>Задача проходит через несколько состояний:</p>
+
+  <div class="diagram-wrapper">
+    <pre class="mermaid">
+flowchart LR
+  Create["TaskCreate"] --> Pending["pending"]
+  Pending --> InProgress["in_progress"]
+  InProgress --> Completed["completed"]
+  InProgress -.-> Cancelled["cancelled"]
+  Pending -.-> Cancelled
+
+  style Create fill:#6c5ce7,color:#fff,stroke:#5a4bd1
+  style Pending fill:#f39c12,color:#fff,stroke:#e67e22
+  style InProgress fill:#3498db,color:#fff,stroke:#2980b9
+  style Completed fill:#00b894,color:#fff,stroke:#00a381
+  style Cancelled fill:#636e72,color:#fff,stroke:#535c68
+    </pre>
+  </div>
+
+  <div class="card card-accent">
+    <strong>Ключевой момент:</strong> переход из <code>in_progress</code> в <code>cancelled</code> — это
+    неавтоматический путь (пунктирная стрелка). Задачу можно отменить вручную,
+    но обычно она либо выполняется, либо остаётся в ожидании.
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Когда использовать                      -->
+  <!-- ═══════════════════════════════════════ -->
+  <h2><span class="emoji">&#x1F4A1;</span> Когда я использую Task</h2>
+
+  <ul>
+    <li><strong>Многошаговая задача (3+ шагов):</strong> создать субагента, настроить хуки, проверить — чтобы не забыть промежуточные шаги</li>
+    <li><strong>Можно потерять нить:</strong> "что я уже сделал, что осталось" — Task сохраняет контекст</li>
+    <li><strong>Нужен прогресс в реальном времени:</strong> вижу, как задача переходит от pending к completed</li>
+  </ul>
+
+  <div class="card card-green">
+    <strong>Практический пример:</strong> "Установи и настрой X, Y, Z" —
+    создаю три задачи, каждую отмечаю in_progress перед выполнением,
+    после выполнения ставлю completed. В конце вижу полную картину.
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Отличия от Agent и Workflow             -->
+  <!-- ═══════════════════════════════════════ -->
+  <h2><span class="emoji">&#x26A0;&#xFE0F;</span> Отличие от Agent и Workflow</h2>
+
+  <p><strong>Важно понимать:</strong> Task — это не вычислительный ресурс, а простой чек-лист.</p>
+
+  <table>
+    <tr>
+      <th>Инструмент</th>
+      <th>Что это</th>
+      <th>Контекст</th>
+    </tr>
+    <tr>
+      <td><strong>Task</strong></td>
+      <td>Todo-список</td>
+      <td>Текущая сессия</td>
+    </tr>
+    <tr>
+      <td><strong>Agent</strong></td>
+      <td>Под-агент</td>
+      <td>Отдельный контекст</td>
+    </tr>
+    <tr>
+      <td><strong>Workflow</strong></td>
+      <td>Скрипт с несколькими агентами</td>
+      <td>Много отдельных контекстов</td>
+    </tr>
+  </table>
+
+  <div class="card card-red">
+    <strong>Помните:</strong> Task не отправляет код и не делает запросы. Он только фиксирует мой прогресс.
+    Это не замена Agent и не замена Workflow — это дополнение к ним.
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Best practices                          -->
+  <!-- ═══════════════════════════════════════ -->
+  <h2><span class="emoji">&#x2705;</span> Best Practices</h2>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <strong>Создавай задачи перед началом большой работы</strong>
+      <p>Не создавай задачи "на ходу" — сначала опиши все шаги, потом приступай.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <strong>Держи в in_progress только одну задачу за раз</strong>
+      <p>Если две задачи "в работе" одновременно — теряется ясность. Сделай одну, потом следующую.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <strong>Помечай completed сразу после выполнения</strong>
+      <p>Не откладывай "когда-нибудь" — пометка сделано сразу. Иначе задача "висит" и сбивает с толку.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <strong>Не плоди задачи</strong>
+      <p>3-5 задач — норма. 15 — перебор. Если задач больше — разбей на подзадачи или используй Workflow.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Пример использования                    -->
+  <!-- ═══════════════════════════════════════ -->
+  <h2><span class="emoji">&#x1F4D6;</span> Пример использования</h2>
+
+  <p><strong>Сценарий:</strong> "Установи и настрой X, Y, Z"</p>
+
+  <div class="code-block"><code>Step 1: Создать 3 задачи
+  TaskCreate({ name: "Установить X", description: "..." })  → pending
+  TaskCreate({ name: "Настроить Y", description: "..." })  → pending
+  TaskCreate({ name: "Проверить Z", description: "..." })  → pending
+
+Step 2: Первая задача → in_progress
+  TaskUpdate({ id: "task-1", status: "in_progress" })
+
+Step 3: Выполнить X
+  ... выполняю задачу ...
+
+Step 4: completed → следующая in_progress
+  TaskUpdate({ id: "task-1", status: "completed" })
+  TaskUpdate({ id: "task-2", status: "in_progress" })
+
+Step 5: Повторяю для Y и Z</code></div>
+
+  <div class="diagram-wrapper">
+    <pre class="mermaid">
+sequenceDiagram
+    participant U as Пользователь
+    participant T as Task Tool
+    participant C as Claude Code
+
+    U->>T: TaskCreate: "Установить X"
+    T-->>U: pending
+
+    U->>T: TaskUpdate: in_progress
+    T-->>U: in_progress
+
+    C->>C: Устанавливаю X...
+    C->>T: TaskUpdate: completed
+    T-->>U: completed
+
+    C->>T: TaskCreate: "Настроить Y"
+    T-->>U: pending
+
+    C->>T: TaskUpdate: in_progress
+    T-->>U: in_progress
+
+    C->>C: Настраиваю Y...
+    C->>T: TaskUpdate: completed
+    T-->>U: completed
+    </pre>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Чего Task НЕ делает                     -->
+  <!-- ═══════════════════════════════════════ -->
+  <h2><span class="emoji">&#x1F6AB;</span> Чего Task НЕ делает</h2>
+
+  <div class="card card-red">
+    <ul>
+      <li><strong>Не запускает код или команды</strong> — это только список задач, не исполнитель</li>
+      <li><strong>Не вызывает под-агентов</strong> — для этого есть Agent tool</li>
+      <li><strong>Не делает ничего сам</strong> — только фиксирует мой прогресс</li>
+    </ul>
+    <p style="margin-top:12px;margin-bottom:0;">
+      Task — это чек-лист, не вычислительный ресурс. Он не отправляет код и не делает запросы.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- Сводка                                  -->
+  <!-- ═══════════════════════════════════════ -->
+  <h2><span class="emoji">&#x1F4CC;</span> Сводка</h2>
+
+  <div class="card card-accent">
+    <p style="margin-bottom:0;">
+      Task — это встроенный todo-лист в Claude Code. Он не заменяет Agent и Workflow,
+      а дополняет их: пока Agent выполняет работу, Task отслеживает прогресс.
+      Создавай задачи перед большой работой, держи по одной in_progress,
+      помечай completed сразу. 3-5 задач — идеально.
+    </p>
+  </div>
+
+  <footer>
+    Создано <strong>writer-agent</strong> через Workflow tool.
+    <br>Актуально на 2026-06-17.
+    <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+  </footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  })
+</script>
+
+</body>
+</html>

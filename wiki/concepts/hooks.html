@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Хуки Claude Code — шпаргалка</title>
+  <style>
+ :root {
+ --bg: #fafbfc;
+ --card-bg: #ffffff;
+ --border: #e1e4e8;
+ --text: #24292e;
+ --text-muted: #586069;
+ --accent: #0366d6;
+ --accent-light: #f1f8ff;
+ --code-bg: #f6f8fa;
+ --green: #28a745;
+ --orange: #e36209;
+ --red: #d73a49;
+ --purple: #6f42c1;
+ --teal: #008080;
+ --yellow: #b08800;
+ }
+
+ * { margin: 0; padding: 0; box-sizing: border-box; }
+
+ body {
+ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+ background: var(--bg);
+ color: var(--text);
+ line-height: 1.7;
+ padding: 0 16px;
+ }
+
+ .container {
+ max-width: 1060px;
+ margin: 0 auto;
+ padding: 40px 0 80px;
+ }
+
+ h1 {
+ font-size: 2.2em;
+ margin-bottom: 8px;
+ background: linear-gradient(135deg, var(--accent), var(--purple));
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ }
+
+ .subtitle {
+ font-size: 1.15em;
+ color: var(--text-muted);
+ margin-bottom: 40px;
+ }
+
+ h2 {
+ font-size: 1.5em;
+ margin: 48px 0 16px;
+ padding-bottom: 8px;
+ border-bottom: 2px solid var(--border);
+ color: var(--text);
+ }
+
+ h2 .emoji { margin-right: 8px; }
+
+ h3 {
+ font-size: 1.15em;
+ margin: 24px 0 10px;
+ color: var(--accent);
+ }
+
+ p { margin-bottom: 14px; }
+
+ .card {
+ background: var(--card-bg);
+ border: 1px solid var(--border);
+ border-radius: 12px;
+ padding: 24px 28px;
+ margin: 20px 0;
+ box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+ }
+
+ .card-accent {
+ border-left: 4px solid var(--accent);
+ }
+
+ .card-green {
+ border-left: 4px solid var(--green);
+ background: #f6fff8;
+ }
+
+ .card-orange {
+ border-left: 4px solid var(--orange);
+ background: #fff8f0;
+ }
+
+ .card-purple {
+ border-left: 4px solid var(--purple);
+ background: #f8f4ff;
+ }
+
+ .card-red {
+ border-left: 4px solid var(--red);
+ background: #fff5f5;
+ }
+
+ .card-teal {
+ border-left: 4px solid var(--teal);
+ background: #f0fffa;
+ }
+
+ .code-block {
+ background: var(--code-bg);
+ border: 1px solid var(--border);
+ border-radius: 8px;
+ padding: 18px 20px;
+ font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+ font-size: 0.9em;
+ overflow-x: auto;
+ margin: 14px 0;
+ line-height: 1.6;
+ white-space: pre-wrap;
+ }
+
+ code {
+ background: var(--code-bg);
+ padding: 2px 6px;
+ border-radius: 4px;
+ font-family: "SFMono-Regular", Consolas, monospace;
+ font-size: 0.9em;
+ }
+
+ .code-block code {
+ background: none;
+ padding: 0;
+ }
+
+ table {
+ width: 100%;
+ border-collapse: collapse;
+ margin: 16px 0;
+ font-size: 0.92em;
+ }
+
+ th {
+ background: var(--accent-light);
+ text-align: left;
+ padding: 10px 14px;
+ font-weight: 600;
+ border-bottom: 2px solid var(--accent);
+ white-space: nowrap;
+ }
+
+ td {
+ padding: 10px 14px;
+ border-bottom: 1px solid var(--border);
+ vertical-align: top;
+ }
+
+ tr:hover td {
+ background: #f9fbfd;
+ }
+
+ .tip {
+ display: flex;
+ align-items: flex-start;
+ gap: 10px;
+ background: #fffff0;
+ border: 1px solid #f0e68c;
+ border-radius: 8px;
+ padding: 14px 18px;
+ margin: 16px 0;
+ font-size: 0.95em;
+ }
+
+ .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+ .diagram-wrapper {
+ overflow-x: auto;
+ overflow-y: hidden;
+ padding: 16px 0;
+ margin: 0 -16px;
+ }
+ .diagram-wrapper svg {
+ max-width: none !important;
+ height: auto !important;
+ }
+
+ .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+ ul, ol { padding-left: 24px; margin: 10px 0; }
+ li { margin-bottom: 6px; }
+
+ a { color: var(--accent); text-decoration: none; }
+ a:hover { text-decoration: underline; }
+
+ .toc {
+ background: var(--card-bg);
+ border: 1px solid var(--border);
+ border-radius: 12px;
+ padding: 20px 28px;
+ margin: 24px 0;
+ }
+
+ .toc h3 { margin-top: 0; color: var(--text); }
+ .toc ol { padding-left: 20px; }
+ .toc li { margin-bottom: 4px; }
+
+ .hr-dashed {
+ border: none;
+ border-top: 2px dashed var(--border);
+ margin: 40px 0;
+ }
+
+ .tag-pre {
+ display: inline-block;
+ background: #e3f2fd;
+ color: #1565c0;
+ border: 1px solid #bbdefb;
+ border-radius: 6px;
+ padding: 2px 10px;
+ font-size: 0.82em;
+ font-weight: 600;
+ margin-right: 4px;
+ }
+
+ .tag-post {
+ display: inline-block;
+ background: #e8f5e9;
+ color: #2e7d32;
+ border: 1px solid #c8e6c9;
+ border-radius: 6px;
+ padding: 2px 10px;
+ font-size: 0.82em;
+ font-weight: 600;
+ margin-right: 4px;
+ }
+
+ .tag-session {
+ display: inline-block;
+ background: #f3e5f5;
+ color: #7b1fa2;
+ border: 1px solid #e1bee7;
+ border-radius: 6px;
+ padding: 2px 10px;
+ font-size: 0.82em;
+ font-weight: 600;
+ margin-right: 4px;
+ }
+
+ .tag-notify {
+ display: inline-block;
+ background: #fff3e0;
+ color: #e65100;
+ border: 1px solid #ffe0b2;
+ border-radius: 6px;
+ padding: 2px 10px;
+ font-size: 0.82em;
+ font-weight: 600;
+ margin-right: 4px;
+ }
+
+ .back-link {
+ display: inline-block;
+ margin-bottom: 20px;
+ font-size: 0.9em;
+ }
+
+ .comparison-grid {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 16px;
+ margin: 16px 0;
+ }
+
+ .comparison-grid .card {
+ margin: 0;
+ }
+
+ @media (max-width: 700px) {
+ .comparison-grid {
+ grid-template-columns: 1fr;
+ }
+ }
+ </style>
+</head>
+<body>
+<div class="container">
+
+ <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+ <h1>Хуки Claude Code</h1>
+ <p class="subtitle">Автоматические действия до и после событий -- как подписка на действия Claude</p>
+
+ <!-- СОДЕРЖАНИЕ -->
+ <div class="toc">
+ <h3>Содержание</h3>
+ <ol>
+ <li><a href="#what">Что такое хуки?</a></li>
+ <li><a href="#lifecycle">Жизненный цикл хука</a></li>
+ <li><a href="#types">Типы событий (триггеры)</a></li>
+ <li><a href="#actions">Что умеют делать хуки</a></li>
+ <li><a href="#config">Где живут и как настроить</a></li>
+ <li><a href="#our-hooks">Наши хуки в действии</a></li>
+ <li><a href="#scenarios">Зачем вообще нужны</a></li>
+ <li><a href="#limits">Ограничения и ловушки</a></li>
+ </ol>
+ </div>
+
+ <!-- 1. ЧТО ТАКОЕ ХУКИ -->
+ <h2 id="what"><span class="emoji">🔧</span> Что такое хуки?</h2>
+
+ <p>
+ Представь: ты настроил уведомления в телефоне -- «когда кто-то написал в Telegram, покажи пуш».
+ Хуки в Claude Code работают точно так же. Только вместо пушей -- выполняется команда.
+ </p>
+
+ <div class="card card-accent">
+ <p><strong>Проще простого:</strong> Хук -- это <strong>автоматическая команда</strong>,
+ которая выполняется при определённом событии. Claude вызвал Write - сработал хук -
+ сделал бэкап. Всё. Никаких агентов, никакого AI -- просто shell-команда на событии.</p>
+ </div>
+
+ <p>Хуки настраиваются в JSON-конфигах и работают на уровне Claude Code, не требуя запуска моделей.
+ Это делает их быстрыми и надёжными.</p>
+
+ <hr class="hr-dashed">
+
+ <!-- 2. ЖИЗНЕННЫЙ ЦИКЛ -->
+ <h2 id="lifecycle"><span class="emoji">🔄</span> Жизненный цикл хука</h2>
+
+ <div class="diagram-wrapper">
+ <pre class="mermaid">
+ flowchart LR
+   A["Claude вызывает инструмент"] --> B{"Есть хук на событие?"}
+   B -->|"Нет"| C["Инструмент выполняется"]
+   B -->|"Да, matcher совпал"| D["Запуск action"]
+   D --> E{"PreToolUse?"}
+   E -->|"Да"| F{"Exit code = 0?"}
+   F -->|"Да"| C
+   F -->|"Нет"| G["Инструмент заблокирован"]
+   E -->|"Нет, PostToolUse"| C
+   C --> H["PostToolUse action"]
+   H --> I["Готово"]
+   G --> I
+ </pre>
+ </div>
+
+ <p>Процесс идёт по шагам:</p>
+
+ <ol>
+ <li><strong>Событие.</strong> Claude вызывает Write, Edit, Bash -- что угодно.</li>
+ <li><strong>Проверка.</strong> Claude Code смотрит: есть ли хук на это событие и совпадает ли matcher?</li>
+ <li><strong>Выполнение.</strong> Если совпал -- запускается указанный action (команда, LLM-проверка и т.д.).</li>
+ <li><strong>Результат.</strong> Для PreToolUse: если команда вернула <code>block</code> или ненулевой код -- инструмент <strong>не вызывается</strong>. Для PostToolUse результат -- уже неважен (действие выполнено).</li>
+ </ol>
+
+ <div class="tip">
+ <span class="tip-icon">💡</span>
+ <span><strong>Ключевой момент:</strong> PreToolUse может <strong>заблокировать</strong> вызов инструмента.
+ PostToolUse -- уже нет, потому что действие уже произошло.</span>
+ </div>
+
+ <hr class="hr-dashed">
+
+ <!-- 3. ТИПЫ СОБЫТИЙ -->
+ <h2 id="types"><span class="emoji">📋</span> Типы событий (триггеры)</h2>
+
+ <p>Каждый хук привязан к событию. Claude Code поддерживает несколько типов:</p>
+
+ <table>
+ <tr>
+ <th>Событие</th>
+ <th>Когда срабатывает</th>
+ <th>Особенности</th>
+ </tr>
+ <tr>
+ <td><span class="tag-pre">PreToolUse</span></td>
+ <td><strong>Перед</strong> вызовом инструмента (Write, Edit, Bash...)</td>
+ <td>Можно <strong>заблокировать</strong> вызов. Получает JSON с <code>tool_input</code></td>
+ </tr>
+ <tr>
+ <td><span class="tag-post">PostToolUse</span></td>
+ <td><strong>После</strong> успешного выполнения инструмента</td>
+ <td>Нельзя отменить. Получает <code>tool_response</code></td>
+ </tr>
+ <tr>
+ <td><span class="tag-post">PostToolUseFailure</span></td>
+ <td>После <strong>ошибки</strong> в инструменте</td>
+ <td>Полезно для логирования ошибок</td>
+ </tr>
+ <tr>
+ <td><span class="tag-session">SessionStart</span></td>
+ <td>При старте сессии</td>
+ <td>Раз для раза. Инициализация</td>
+ </tr>
+ <tr>
+ <td><span class="tag-notify">Stop</span></td>
+ <td>При остановке (clear, exit)</td>
+ <td>Можно использовать для cleanup</td>
+ </tr>
+ <tr>
+ <td><span class="tag-session">PrePrompt</span></td>
+ <td>Перед отправкой промпта модели</td>
+ <td>Можно модифицировать промпт</td>
+ </tr>
+ <tr>
+ <td><span class="tag-session">UserPromptSubmit</span></td>
+ <td>Когда пользователь отправил сообщение</td>
+ <td>Валидация ввода</td>
+ </tr>
+ <tr>
+ <td><span class="tag-notify">Notification</span></td>
+ <td>Когда Claude хочет уведомить пользователя</td>
+ <td>Системные уведомления</td>
+ </tr>
+ <tr>
+ <td><span class="tag-session">PreCompact</span> / <span class="tag-session">PostCompact</span></td>
+ <td>До/после сжатия контекста</td>
+ <td>Управление контекстом</td>
+ </tr>
+ <tr>
+ <td><span class="tag-pre">PermissionRequest</span></td>
+ <td>При запросе разрешения</td>
+ <td>Авто-ответ на типичные запросы</td>
+ </tr>
+ </table>
+
+ <p>Matcher (фильтр) использует регулярные выражения. Например, <code>Write|Edit</code> ловит оба типа инструмента.
+ Можно указать <code>.*</code> чтобы ловить все.</p>
+
+ <hr class="hr-dashed">
+
+ <!-- 4. ЧТО УМЕЮТ ДЕЛАТЬ -->
+ <h2 id="actions"><span class="emoji">⚙</span> Что умеют делать хуки</h2>
+
+ <div class="comparison-grid">
+ <div class="card card-green">
+ <h3><code>command</code></h3>
+ <p>Выполнить shell-команду. Самый распространённый и простой.</p>
+ <div class="code-block">
+ <code>{
+ "type": "command",
+ "command": "echo 'Файл изменён'"
+}</code>
+ </div>
+ <p>Команда получает JSON на stdin с данными о событии.
+ Возвращает exit code: <code>0</code> = OK, <code>не 0</code> = блокировка (для PreToolUse).</p>
+ </div>
+
+ <div class="card card-purple">
+ <h3><code>prompt</code></h3>
+ <p>Проверить условие через LLM. Дорого, но умно.</p>
+ <div class="code-block">
+ <code>{
+ "type": "prompt",
+ "prompt": "Проверь, что код\nсоответствует стилю проекта"
+}</code>
+ </div>
+ <p>Модель анализирует контекст и принимает решение.
+ Подходит для сложной валидации.</p>
+ </div>
+
+ <div class="card card-orange">
+ <h3><code>http</code></h3>
+ <p>Отправить HTTP-запрос. Уведомления в Slack, Telegram и т.д.</p>
+ <div class="code-block">
+ <code>{
+ "type": "http",
+ "url": "https://hooks.slack.com/...",
+ "method": "POST"
+}</code>
+ </div>
+ <p>Полезно для нотификаций команде,
+ интеграции с CI/CD.</p>
+ </div>
+
+ <div class="card card-teal">
+ <h3><code>agent</code></h3>
+ <p>Запустить субагента для проверки. Мощно, но медленно.</p>
+ <div class="code-block">
+ <code>{
+ "type": "agent",
+ "agent": "my-checker",
+ "prompt": "Проверь PR"
+}</code>
+ </div>
+ <p>Субагент получает контекст и может
+ принимать решения на уровне Claude.</p>
+ </div>
+ </div>
+
+ <div class="card card-accent">
+ <h3><code>mcp_tool</code></h3>
+ <p>Вызвать инструмент из подключённого MCP-сервера. Позволяет использовать любые MCP-инструменты как хуки.</p>
+ <div class="code-block">
+ <code>{
+ "type": "mcp_tool",
+ "server": "my-server",
+ "tool": "my_tool",
+ "input": { "key": "value" }
+}</code>
+ </div>
+ </div>
+
+ <hr class="hr-dashed">
+
+ <!-- 5. ГДЕ ЖИВУТ -->
+ <h2 id="config"><span class="emoji">📁</span> Где живут и как настроить</h2>
+
+ <p>Хуки настраиваются в JSON-файлах. Три уровня:</p>
+
+ <div class="diagram-wrapper">
+ <pre class="mermaid">
+ flowchart TD
+   subgraph Global["Глобальные настройки"]
+     A["~/.claude/settings.local.json"]
+   end
+   subgraph Project["Проектные настройки"]
+     B[".claude/settings.json"]
+   end
+   subgraph Agent["Агентные настройки"]
+     C["~/.claude/agents/*.md"]
+   end
+   A --> D["Действуют во всех проектах"]
+   B --> E["Действуют только в этом проекте"]
+   C --> F["Действуют только когда работает агент"]
+   D --> G["Хуки складываются из всех трёх уровней"]
+   E --> G
+   F --> G
+ </pre>
+ </div>
+
+ <table>
+ <tr>
+ <th>Файл</th>
+ <th>Область</th>
+ <th>Когда</th>
+ </tr>
+ <tr>
+ <td><code>~/.claude/settings.local.json</code></td>
+ <td>Глобальные</td>
+ <td>Во всех проектах, для всех сессий</td>
+ </tr>
+ <tr>
+ <td><code>.claude/settings.json</code></td>
+ <td>Проектные</td>
+ <td>Только в этом проекте</td>
+ </tr>
+ <tr>
+ <td>Frontmatter агента (<code>~/.claude/agents/*.md</code>)</td>
+ <td>Для агента</td>
+ <td>Только когда работает этот агент</td>
+ </tr>
+ </table>
+
+ <p>Формат записи хуков:</p>
+
+ <div class="code-block">
+ <code><span class="yaml-comment">// ~/.claude/settings.local.json</span>
+{
+ "hooks": {
+ "<span class="yaml-comment">/* тип события */</span>": [
+ {
+ "matcher": "<span class="yaml-comment">/* регулярка: Write|Edit, Bash, ... */</span>",
+ "hooks": [
+ {
+ "type": "command",
+ "command": "<span class="yaml-comment">/* shell-команда */</span>"
+ }
+ ]
+ }
+ ]
+ }
+}</code>
+ </div>
+
+ <div class="tip">
+ <span class="tip-icon">💡</span>
+ <span><strong>Не путай:</strong> <code>settings.local.json</code> -- глобальные настройки (обычно gitignore).
+ <code>.claude/settings.json</code> в проекте -- проектные. Хуки в обоих файлах <strong>складываются</strong>, не перезаписываются.</span>
+ </div>
+
+ <hr class="hr-dashed">
+
+ <!-- 6. НАШИ ХУКИ -->
+ <h2 id="our-hooks"><span class="emoji">🛠</span> Наши хуки в действии</h2>
+
+ <p>У нас настроены два хука в <code>~/.claude/settings.local.json</code>. Оба реагируют на запись файлов:</p>
+
+   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 20px 0;">
+    <div class="card card-accent"><h3>Бэкап перед записью</h3><p><strong>PreToolUse</strong> на Write|Edit: копирует JSON/YAML в /tmp/claude-backups/ перед изменением.</p><p>Позволяет откатить изменения, если что-то пошло не так.</p></div>
+    <div class="card card-green"><h3>Автоформатирование</h3><p><strong>PostToolUse</strong> на Write|Edit: запускает prettier после записи JSON/YAML-файлов.</p><p>Код всегда единообразен, независимо от того как написал Claude.</p></div>
+  </div>
+
+ <div class="comparison-grid">
+ <div class="card card-accent">
+ <h3>Бэкап перед записью</h3>
+ <p><strong>Тип:</strong> <span class="tag-pre">PreToolUse</span></p>
+ <p><strong>Matcher:</strong> <code>Write|Edit</code></p>
+ <p><strong>Что делает:</strong> Перед записью JSON/YAML-файла сохраняет текущую версию в <code>/tmp/claude-backups/</code> с меткой времени.</p>
+ <div class="code-block">
+ <code><span class="yaml-comment"># Структура бэкапов:</span>
+/tmp/claude-backups/
++-- 1750087234-settings.json
++-- 1750087300-config.yaml
++-- 1750087456-package.json</code>
+ </div>
+ <p><strong>Зачем:</strong> Если Claude перезапишет конфиг не так -- можно откатить.</p>
+ </div>
+
+ <div class="card card-green">
+ <h3>Автоформатирование</h3>
+ <p><strong>Тип:</strong> <span class="tag-post">PostToolUse</span></p>
+ <p><strong>Matcher:</strong> <code>Write|Edit</code></p>
+ <p><strong>Что делает:</strong> После записи JSON/YAML-файла запускает <code>npx prettier --write</code> для форматирования.</p>
+ <div class="code-block">
+ <code><span class="yaml-comment"># Что форматируется:</span>
+*.json - красивые отступы
+*.yaml - единый стиль
+*.jsonc - комментарии сохраняются</code>
+ </div>
+ <p><strong>Зачем:</strong> Claude пишет JSON корректно, но не всегда красиво. Prettier делает единообразно.</p>
+ </div>
+ </div>
+
+ <div class="card card-accent">
+ <h3>Общая черта: защита от падения</h3>
+ <p>Оба хука завершаются <code>|| true</code>. Это значит: даже если Python упал или Prettier не установлен --
+ хук не заблокирует запись файла. Claude продолжит работу.</p>
+ <div class="code-block">
+ <code><span class="yaml-comment"># В конце каждой команды:</span>
+... 2>/dev/null || true
+<span class="yaml-comment"># 2>/dev/null -- подавляем stderr</span>
+<span class="yaml-comment"># || true -- всегда возвращаем exit 0</span></code>
+ </div>
+ </div>
+
+ <hr class="hr-dashed">
+
+ <!-- 7. СЦЕНАРИИ -->
+ <h2 id="scenarios"><span class="emoji">💡</span> Зачем вообще нужны</h2>
+
+ <p>Бэкапы и форматирование -- это два самых популярных сценария. Но хуки умеют больше:</p>
+
+ <div class="card card-green">
+ <h3>Бэкапы</h3>
+ <p>Копировать файл перед изменением. Если что-то пошло не так -- есть куда откатиться.</p>
+ <p><em>Пример: наш PreToolUse на Write|Edit.</em></p>
+ </div>
+
+ <div class="card card-accent">
+ <h3>Автоформатирование</h3>
+ <p>Запускать linter/formatter после записи. Код всегда чистый, не зависимо от того что написал Claude.</p>
+ <p><em>Пример: наш PostToolUse на Write|Edit + Prettier.</em></p>
+ </div>
+
+ <div class="card card-orange">
+ <h3>Логирование</h3>
+ <p>Записывать все Bash-команды в лист-журнал. Удобно для аудита: что делал Claude, когда, и с какими аргументами.</p>
+ <div class="code-block">
+ <code><span class="yaml-comment">// PreToolUse matcher="Bash"</span>
+"command": "echo \"$(date -Iseconds) $(cat | jq -r '.tool_input.command')\" >> ~/claude-audit.log"</code>
+ </div>
+ </div>
+
+ <div class="card card-purple">
+ <h3>Уведомления</h3>
+ <p>Дёрнуть Slack/Telegram когда Claude завершил задачу. Удобно когда ждёшь результат.</p>
+ <div class="code-block">
+ <code><span class="yaml-comment">// Stop-хук</span>
+"type": "http",
+"url": "https://hooks.slack.com/services/...",
+"method": "POST",
+"body": "{\"text\": \"Claude завершил работу\"}"</code>
+ </div>
+ </div>
+
+ <div class="card card-teal">
+ <h3>Валидация</h3>
+ <p>Проверять что конфиг корректен <strong>до</strong> применения. Через <code>prompt</code>-хук можно дать LLM оценить изменение.</p>
+ <div class="code-block">
+ <code><span class="yaml-comment">// PreToolUse + prompt</span>
+"type": "prompt",
+"prompt": "Проверь что settings.json\nостаётся валидным JSON после этого изменения"</code>
+ </div>
+ </div>
+
+ <div class="card card-red">
+ <h3>Автотесты</h3>
+ <p>Прогонять тесты после изменения файлов. Если тесты упали -- Claude сразу узнает.</p>
+ <div class="code-block">
+ <code><span class="yaml-comment">// PostToolUse matcher="Write|Edit" matcher на .py файлы</span>
+"command": "cd /path/to/project && pytest tests/ -q 2>/dev/null || true"</code>
+ </div>
+ </div>
+
+ <hr class="hr-dashed">
+
+ <!-- 8. ОГРАНИЧЕНИЯ -->
+ <h2 id="limits"><span class="emoji">⚠</span> Ограничения и ловушки</h2>
+
+ <div class="card card-red">
+ <h3>1. Не могут писать в чат напрямую</h3>
+ <p>Хуки не выводят текст пользователю в чат. Единственный способ -- через <code>systemMessage</code> в ответе,
+ но это не всегда работает как ожидаешь. Для уведомлений лучше HTTP-запросы.</p>
+ </div>
+
+ <div class="card card-orange">
+ <h3>2. Тихое падение</h3>
+ <p>Если в хуке ошибка -- он молча игнорируется. Claude не покажет "хук упал".
+ Поэтому всегда ставь <code>|| true</code> в конце команд и проверяй логи вручную.</p>
+ </div>
+
+ <div class="card card-purple">
+ <h3>3. Не все события в агентах</h3>
+ <p>Хуки во фронтматере агента поддерживают не все типы событий.
+ Некоторые триггеры (SessionStart, Stop) работают только на уровне сессии.</p>
+ </div>
+
+ <div class="card card-accent">
+ <h3>4. Matcher -- regex, а не glob</h3>
+ <p>Фильтр <code>matcher</code> использует регулярные выражения. <code>Write|Edit</code> -- это OR-оператор regex.
+ Не <code>Write, Edit</code> и не <code>*.py</code>. Привыкай к regex-синтаксису.</p>
+ </div>
+
+ <div class="card card-teal">
+ <h3>5. Команда получает JSON на stdin</h3>
+ <p>Shell-команда хука получает JSON с данными о событии через stdin. Нужно его парсить.
+ Python <code>json.load(sys.stdin)</code> или <code>jq</code> -- стандартные инструменты.</p>
+ <div class="code-block">
+ <code><span class="yaml-comment"># Пример stdin для Write:</span>
+{
+ "tool_input": {
+ "file_path": "/home/user/config.json",
+ "content": "..."
+ }
+}</code>
+ </div>
+ </div>
+
+ <hr class="hr-dashed">
+
+ <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+ <p style="font-size: 1.1em; margin:0;">
+ <strong>Итого:</strong> Хуки -- это автоматические shell-команды на события Claude Code.
+ <span class="tag-pre">PreToolUse</span> может блокировать, <span class="tag-post">PostToolUse</span> -- доделывать.
+ Настроены в <code>settings.local.json</code>. У нас: бэкапы + автоформатирование.
+ Простой инструмент, который экономит кучу ручной работы.
+ </p>
+ </div>
+
+</div>
+
+ <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+ <script>
+   mermaid.initialize({
+     startOnLoad: true,
+     theme: 'default',
+     flowchart: { useMaxWidth: false }
+   })
+ </script>
+
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

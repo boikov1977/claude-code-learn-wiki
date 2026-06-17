@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Permissions — система правил доступа Claude Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #6c5ce7;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    .mode-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85em;
+      margin-right: 6px;
+    }
+    .mode-badge.allow { background: #f6fff8; color: var(--green); border: 1px solid #c3e6cb; }
+    .mode-badge.deny { background: #ffeef0; color: var(--red); border: 1px solid #f9c5ce; }
+    .mode-badge.ask { background: #fffde6; color: #b08800; border: 1px solid #f0e68c; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    kbd {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .rule-example {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .rule-example:last-child {
+      border-bottom: none;
+    }
+    .rule-example .pattern {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.92em;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 280px;
+      flex-shrink: 0;
+    }
+    .rule-example .desc {
+      color: var(--text-muted);
+      font-size: 0.95em;
+    }
+
+    .priority-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .priority-block {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1.1em;
+      text-align: center;
+    }
+    .priority-arrow {
+      font-size: 1.5em;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>Permissions — система правил доступа</h1>
+  <p class="subtitle">Три значения, приоритеты, синтаксис правил и как Claude Code решает, можно или нельзя</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое Permissions?</a></li>
+      <li><a href="#values">Три значения: allow, deny, ask</a></li>
+      <li><a href="#syntax">Синтаксис правил</a></li>
+      <li><a href="#priority">Приоритеты: deny > ask > allow</a></li>
+      <li><a href="#evaluation">Процесс проверки</a></li>
+      <li><a href="#config">Конфигурация: settings.json</a></li>
+      <li><a href="#modes">Режимы defaultMode</a></li>
+      <li><a href="#best">Best practices и типичные ошибки</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ PERMISSIONS -->
+  <h2 id="what"><span class="emoji">🔑</span> Что такое Permissions?</h2>
+
+  <p>
+    Claude Code — это агент, который выполняет реальные действия: читает файлы, пишет код,
+    запускает команды, удаляет данные. Не каждое действие безопасно, поэтому нужна система,
+    которая решает: <strong>можно это делать или нельзя</strong>.
+  </p>
+
+  <p>
+    <strong>Permissions</strong> — это встроенная система правил доступа Claude Code.
+    Она определяет, какие инструменты (tools) агент может использовать без вопросов,
+    какие — только с твоим подтверждением, а какие — вообще запрещены.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> Permissions — это список «можно / нельзя / спросить»
+    для каждого типа действия. Настройки живут в <code>settings.json</code> и работают
+    на нескольких уровнях: глобальном, проектном и сессионном.</p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span>Permissions и режимы работы (defaultMode) — это <strong>две разные системы</strong>,
+    которые работают вместе. Режим задаёт общую политику, а правила permissions —
+    конкретные исключения. Подробнее о режимах — в статье <a href="permission-modes.html">Режимы работы</a>.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ТРИ ЗНАЧЕНИЯ -->
+  <h2 id="values"><span class="emoji">🚦</span> Три значения: allow, deny, ask</h2>
+
+  <p>Каждое правило permissions имеет одно из трёх значений:</p>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3><span class="mode-badge allow">allow</span> Разрешено</h3>
+      <p>
+        Инструмент выполняется <strong>молча</strong>, без подтверждения.
+        Агент просто делает свою работу и идёт дальше.
+      </p>
+      <p><strong>Пример:</strong> чтение файлов, запуск тестов, поиск по коду — вещи,
+      которые ты доверяешь агенту на 100%.</p>
+    </div>
+
+    <div class="card card-red">
+      <h3><span class="mode-badge deny">deny</span> Запрещено</h3>
+      <p>
+        Инструмент <strong>заблокирован полностью</strong>. Агент не может его вызвать,
+        даже если очень хочет. Не спрашивает — просто не работает.
+      </p>
+      <p><strong>Пример:</strong> вредоносные команды, нежелательные агенты,
+      опасные операции, которые ты точно не хочешь видеть.</p>
+    </div>
+
+    <div class="card card-yellow" style="grid-column: 1 / -1;">
+      <h3><span class="mode-badge ask">ask</span> Спросить</h3>
+      <p>
+        Перед выполнением агент показывает тебе <strong>запрос на подтверждение</strong>.
+        Ты видишь что именно будет сделано и решаешь: «ОК» или «Нет».
+      </p>
+      <p><strong>Пример:</strong> редактирование файлов, запуск bash-команд,
+      использование MCP-инструментов — всё, что требует контроля.</p>
+    </div>
+  </div>
+
+  <div class="priority-visual">
+    <div class="priority-block" style="background:#ffeef0;color:var(--red);">deny</div>
+    <div class="priority-arrow">&gt;</div>
+    <div class="priority-block" style="background:#fffde6;color:#b08800;">ask</div>
+    <div class="priority-arrow">&gt;</div>
+    <div class="priority-block" style="background:#f6fff8;color:var(--green);">allow</div>
+  </div>
+
+  <table>
+    <tr>
+      <th>Значение</th>
+      <th>Что происходит</th>
+      <th>Когда использовать</th>
+    </tr>
+    <tr>
+      <td><span class="mode-badge allow">allow</span></td>
+      <td>Выполняется без вопросов</td>
+      <td>Безопасные операции: чтение, поиск, тесты</td>
+    </tr>
+    <tr>
+      <td><span class="mode-badge ask">ask</span></td>
+      <td>Спрашивает подтверждение</td>
+      <td>Потенциально опасные операции: запись, команды</td>
+    </tr>
+    <tr>
+      <td><span class="mode-badge deny">deny</span></td>
+      <td>Полностью заблокировано</td>
+      <td>То, что точно не должно происходить</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. СИНТАКСИС ПРАВИЛ -->
+  <h2 id="syntax"><span class="emoji">📝</span> Синтаксис правил</h2>
+
+  <p>Правила записываются в виде строк в массивах <code>allow</code>, <code>deny</code>
+  или используются в настройках проекта. Синтаксис зависит от типа инструмента:</p>
+
+  <h3>Точное совпадение</h3>
+
+  <div class="card card-accent">
+    <div class="rule-example">
+      <span class="pattern">Bash(python3 script.py)</span>
+      <span class="desc">Разрешает только эту конкретную команду</span>
+    </div>
+    <div class="rule-example">
+      <span class="pattern">Read(/home/user/config.json)</span>
+      <span class="desc">Разрешает чтение только этого файла</span>
+    </div>
+    <div class="rule-example">
+      <span class="pattern">Skill(deep-research)</span>
+      <span class="desc">Разрешает только этот скилл</span>
+    </div>
+  </div>
+
+  <h3>Wildcard (шаблон с *)</h3>
+
+  <div class="card card-purple">
+    <div class="rule-example">
+      <span class="pattern">Bash(git *)</span>
+      <span class="desc">Любая команда, начинающаяся с <code>git</code></span>
+    </div>
+    <div class="rule-example">
+      <span class="pattern">Bash(python *)</span>
+      <span class="desc">Любой вызов python</span>
+    </div>
+    <div class="rule-example">
+      <span class="pattern">Bash(/home/andrei/mcp/*/server.py)</span>
+      <span class="desc">Wildcard на уровне каталога</span>
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">⚠️</span>
+    <span>Wildcard <code>*</code> означает <strong>всё что угодно после пробела</strong> или
+    конца строки. <code>Bash(git *)</code> совпадёт с <code>git status</code>,
+    <code>git commit -m "msg"</code>, но <strong>не</strong> с <code>github-cli status</code>.</span>
+  </div>
+
+  <h3>Только инструмент (без аргументов)</h3>
+
+  <div class="card card-green">
+    <div class="rule-example">
+      <span class="pattern">WebSearch</span>
+      <span class="desc">Разрешает все вызовы веб-поиска</span>
+    </div>
+    <div class="rule-example">
+      <span class="pattern">WebFetch</span>
+      <span class="desc">Разрешает все вызовы получения веб-страниц</span>
+    </div>
+  </div>
+
+  <h3>MCP-инструменты</h3>
+
+  <div class="card card-orange">
+    <div class="rule-example">
+      <span class="pattern">mcp__poisk-mcp__search_web</span>
+      <span class="desc">Инструмент <code>search_web</code> из MCP-сервера <code>poisk-mcp</code></span>
+    </div>
+    <div class="rule-example">
+      <span class="pattern">mcp__poisk-mcp__read_webpage</span>
+      <span class="desc">Инструмент <code>read_webpage</code> из того же сервера</span>
+    </div>
+  </div>
+
+  <p>Формат MCP-инструментов: <code>mcp__{server-name}__{tool-name}</code>. Два подчёркивания
+  между частями — это разделитель.</p>
+
+  <h3>Встроенные инструменты Claude Code</h3>
+
+  <div class="card card-accent">
+    <table>
+      <tr>
+        <th>Префикс</th>
+        <th>Инструмент</th>
+        <th>Пример правила</th>
+      </tr>
+      <tr>
+        <td><code>Bash(...)</code></td>
+        <td>Запуск команд</td>
+        <td><code>Bash(git *)</code>, <code>Bash(python3 *)</code></td>
+      </tr>
+      <tr>
+        <td><code>Read(...)</code></td>
+        <td>Чтение файлов</td>
+        <td><code>Read(Grep *)</code>, <code>Read(Glob *)</code></td>
+      </tr>
+      <tr>
+        <td><code>Edit(...)</code></td>
+        <td>Редактирование файлов</td>
+        <td><code>Edit(Write *)</code>, <code>Edit(Edit *)</code></td>
+      </tr>
+      <tr>
+        <td><code>Write</code></td>
+        <td>Создание файлов</td>
+        <td><code>Write</code> (все файлы)</td>
+      </tr>
+      <tr>
+        <td><code>WebSearch</code></td>
+        <td>Веб-поиск</td>
+        <td><code>WebSearch</code></td>
+      </tr>
+      <tr>
+        <td><code>WebFetch</code></td>
+        <td>Получение страниц</td>
+        <td><code>WebFetch</code></td>
+      </tr>
+      <tr>
+        <td><code>Agent(...)</code></td>
+        <td>Вызов субагента</td>
+        <td><code>Agent(explore)</code></td>
+      </tr>
+      <tr>
+        <td><code>Skill(...)</code></td>
+        <td>Вызов скилла</td>
+        <td><code>Skill(deep-research)</code></td>
+      </tr>
+    </table>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ПРИОРИТЕТЫ -->
+  <h2 id="priority"><span class="emoji">⚖️</span> Приоритеты: deny > ask > allow</h2>
+
+  <p>Правила проверяются в строгом порядке. Если одно и то же действие совпадает
+  с правилами из разных массивов — побеждает правило с <strong>наивысшим приоритетом</strong>:</p>
+
+  <div class="card card-red">
+    <h3>Порядок приоритетов</h3>
+    <ol>
+      <li><strong>deny</strong> — если действие запрещено, оно <strong>всегда</strong> будет заблокировано,
+      даже если есть правило <code>allow</code> для того же инструмента</li>
+      <li><strong>ask</strong> — если не запрещено, проверяется: нужно ли спросить подтверждение</li>
+      <li><strong>allow</strong> — если не запрещено и не требует подтверждения — выполняется молча</li>
+    </ol>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Пример конфликта</h3>
+    <div class="code-block">
+      <code>{
+  <span class="yaml-key">"allow"</span>: [<span class="yaml-val">"Bash(rm *)"</span>],
+  <span class="yaml-key">"deny"</span>: [<span class="yaml-val">"Bash(rm -rf *)"</span>]
+}</code>
+    </div>
+    <p>Результат:</p>
+    <ul>
+      <li><code>rm file.txt</code> &mdash; <span class="mode-badge allow">allow</span> (совпадает с <code>Bash(rm *)</code>, нет в deny)</li>
+      <li><code>rm -rf /</code> &mdash; <span class="mode-badge deny">deny</span> (совпадает с <code>Bash(rm -rf *)</code>, deny побеждает)</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ПРОЦЕСС ПРОВЕРКИ -->
+  <h2 id="evaluation"><span class="emoji">🔄</span> Процесс проверки</h2>
+
+  <p>Каждый раз, когда Claude Code хочет вызвать инструмент, происходит проверка:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    START(("🤖 Claude вызывает<br>инструмент")) --> CHECK_MODE{"Режим работы<br>defaultMode?"}
+
+    CHECK_MODE -->|"plan"| PLAN_BLOCK["🚫 Заблокировано<br><small>Plan Mode: только чтение</small>"]
+    CHECK_MODE -->|"bypassPermissions"| BYPASS["✅ Выполняется<br><small>Всё без вопросов</small>"]
+    CHECK_MODE -->|"auto / acceptEdits / default"| CHECK_DENY{"Есть совпадение<br>в deny?"}
+
+    CHECK_DENY -->|"Да"| DENY_BLOCK["🚫 Заблокировано<br><small>deny побеждает всегда</small>"]
+    CHECK_DENY -->|"Нет"| CHECK_ALLOW{"Есть совпадение<br>в allow?"}
+
+    CHECK_ALLOW -->|"Да"| ALLOW_RUN["✅ Выполняется<br><small>Без подтверждения</small>"]
+    CHECK_ALLOW -->|"Нет"| ASK_USER["❓ Спрашивает<br>тебя<br><small>Подтверди или отклони</small>"]
+
+    ASK_USER -->|"ОК"| EXECUTE["✅ Выполняется"]
+    ASK_USER -->|"Нет"| DENIED["🚫 Отклонено"]
+
+    style START fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style CHECK_MODE fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style PLAN_BLOCK fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style BYPASS fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style CHECK_DENY fill:#ffeef0,stroke:#d73a49,stroke-width:2px
+    style DENY_BLOCK fill:#ffeef0,stroke:#d73a49,stroke-width:2px
+    style CHECK_ALLOW fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    style ALLOW_RUN fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style ASK_USER fill:#fffde6,stroke:#b08800,stroke-width:2px
+    style EXECUTE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style DENIED fill:#ffeef0,stroke:#d73a49,stroke-width:2px
+    </div>
+  </div>
+
+  <p>Пошагово:</p>
+
+  <ol>
+    <li><strong>Проверка режима.</strong> Если режим <code>plan</code> — пишущие инструменты заблокированы.
+    Если <code>bypassPermissions</code> — всё разрешено без вопросов.</li>
+    <li><strong>Проверка deny.</strong> Если инструмент (с учётом аргументов) совпадает
+    с любым правилом в <code>deny</code> — сразу блокируется.</li>
+    <li><strong>Проверка allow.</strong> Если есть совпадение в <code>allow</code> — выполняется молча.</li>
+    <li><strong>Ask по умолчанию.</strong> Если ничего не совпало — агент спрашивает у тебя.</li>
+  </ol>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. КОНФИГУРАЦИЯ -->
+  <h2 id="config"><span class="emoji">⚙️</span> Конфигурация: settings.json</h2>
+
+  <p>Правила permissions задаются в файле <code>settings.json</code>. Он существует на трёх уровнях:</p>
+
+  <table>
+    <tr>
+      <th>Уровень</th>
+      <th>Путь</th>
+      <th>Когда применяется</th>
+    </tr>
+    <tr>
+      <td><strong>Глобальный</strong></td>
+      <td><code>~/.claude/settings.json</code></td>
+      <td>Во всех проектах</td>
+    </tr>
+    <tr>
+      <td><strong>Проектный</strong></td>
+      <td><code>.claude/settings.json</code> (в корне проекта)</td>
+      <td>Только в этом проекте</td>
+    </tr>
+    <tr>
+      <td><strong>Локальный</strong></td>
+      <td><code>.claude/settings.local.json (в корне проекта)</code></td>
+      <td>Личные настройки, не коммитятся в git</td>
+    </tr>
+  </table>
+
+  <h3>Пример полного конфига</h3>
+
+  <div class="card card-accent">
+    <div class="code-block">
+      <code><span class="yaml-comment">// ~/.claude/settings.json — глобальные настройки</span>
+{
+  <span class="yaml-key">"permissions"</span>: {
+    <span class="yaml-key">"allow"</span>: [
+      <span class="yaml-val">"Bash(git *)"</span>,
+      <span class="yaml-val">"Bash(python *)"</span>,
+      <span class="yaml-val">"Bash(python3 *)"</span>,
+      <span class="yaml-val">"Bash(uv *)"</span>,
+      <span class="yaml-val">"Bash(pytest *)"</span>,
+      <span class="yaml-val">"Bash(npm *)"</span>,
+      <span class="yaml-val">"Read(Grep *)"</span>,
+      <span class="yaml-val">"Read(Glob *)"</span>,
+      <span class="yaml-val">"Edit(Write *)"</span>,
+      <span class="yaml-val">"Edit(Edit *)"</span>,
+      <span class="yaml-val">"Skill(deep-research)"</span>,
+      <span class="yaml-val">"WebSearch"</span>,
+      <span class="yaml-val">"mcp__poisk-mcp__search_web"</span>
+    ],
+    <span class="yaml-key">"deny"</span>: [
+      <span class="yaml-val">"Agent(explore)"</span>,
+      <span class="yaml-val">"Agent(statusline-setup)"</span>,
+      <span class="yaml-val">"WebFetch"</span>
+    ],
+    <span class="yaml-key">"defaultMode"</span>: <span class="yaml-val">"auto"</span>
+  },
+  <span class="yaml-key">"model"</span>: <span class="yaml-val">"claude-go-deepseek-v4-flash"</span>,
+  <span class="yaml-key">"language"</span>: <span class="yaml-val">"russian"</span>
+}</code>
+    </div>
+  </div>
+
+  <div class="card card-green">
+    <h3>Пример проектного конфига</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment">// .claude/settings.json — настройки проекта</span>
+{
+  <span class="yaml-key">"permissions"</span>: {
+    <span class="yaml-key">"allow"</span>: [
+      <span class="yaml-val">"Bash(npm run test *)"</span>,
+      <span class="yaml-val">"Bash(npm run lint *)"</span>,
+      <span class="yaml-val">"Bash(npx prettier *)"</span>
+    ],
+    <span class="yaml-key">"deny"</span>: [
+      <span class="yaml-val">"Bash(rm -rf *)"</span>,
+      <span class="yaml-val">"Bash(sudo *)"</span>
+    ]
+  }
+}</code>
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>settings.local.json</strong> — личные настройки, которые <strong>не коммитятся в git</strong>.
+    Используй для приватных правил: MCP-серверов, персональных путей, хуков.
+    А <code>settings.json</code> в корне проекта — для командных правил.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. РЕЖИМЫ defaultMode -->
+  <h2 id="modes"><span class="emoji">🎛️</span> Режимы defaultMode</h2>
+
+  <p>Поле <code>defaultMode</code> в <code>permissions</code> задаёт <strong>общую политику</strong>
+  по умолчанию. Правила в <code>allow</code>/<code>deny</code> работают как <strong>исключения</strong>
+  поверх этой политики.</p>
+
+  <table>
+    <tr>
+      <th>Режим</th>
+      <th>Чтение</th>
+      <th>Запись</th>
+      <th>Команды</th>
+      <th>Для кого</th>
+    </tr>
+    <tr>
+      <td><code>default</code></td>
+      <td>Спрашивает</td>
+      <td>Спрашивает</td>
+      <td>Спрашивает</td>
+      <td>Новички, первый запуск</td>
+    </tr>
+    <tr>
+      <td><code>auto</code></td>
+      <td>Молча</td>
+      <td>Спрашивает</td>
+      <td>Спрашивает</td>
+      <td>Повседневная работа</td>
+    </tr>
+    <tr>
+      <td><code>acceptEdits</code></td>
+      <td>Молча</td>
+      <td>Молча</td>
+      <td>Спрашивает</td>
+      <td>Массовые правки</td>
+    </tr>
+    <tr>
+      <td><code>plan</code></td>
+      <td>Молча</td>
+      <td>Запрещено</td>
+      <td>Запрещено</td>
+      <td>Исследование, планирование</td>
+    </tr>
+    <tr>
+      <td><code>bypassPermissions</code></td>
+      <td>Молча</td>
+      <td>Молча</td>
+      <td>Молча</td>
+      <td>Опытные, максимальная скорость</td>
+    </tr>
+  </table>
+
+  <div class="card card-purple">
+    <h3>Как правила и режимы работают вместе</h3>
+    <p>Допустим, у тебя <code>defaultMode: "auto"</code> и правило:</p>
+    <div class="code-block">
+      <code><span class="yaml-key">"deny"</span>: [<span class="yaml-val">"Bash(rm *)"</span>]</code>
+    </div>
+    <p>В режиме <code>auto</code> команды обычно <strong>спрашивают подтверждение</strong>.
+    Но <code>rm</code> даже не дойдёт до вопроса — он будет <strong>заблокирован</strong>
+    правилом <code>deny</code>.</p>
+    <p>А если добавить <code>"Bash(rm *)" → allow</code>, то в режиме <code>auto</code>
+    команда <code>rm</code> будет выполняться <strong>молча</strong>, хотя обычно такие
+    команды спрашивают. Правило <code>allow</code> перекрывает поведение режима.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. BEST PRACTICES -->
+  <h2 id="best"><span class="emoji">✅</span> Best practices и типичные ошибки</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>Делай</h3>
+      <ul>
+        <li>Начинай с <code>default</code> или <code>auto</code> — расширяй по мере понимания</li>
+        <li>Используй <code>deny</code> для конкретных опасных команд: <code>rm -rf</code>, <code>sudo</code></li>
+        <li>Прописывай wildcard широких категорий: <code>Bash(git *)</code>, <code>Bash(python *)</code></li>
+        <li>Для MCP-инструментов указывай конкретные имена: <code>mcp__server__tool</code></li>
+        <li>Используй <code>settings.local.json</code> для приватных правил</li>
+      </ul>
+    </div>
+
+    <div class="card card-red">
+      <h3>Не делай</h3>
+      <ul>
+        <li>Не ставь <code>bypassPermissions</code> без понимания последствий</li>
+        <li>Не коммить <code>settings.local.json</code> — там приватные пути и ключи</li>
+        <li>Не путай <code>allow</code> с <code>defaultMode</code> — это разные механизмы</li>
+        <li>Не ставь слишком широкие allow без deny: <code>Bash(*)</code> опасно</li>
+        <li>Не забывай: <code>deny</code> побеждает <code>allow</code>, всегда</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Типичные ошибки</h3>
+
+  <div class="card card-red">
+    <h3>Ошибка 1: Слишком широкий wildcard</h3>
+    <div class="code-block">
+      <code><span class="yaml-key">"allow"</span>: [<span class="yaml-val">"Bash(*)"</span>]  <span class="yaml-comment">// ОПАСНО! Разрешает ВСЁ</span></code>
+    </div>
+    <p><strong>Проблема:</strong> Агент сможет запустить любую команду без вопросов —
+    <code>rm -rf /</code>, <code>curl ... | bash</code>, что угодно.</p>
+    <p><strong>Решение:</strong> Перечисли конкретные категории: <code>Bash(git *)</code>,
+    <code>Bash(python *)</code>, <code>Bash(npm *)</code>.</p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Ошибка 2: Путаница allow и defaultMode</h3>
+    <div class="code-block">
+      <code>{
+  <span class="yaml-key">"allow"</span>: [<span class="yaml-val">"Bash(rm *)"</span>],
+  <span class="yaml-key">"defaultMode"</span>: <span class="yaml-val">"auto"</span>
+}</code>
+    </div>
+    <p><strong>Ожидание:</strong> «auto спрашивает команды, значит rm будет спрашивать».</p>
+    <p><strong>Реальность:</strong> Правило <code>allow</code> перекрывает поведение режима.
+    <code>rm</code> выполнится молча.</p>
+  </div>
+
+  <div class="card card-yellow">
+    <h3>Ошибка 3: Забыть про deny</h3>
+    <div class="code-block">
+      <code>{
+  <span class="yaml-key">"allow"</span>: [<span class="yaml-val">"Bash(rm *)"</span>],
+  <span class="yaml-comment">// Нет deny для rm -rf!</span>
+}</code>
+    </div>
+    <p><strong>Проблема:</strong> <code>rm file.txt</code> и <code>rm -rf /</code> оба совпадают
+    с <code>Bash(rm *)</code>. Агент удалит всё без вопросов.</p>
+    <p><strong>Решение:</strong> Всегда добавляй <code>deny</code> для опасных вариантов:</p>
+    <div class="code-block">
+      <code><span class="yaml-key">"deny"</span>: [<span class="yaml-val">"Bash(rm -rf *)"</span>]</code>
+    </div>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Ошибка 4: Неправильный синтаксис MCP</h3>
+    <div class="code-block">
+      <code><span class="yaml-key">"allow"</span>: [
+  <span class="yaml-val">"mcp__poisk-mcp-search_web"</span>,  <span class="yaml-comment">// ОШИБКА: один _ вместо двух</span>
+  <span class="yaml-val">"mcp_poisk_mcp__search_web"</span>   <span class="yaml-comment">// ОШИБКА: подчёркивания вместо дефисов</span>
+]</code>
+    </div>
+    <p><strong>Правильно:</strong></p>
+    <div class="code-block">
+      <code><span class="yaml-key">"allow"</span>: [<span class="yaml-val">"mcp__poisk-mcp__search_web"</span>]</code>
+    </div>
+    <p>Дефис в имени сервера сохраняется. Разделитель — <code>__</code> (двойное подчёркивание).</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ИТОГО -->
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Permissions — это система «можно / нельзя / спросить» для каждого действия.
+      Правила настраиваются через <code>settings.json</code>, работают с приоритетом <strong>deny &gt; ask &gt; allow</strong>,
+      а <code>defaultMode</code> задаёт общую политику. Начни с <code>auto</code>,
+      добавляй <code>allow</code> для рутины, <code>deny</code> для опасного, и не забывай про проектные настройки.
+    </p>
+  </div>
+
+  <footer style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.85em;text-align:center;">
+    Создано <strong>writer-agent</strong> через Workflow tool.
+    <br>Актуально на 2026-06-17.
+    <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+  </footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worktree в Claude Code — Простым языком</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: { useMaxWidth: false },
+      sequence: { useMaxWidth: false }
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #f8f9fc;
+      --card: #ffffff;
+      --accent: #6c5ce7;
+      --accent-light: #a29bfe;
+      --accent-bg: #f0edff;
+      --green: #00b894;
+      --green-bg: #e6fff8;
+      --orange: #fdcb6e;
+      --orange-bg: #fff9e6;
+      --red: #e17055;
+      --red-bg: #ffeaea;
+      --blue: #0984e3;
+      --blue-bg: #e6f3ff;
+      --text: #2d3436;
+      --text-muted: #636e72;
+      --border: #dfe6e9;
+      --shadow: 0 4px 24px rgba(108, 92, 231, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 50%, #74b9ff 100%);
+      color: white;
+      padding: 60px 24px 50px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .hero .subtitle {
+      font-size: 1.2rem;
+      opacity: 0.92;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .hero .emoji-big {
+      font-size: 4rem;
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card h2 .icon { font-size: 1.6rem; }
+
+    .card p { margin-bottom: 12px; color: var(--text); }
+
+    .analogy {
+      background: var(--accent-bg);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 12px 12px 0;
+      padding: 18px 22px;
+      margin: 16px 0;
+      font-size: 1.05rem;
+    }
+    .analogy strong { color: var(--accent); }
+
+    .use-case {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin: 16px 0;
+    }
+    .use-case-item {
+      background: var(--green-bg);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid #b2f0e0;
+      transition: transform 0.15s;
+    }
+    .use-case-item:hover { transform: translateY(-2px); }
+    .use-case-item .uc-icon { font-size: 2rem; margin-bottom: 6px; }
+    .use-case-item .uc-title { font-weight: 700; margin-bottom: 4px; }
+    .use-case-item .uc-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+    .command-block {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 14px 0;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.92rem;
+      overflow-x: auto;
+      line-height: 1.8;
+    }
+    .command-block .prompt { color: #a29bfe; }
+    .command-block .comment { color: #6c7086; }
+    .command-block .highlight { color: #a6e3a1; font-weight: 600; }
+
+    .command-label {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .limitation {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--orange-bg);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin: 10px 0;
+      border: 1px solid #f0e0a0;
+    }
+    .limitation .lim-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .badge-new { background: var(--green-bg); color: var(--green); }
+    .badge-tip { background: var(--blue-bg); color: var(--blue); }
+
+    .table-wrap { overflow-x: auto; margin: 14px 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: var(--accent-bg);
+      color: var(--accent);
+      font-weight: 700;
+    }
+    tr:hover td { background: #f8f8ff; }
+
+    .step-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    .step-box {
+      background: var(--card);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 14px 18px;
+      text-align: center;
+      min-width: 140px;
+    }
+    .step-box .step-num {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      line-height: 28px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .step-box .step-text { font-weight: 600; font-size: 0.9rem; }
+    .step-arrow {
+      font-size: 1.6rem;
+      color: var(--accent-light);
+      padding: 0 6px;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      padding: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 1.8rem; }
+      .hero .subtitle { font-size: 1rem; }
+      .card { padding: 22px 18px; }
+      .use-case { grid-template-columns: 1fr 1fr; }
+      .step-flow { flex-direction: column; }
+      .step-arrow { transform: rotate(90deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <span class="emoji-big">🌳</span>
+    <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>Worktree в Claude Code</h1>
+    <p class="subtitle">Изолированные копии проекта для безопасных экспериментов — всё просто, как по маслу</p>
+  </div>
+
+  <div class="container">
+
+    <!-- ===================== ЧТО ТАКОЕ ===================== -->
+    <div class="card">
+      <h2><span class="icon">🤔</span> Что такое Worktree (рабочее дерево)?</h2>
+
+      <p>
+        <strong>Worktree</strong> — это изолированная копия твоего проекта, в которой можно спокойно ломать,
+        менять и экспериментировать, <em>не боясь испортить основную папку</em>.
+      </p>
+
+      <div class="analogy">
+        <strong>💡 Аналогия на пальцах:</strong> Представь, что у тебя есть комната с рабочим столом (основной проект).
+        Worktree — это <strong>снять такую же копию комнаты в отдельном кабинете</strong>.
+        Ты можешь разбросать там всё что хочешь, сжечь стол, перевернуть стул —
+        а в основной комнате <strong>ноль изменений</strong>. Чисто и безопасно.
+      </div>
+
+      <p>
+        Технически это <code>git worktree</code> — Git умеет держать несколько рабочих директорий,
+        привязанных к разным веткам. Claude Code просто оборачивает это в удобную команду:
+      </p>
+
+      <div class="command-block">
+        <span class="comment">// Claude Code создаёт worktree автоматически</span><br>
+        <span class="highlight">EnterWorktree</span> <span class="comment">→ создаёт ветку + копию проекта</span><br><br>
+        <span class="comment">// Все изменения летят только туда</span><br>
+        <span class="comment">// Основной проект — нетронут</span><br><br>
+        <span class="highlight">ExitWorktree</span> <span class="comment">→ выход (сохранить или удалить)</span>
+      </div>
+    </div>
+
+    <!-- ===================== ЗАЧЕМ ===================== -->
+    <div class="card">
+      <h2><span class="icon">🎯</span> Зачем это нужно?</h2>
+
+      <div class="use-case">
+        <div class="use-case-item">
+          <div class="uc-icon">🧪</div>
+          <div class="uc-title">Эксперименты</div>
+          <div class="uc-desc">Рискованный рефакторинг? Попробуй в worktree — не получится — удалил и всё</div>
+        </div>
+        <div class="use-case-item">
+          <div class="uc-icon">🔀</div>
+          <div class="uc-title">Параллельная работа</div>
+          <div class="uc-desc">Основной код стабилен, а ты в worktree тестируешь новую фичу</div>
+        </div>
+        <div class="use-case-item">
+          <div class="uc-icon">🤖</div>
+          <div class="uc-title">Субагенты</div>
+          <div class="uc-desc">Запуск агента с <code>isolation: worktree</code> — ему своя копия репозитория</div>
+        </div>
+        <div class="use-case-item">
+          <div class="uc-icon">🔍</div>
+          <div class="uc-title">Код-ревью</div>
+          <div class="uc-desc">Worktree на каждую ветку PR — смотришь изменения изолированно</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== ДИАГРАММА 1: ПРОЦЕСС ===================== -->
+    <div class="card">
+      <h2><span class="icon">🔄</span> Как выглядит процесс</h2>
+      <p>Весь цикл работы с worktree сводится к трём шагам:</p>
+
+      <div class="step-flow">
+        <div class="step-box">
+          <div class="step-num">1</div>
+          <div class="step-text">EnterWorktree</div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-box">
+          <div class="step-num">2</div>
+          <div class="step-text">Работаешь как обычно</div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-box">
+          <div class="step-num">3</div>
+          <div class="step-text">ExitWorktree</div>
+        </div>
+      </div>
+
+      <div class="diagram-wrapper">
+        <pre class="mermaid">
+flowchart LR
+    A["🏠 Основной проект\n(чисто, спокойно)"] -->|"EnterWorktree\nсоздаёт ветку"| B["🌳 Worktree\n.claude/worktrees/name/"]
+    B -->|"Работаем:\nпишем код,\nтестируем"| C["📝 Изменения\nтолько здесь"]
+    C -->|"ExitWorktree\n(action: keep)"| D["💾 Worktree\nостаётся на диске\nможно вернуться"]
+    C -->|"ExitWorktree\n(action: delete)"| E["🗑️ Worktree\nудалён, ветка\nостаётся в Git"]
+    D -->|"Возвращаемся\nв основную\nдиректорию"| F["🏠 Основной проект\nснова работаем тут"]
+
+    style A fill:#f0edff,stroke:#6c5ce7,stroke-width:2px,color:#2d3436
+    style B fill:#e6fff8,stroke:#00b894,stroke-width:2px,color:#2d3436
+    style C fill:#fff9e6,stroke:#fdcb6e,stroke-width:2px,color:#2d3436
+    style D fill:#e6f3ff,stroke:#0984e3,stroke-width:2px,color:#2d3436
+    style E fill:#ffeaea,stroke:#e17055,stroke-width:2px,color:#2d3436
+    style F fill:#f0edff,stroke:#6c5ce7,stroke-width:2px,color:#2d3436
+        </pre>
+      </div>
+    </div>
+
+    <!-- ===================== ДИАГРАММА 2: ИЗОЛЯЦИЯ ===================== -->
+    <div class="card">
+      <h2><span class="icon">🏗️</span> Схема изоляции: основная vs worktree</h2>
+      <p>Главный принцип: <strong>два мира, одно хранилище Git</strong>.</p>
+
+      <div class="diagram-wrapper">
+        <pre class="mermaid">
+flowchart TB
+    subgraph GIT["📦 Git-репозиторий (общий)"]
+        direction TB
+        G["Ветки: main, feature-x, ..."]
+    end
+
+    subgraph MAIN["🏠 Основная директория"]
+        direction TB
+        M1["📄 src/"]
+        M2["📄 tests/"]
+        M3["📄 config.json"]
+        M4["📄 package.json"]
+    end
+
+    subgraph WT["🌳 Worktree: feature-x"]
+        direction TB
+        W1["📄 src/ (свои правки)"]
+        W2["📄 tests/ (свои тесты)"]
+        W3["📄 config.json"]
+        W4["📄 package.json"]
+    end
+
+    GIT --- MAIN
+    GIT --- WT
+
+    MAIN -.->|"Нет пересечений!\nИзменения\nне влияют\nдруг на друга"| WT
+
+    style GIT fill:#f0edff,stroke:#6c5ce7,stroke-width:2px,color:#2d3436
+    style MAIN fill:#fff9e6,stroke:#fdcb6e,stroke-width:2px,color:#2d3436
+    style WT fill:#e6fff8,stroke:#00b894,stroke-width:2px,color:#2d3436
+        </pre>
+      </div>
+
+      <div class="analogy">
+        <strong>💡 Проще говоря:</strong> Worktree — это как второй монитор для того же компьютера.
+        Оба монитора используют одну «железку» (Git), но работают в своих окнах.
+        Закрыл одно окно — другое работает как ни в чём не бывало.
+      </div>
+    </div>
+
+    <!-- ===================== КАК ЭТО ВЫГЛЯДИТ ===================== -->
+    <div class="card">
+      <h2><span class="icon">💻</span> Как это выглядит в Claude Code</h2>
+
+      <p>Ты просто говоришь Claude Code создать worktree — он делает всё сам:</p>
+
+      <span class="command-label">Создание worktree</span>
+      <div class="command-block">
+        <span class="comment"># Ты говоришь Claude Code:</span><br>
+        <span class="prompt">&gt;</span> Создай worktree для экспериментов с новым API<br><br>
+        <span class="comment"># Claude Code выполняет EnterWorktree и создаёт:</span><br>
+        <span class="highlight">.claude/worktrees/experiment-new-api/</span><br><br>
+        <span class="comment"># Ветка: experiment-new-api (или как назовёшь)</span><br>
+        <span class="comment"># Рабочая директория переключена</span><br>
+        <span class="comment"># Все команды идут в worktree</span>
+      </div>
+
+      <span class="command-label">Работа внутри worktree</span>
+      <div class="command-block">
+        <span class="comment"># Работаешь как обычно — Claude Code уже в worktree</span><br>
+        <span class="prompt">&gt;</span> Рефактори модуль авторизации<br>
+        <span class="prompt">&gt;</span> Напиши тесты для нового эндпоинта<br>
+        <span class="prompt">&gt;</span> Запусти линтер<br><br>
+        <span class="comment"># Все изменения — только в .claude/worktrees/experiment-new-api/</span><br>
+        <span class="comment"># Основная папка — чистая как слеза 👌</span>
+      </div>
+
+      <span class="command-label">Выход из worktree</span>
+      <div class="command-block">
+        <span class="comment"># Готов, хочешь выйти:</span><br>
+        <span class="prompt">&gt;</span> Выйди из worktree<br><br>
+        <span class="comment"># Claude Code спросит action:</span><br>
+        <span class="highlight">action: keep</span>    <span class="comment"># — worktree остаётся на диске, можно вернуться</span><br>
+        <span class="highlight">action: delete</span>  <span class="comment"># — worktree удаляется, ветка остаётся в Git</span><br><br>
+        <span class="comment"># Если в worktree есть незакоммиченные изменения —</span><br>
+        <span class="comment"># инструмент не даст удалить без подтверждения! Безопасно.</span>
+      </div>
+    </div>
+
+    <!-- ===================== КОГДА ИСПОЛЬЗОВАТЬ ===================== -->
+    <div class="card">
+      <h2><span class="icon">📋</span> Когда использовать Worktree</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ситуация</th>
+              <th>Worktree?</th>
+              <th>Почему</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>🧪 Начинаешь большую фичу</td>
+              <td><span class="badge badge-new">Да!</span></td>
+              <td>Изолируешь эксперимент, не мешаешь коллегам</td>
+            </tr>
+            <tr>
+              <td>🤖 Запускаешь субагента</td>
+              <td><span class="badge badge-new">Да!</span></td>
+              <td><code>isolation: worktree</code> — агент получает свою копию</td>
+            </tr>
+            <tr>
+              <td>😰 Боишься что-то сломать</td>
+              <td><span class="badge badge-new">Да!</span></td>
+              <td>Ничего не удалишь в основной папке</td>
+            </tr>
+            <tr>
+              <td>📊 Работаешь над стабильным кодом</td>
+              <td><span class="badge badge-new">Да!</span></td>
+              <td>Не рискуешь стабильной базой</td>
+            </tr>
+            <tr>
+              <td>🔍 Ревьюешь PR</td>
+              <td><span class="badge badge-tip">Полезно</span></td>
+              <td>Отдельная копия для каждой ветки</td>
+            </tr>
+            <tr>
+              <td>✏️ Мелкий фикс (1 файл)</td>
+              <td>Не обязательно</td>
+              <td>Работай в основной — проще</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===================== ОГРАНИЧЕНИЯ ===================== -->
+    <div class="card">
+      <h2><span class="icon">⚠️</span> Ограничения и подводные камни</h2>
+
+      <div class="limitation">
+        <span class="lim-icon">🔧</span>
+        <div>
+          <strong>Не все инструменты</strong> — некоторые tool'ы и хуки могут некорректно работать в worktree.
+          Если что-то странное — выйди из worktree и проверь в основной директории.
+        </div>
+      </div>
+
+      <div class="limitation">
+        <span class="lim-icon">🏠</span>
+        <div>
+          <strong>Возврат домой</strong> — после <code>ExitWorktree</code> сессия Claude Code возвращается
+          в обычную директорию. Ты как будто перешёл из кабинета обратно в свою комнату.
+        </div>
+      </div>
+
+      <div class="limitation">
+        <span class="lim-icon">💾</span>
+        <div>
+          <strong>При action: keep</strong> — worktree остаётся на диске. Не забывай удалять старые,
+          иначе будут занимать место. Команда <code>git worktree list</code> покажет все worktrees.
+        </div>
+      </div>
+
+      <div class="limitation">
+        <span class="lim-icon">🔒</span>
+        <div>
+          <strong>Безопасность удаления</strong> — если в worktree есть несохранённые изменения,
+          инструмент <strong>не даст удалить</strong> без подтверждения. Всегда можно вернуться.
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== ПОДСКАЗКИ ===================== -->
+    <div class="card">
+      <h2><span class="icon">💡</span> Полезные команды Git</h2>
+      <p>Для понимания что происходит «под капотом»:</p>
+
+      <div class="command-block">
+        <span class="comment"># Посмотреть все worktrees</span><br>
+        <span class="prompt">$</span> <span class="highlight">git worktree list</span><br><br>
+        <span class="comment"># Результат:</span><br>
+        /home/user/my-project          abc1234 [main]<br>
+        /home/user/my-project/.claude/worktrees/feature-x  def5678 [feature-x]<br><br>
+        <span class="comment"># Ручное удаление worktree (если Claude Code не помог)</span><br>
+        <span class="prompt">$</span> <span class="highlight">git worktree remove .claude/worktrees/feature-x</span><br><br>
+        <span class="comment"># Убрать «мёртвые» worktree (если папка удалена вручную)</span><br>
+        <span class="prompt">$</span> <span class="highlight">git worktree prune</span>
+      </div>
+    </div>
+
+    <!-- ===================== ИТОГО ===================== -->
+    <div class="card" style="background: linear-gradient(135deg, #f0edff 0%, #e6fff8 100%); border: 2px solid var(--accent-light);">
+      <h2><span class="icon">✨</span> Итого</h2>
+      <div class="analogy" style="background: rgba(255,255,255,0.7); border-left-color: var(--green);">
+        <strong>Worktree = БЕЗОПАСНАЯ КОПИЯ ПРОЕКТА.</strong><br><br>
+        🏠 Основной проект — чистый и нетронутый<br>
+        🌳 Worktree — твоя песочница для экспериментов<br>
+        🔄 EnterWorktree → работаешь → ExitWorktree<br>
+        🛡️ Ничего не потеряешь и не сломаешь<br><br>
+        <em>Если боишься — делай в worktree. Не боишься — всё равно делай в worktree.</em> 😄
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    📝 Документация для Claude Code Worktrees — сгенерировано для Андрея, 2026
+  </div>
+
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

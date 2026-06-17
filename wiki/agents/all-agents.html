@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Все субагенты Claude Code — обзор</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: { useMaxWidth: false },
+            sequence: { useMaxWidth: false }
+        });
+    </script>
+    <style>
+        :root {
+            --bg: #f7f8fc;
+            --surface: #ffffff;
+            --border: #e2e5ee;
+            --text: #1d1d1f;
+            --text-muted: #64748b;
+            --accent: #2563eb;
+            --accent-light: #eff3ff;
+            --purple: #7c3aed;
+            --purple-light: #f0eeff;
+            --green: #16a34a;
+            --green-light: #ecfdf5;
+            --amber: #d97706;
+            --amber-light: #fffbeb;
+            --red: #dc2626;
+            --red-light: #fef2f2;
+            --blue-dark: #0f3460;
+            --navy: #16213e;
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 6px rgba(0,0,0,0.04);
+            --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 40px 24px;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        /* ===== Header ===== */
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        header h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        header .subtitle {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        /* ===== Sections ===== */
+        section {
+            background: var(--surface);
+            border-radius: 14px;
+            padding: 32px 36px;
+            margin-bottom: 28px;
+            box-shadow: var(--shadow);
+        }
+        section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 6px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+        section .sub {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            margin-top: 4px;
+        }
+        section p {
+            font-size: 0.95rem;
+            color: #334155;
+            margin-bottom: 12px;
+        }
+        section h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--blue-dark);
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        /* ===== Mermaid sizing ===== */
+        .diagram-wrapper {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 16px 0;
+            margin: 16px -16px 8px;
+        }
+        .diagram-wrapper svg {
+            max-width: none !important;
+            height: auto !important;
+            display: block;
+        }
+
+        /* ===== Highlight box ===== */
+        .highlight-box {
+            background: linear-gradient(135deg, var(--accent-light), var(--purple-light));
+            border-left: 4px solid var(--purple);
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 20px 0;
+        }
+        .highlight-box h3 {
+            color: var(--purple);
+            margin-top: 0;
+            font-size: 1.1rem;
+        }
+        .highlight-box p { margin-bottom: 0; }
+
+        /* ===== Agent cards ===== */
+        .agent-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .agent-card {
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            transition: box-shadow 0.2s;
+        }
+        .agent-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        .agent-card .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .agent-card .card-emoji {
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+        .agent-card .card-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .agent-card .card-role {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        .agent-card .card-desc {
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .agent-card .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .tag.model  { background: #eff3ff; color: #1e40af; }
+        .tag.mcp    { background: var(--amber-light); color: #92400e; }
+        .tag.tools  { background: var(--green-light); color: #166534; }
+        .tag.skill  { background: var(--purple-light); color: #5b21b6; }
+
+        .agent-card .when {
+            margin-top: 12px;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+        .agent-card .when strong { color: var(--text); }
+
+        /* ===== Full-width single agent cards ===== */
+        .agent-card.full {
+            grid-column: 1 / -1;
+        }
+
+        /* ===== Tables ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: #f0f2f8;
+            font-weight: 600;
+            color: var(--navy);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f8f9fb; }
+        code {
+            background: #eef0f6;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 0.88em;
+            color: #c7254e;
+        }
+
+        /* ===== Triage section ===== */
+        .triage-colors {
+            display: flex;
+            gap: 16px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+        .triage-role {
+            flex: 1;
+            min-width: 220px;
+            border-radius: 10px;
+            padding: 18px 20px;
+            color: #fff;
+        }
+        .triage-role.innovator  { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+        .triage-role.pragmatist { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .triage-role.conservative { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+        .triage-role h4 { font-size: 1rem; margin-bottom: 4px; }
+        .triage-role p { font-size: 0.88rem; opacity: 0.92; margin-bottom: 0; }
+
+        /* ===== Price badge ===== */
+        .price-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .price-tag.cheap     { background: var(--green-light); color: #166534; }
+        .price-tag.medium    { background: var(--amber-light); color: #92400e; }
+        .price-tag.inherit   { background: #f1f5f9; color: #475569; }
+
+        /* ===== Footer ===== */
+        footer {
+            text-align: center;
+            color: #7a7a9a;
+            font-size: 0.85rem;
+            padding: 28px 0;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+
+        @media (max-width: 700px) {
+            body { padding: 20px 12px; }
+            section { padding: 20px 16px; }
+            header h1 { font-size: 1.8rem; }
+            .agent-cards { grid-template-columns: 1fr; }
+            .agent-card.full { grid-column: 1; }
+            .triage-colors { flex-direction: column; }
+            .diagram-wrapper { margin: 16px -8px 8px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+<a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+<header>
+    <h1>Все субагенты Claude Code</h1>
+    <p class="subtitle">Полный обзор 7 агентов нашей экосистемы: кто они, зачем нужны и как работают вместе</p>
+</header>
+
+<!-- ============================================================ -->
+<!-- 1. ЗАЧЕМ НУЖНЫ АГЕНТЫ                                        -->
+<!-- ============================================================ -->
+<section>
+    <h2>Зачем вообще субагенты</h2>
+    <p class="sub">Концепция, которая стоит за разделением труда</p>
+
+    <p>
+        <strong>Субагент</strong> — это отдельный специалист внутри Claude Code, который выполняет узкую задачу
+        со <strong>своим контекстом</strong> и при необходимости <strong>своей моделью</strong>.
+        Основной агент (тот, с кем ты общаешься) вызывает его по команде,
+        передаёт задачу и получает результат.
+    </p>
+    <p>
+        Почему не делать всё в одном агенте? Потому что это:
+    </p>
+    <ul style="margin: 8px 0 16px 24px; font-size: 0.95rem; color: #334155;">
+        <li><strong>Чистый контекст</strong> — агент-писатель не видит твои архитектурные дебаты, архитекторы — не засоряют контекст кодом</li>
+        <li><strong>Своя модель</strong> — документацию можно писать дешёвой моделью, а архитектуру — мощной</li>
+        <li><strong>Свои инструменты</strong> — explorer только читает, writer только документирует, openspec-manager управляет скиллами</li>
+        <li><strong>Параллельность</strong> — три архитектора могут работать одновременно над одним вопросом</li>
+        <li><strong>Специализация</strong> — каждый агент глубоко знает свою область и делает её лучше универсала</li>
+    </ul>
+
+    <div class="highlight-box">
+        <h3>Формат агента</h3>
+        <p>
+            Каждый субагент — это Markdown-файл в <code>~/.claude/agents/</code> с YAML-фронтматтером
+            (имя, модель, инструменты, MCP-серверы) и промптом-инструкцией в теле.
+            Это <strong>промпт-субагенты</strong>, а не отдельные процессы: они выполняются
+            как дочерний поток основного Claude Code.
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 2. ДИАГРАММА: ВСЕ АГЕНТЫ ПО ГРУППАМ                          -->
+<!-- ============================================================ -->
+<section>
+    <h2>Архитектура: все агенты по группам</h2>
+    <p class="sub">Как организованы 7 агентов и кто за что отвечает</p>
+
+    <div class="diagram-wrapper">
+        <div class="mermaid">
+flowchart TD
+    User["Пользователь"] --> Main["Основной Claude Code<br>(родительский агент)"]
+
+    Main -->|"📝 Документация"| Writer["✍️ writer-agent<br>MiMo-V2.5, xhigh"]
+    Main -->|"🔧 Spec-driven разработка"| OpenSpec["🧠 openspec-manager<br>inherit, 11 skills"]
+    Main -->|"🔍 Поиск в коде"| Explorer["🔍 explorer<br>inherit, read-only"]
+    Main -->|"🖥️ Настройка терминала"| Status["🖥️ statusline-setup<br>inherit"]
+    Main -->|"⚖️ Архитектурный вопрос"| Triage["Архитектурный отдел"]
+
+    subgraph TriageDept["Архитектурный отдел (Triage)"]
+        direction LR
+        Innov["🚀 innovator<br>minimax-m3"]
+        Prag["⚖️ pragmatist<br>deepseek-v4-pro"]
+        Cons["🛡️ conservative<br>qwen3.7-plus"]
+    end
+
+    Triage --> Innov
+    Triage --> Prag
+    Triage --> Cons
+    Innov -->|"вердикт"| Writer
+    Prag -->|"вердикт"| Writer
+    Cons -->|"вердикт"| Writer
+
+    style User fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px
+    style Main fill:#16213e,color:#fff,stroke:none,font-weight:700
+    style Writer fill:#eef2ff,stroke:#4f46e5,stroke-width:2px
+    style OpenSpec fill:#fef3c7,stroke:#d97706,stroke-width:2px
+    style Explorer fill:#ecfdf5,stroke:#16a34a,stroke-width:2px
+    style Guide fill:#f0eeff,stroke:#7c3aed,stroke-width:2px
+    style Status fill:#fef2f2,stroke:#dc2626,stroke-width:2px
+    style TriageDept fill:#f8fafc,stroke:#cbd5e1,stroke-width:1px
+    style Innov fill:#eff3ff,stroke:#2563eb,stroke-width:2px
+    style Prag fill:#ecfdf5,stroke:#16a34a,stroke-width:2px
+    style Cons fill:#f0eeff,stroke:#7c3aed,stroke-width:2px
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 3. ВСЕ АГЕНТЫ — КАРТОЧКИ                                     -->
+<!-- ============================================================ -->
+<section>
+    <h2>Каталог агентов</h2>
+    <p class="sub">Подробно о каждом: роль, модель, инструменты, когда вызывать</p>
+
+    <div class="agent-cards">
+
+        <!-- OPENPEC-MANAGER -->
+        <div class="agent-card full">
+            <div class="card-header">
+                <span class="card-emoji">🧠</span>
+                <div>
+                    <div class="card-name">openspec-manager</div>
+                    <div class="card-role">Spec-driven разработка</div>
+                </div>
+            </div>
+            <div class="card-desc">
+                Управляет полным lifecycle изменений по методологии OpenSpec: proposal, design, tasks,
+                реализация, синхронизация спек, архивация. Самый «рабочий» агент — с 11 скиллами,
+                изолированным MCP-сервером и собственной файловой структурой.
+            </div>
+            <div class="card-meta">
+                <span class="tag model">model: inherit</span>
+                <span class="tag mcp">MCP: openspec-mcp (uvx)</span>
+                <span class="tag skill">11 skills</span>
+                <span class="tag tools">Read, Write, Edit, Bash, Glob, Skill</span>
+            </div>
+            <div class="when">
+                <strong>Когда вызывать:</strong> начало новой фичи, рефакторинг, архитектурное изменение —
+                любая структурированная работа, где нужны спецификации и план перед кодом.
+            </div>
+        </div>
+
+        <!-- WRITER-AGENT -->
+        <div class="agent-card full">
+            <div class="card-header">
+                <span class="card-emoji">✍️</span>
+                <div>
+                    <div class="card-name">writer-agent</div>
+                    <div class="card-role">Документация</div>
+                </div>
+            </div>
+            <div class="card-desc">
+                Анализирует изменения в коде и создаёт/обновляет документацию: README, CHANGELOG, docs/ и HTML-страницы
+                для вики. Использует дешёвую модель MiMo-V2.5 с максимальным усилием (xhigh) —
+                дёшево, но старательно. Умеет искать информацию в интернете через poisk-mcp.
+            </div>
+            <div class="card-meta">
+                <span class="tag model">model: claude-go-mimo-v2.5</span>
+                <span class="tag model" style="background:#fef3c7;color:#92400e;">effort: xhigh</span>
+                <span class="tag mcp">MCP: poisk-mcp</span>
+                <span class="tag skill">skill: deep-research</span>
+                <span class="tag tools">Read, Write, Edit, Bash, Glob, Grep</span>
+            </div>
+            <div class="when">
+                <strong>Когда вызывать:</strong> нужно описать проект, обновить документацию, создать HTML-страницу в вики,
+                написать CHANGELOG, сгенерировать README для нового модуля.
+            </div>
+        </div>
+
+        <!-- EXPLORER -->
+        <div class="agent-card">
+            <div class="card-header">
+                <span class="card-emoji">🔍</span>
+                <div>
+                    <div class="card-name">explorer</div>
+                    <div class="card-role">Быстрый поиск кода</div>
+                </div>
+            </div>
+            <div class="card-desc">
+                Read-only агент для навигации по кодовой базе. Ищет файлы, анализирует структуру,
+                отвечает на вопросы «где используется Y», «как устроен X». Ничего не меняет — только читает и ищет.
+            </div>
+            <div class="card-meta">
+                <span class="tag model">model: inherit</span>
+                <span class="tag tools">Read, Glob, Grep, Bash</span>
+            </div>
+            <div class="when">
+                <strong>Когда вызывать:</strong> найти где используется функция, понять структуру модуля, проверить зависимости.
+            </div>
+        </div>
+
+        <!-- STATUSLINE -->
+        <div class="agent-card">
+            <div class="card-header">
+                <span class="card-emoji">🖥️</span>
+                <div>
+                    <div class="card-name">statusline-setup</div>
+                    <div class="card-role">Настройка статус-строки</div>
+                </div>
+            </div>
+            <div class="card-desc">
+                Маленький специализированный агент: настраивает статус-строку Claude Code
+                через <code>/statusline</code>. Читает текущие настройки, спрашивает что видеть,
+                записывает конфиг в settings.json.
+            </div>
+            <div class="card-meta">
+                <span class="tag model">model: inherit</span>
+                <span class="tag tools">Read, Write, Edit, Bash, Glob</span>
+            </div>
+            <div class="when">
+                <strong>Когда вызывать:</strong> настроить/изменить/убрать статус-строку, показать ветку, время, погоду.
+            </div>
+        </div>
+
+        <!-- INNOVATOR -->
+        <div class="agent-card">
+            <div class="card-header">
+                <span class="card-emoji">🚀</span>
+                <div>
+                    <div class="card-name">innovator</div>
+                    <div class="card-role">Архитектор-инноватор</div>
+                </div>
+            </div>
+            <div class="card-desc">
+                Смелый архитектор, смотрящий на 2–3 шага вперёд. Предлагает передовые решения,
+                новые технологии, не боится ломать устаревшие подходы. Имеет доступ к Context7
+                для актуальной документации библиотек.
+            </div>
+            <div class="card-meta">
+                <span class="tag model">model: claude-go-minimax-m3</span>
+                <span class="tag mcp">MCP: context7 (remote)</span>
+                <span class="tag tools">Read, Write, Edit, Bash, Glob, Grep</span>
+            </div>
+            <div class="when">
+                <strong>Когда вызывать:</strong> нужна самая передовая идея, радиальная переработка, новый стек.
+            </div>
+        </div>
+
+        <!-- PRAGMATIST -->
+        <div class="agent-card">
+            <div class="card-header">
+                <span class="card-emoji">⚖️</span>
+                <div>
+                    <div class="card-name">pragmatist</div>
+                    <div class="card-role">Архитектор-прагматик</div>
+                </div>
+            </div>
+            <div class="card-desc">
+                Ищет золотую середину. Предлагает реалистичные, внедряемые решения с учётом
+                существующего кода, сроков и стоимости. Мастер сравнительных таблиц
+                и cost-benefit анализа. Самая мощная модель в Triage.
+            </div>
+            <div class="card-meta">
+                <span class="tag model">model: claude-go-deepseek-v4-pro</span>
+                <span class="tag mcp">MCP: context7 (remote)</span>
+                <span class="tag tools">Read, Write, Edit, Bash, Glob, Grep</span>
+            </div>
+            <div class="when">
+                <strong>Когда вызывать:</strong> нужно оптимальное, реалистичное решение с оценкой сроков и стоимости.
+            </div>
+        </div>
+
+        <!-- CONSERVATIVE -->
+        <div class="agent-card">
+            <div class="card-header">
+                <span class="card-emoji">🛡️</span>
+                <div>
+                    <div class="card-name">conservative</div>
+                    <div class="card-role">Архитектор-консерватор</div>
+                </div>
+            </div>
+            <div class="card-desc">
+                Хранитель стабильности. Отстаивает проверенные решения, указывает на риски,
+                нестабильность и подводные камни. Не блокирует — а предлагает безопасные альтернативы.
+                Каждый риск оценивает по severity.
+            </div>
+            <div class="card-meta">
+                <span class="tag model">model: claude-go-qwen3.7-plus</span>
+                <span class="tag mcp">MCP: context7 (remote)</span>
+                <span class="tag tools">Read, Write, Edit, Bash, Glob, Grep</span>
+            </div>
+            <div class="when">
+                <strong>Когда вызывать:</strong> оценить риски, проверить безопасность, понять что может пойти не так.
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 4. АРХИТЕКТУРНЫЙ ОТДЕЛ (TRIAGE)                               -->
+<!-- ============================================================ -->
+<section>
+    <h2>Архитектурный отдел (Triage)</h2>
+    <p class="sub">Процесс из 2 раундов, где три агента обсуждают решение, а затем синтезируется вердикт</p>
+
+    <p>
+        Когда перед основным агентом встаёт архитектурный вопрос («Какую БД выбрать?»,
+        «Стоит ли менять стек?»), он запускает <strong>Triage</strong> — структурированный процесс
+        из двух раундов, в котором участвуют три архитектора с разными взглядами.
+    </p>
+
+    <div class="triage-colors">
+        <div class="triage-role innovator">
+            <h4>🚀 Инноватор</h4>
+            <p>Смелые решения, новые технологии, 2–3 шага вперёд</p>
+        </div>
+        <div class="triage-role pragmatist">
+            <h4>⚖️ Прагматик</h4>
+            <p>Баланс, cost-benefit, реалистичные сроки</p>
+        </div>
+        <div class="triage-role conservative">
+            <h4>🛡️ Консерватор</h4>
+            <p>Риски, стабильность, проверенные подходы</p>
+        </div>
+    </div>
+
+    <h3>Как это работает</h3>
+    <p>
+        Всё общение идёт через файлы в папке <code>.triage/&lt;task-name&gt;/</code>.
+        Каждый агент пишет свой файл, потом читает чужие и пишет rebuttal (ответ).
+        Финальный вердикт синтезирует writer-agent.
+    </p>
+
+    <div class="diagram-wrapper">
+        <div class="mermaid">
+sequenceDiagram
+    participant User as Пользователь
+    participant Main as Основной агент
+    participant Inn as 🚀 Innovator<br>(minimax-m3)
+    participant Pra as ⚖️ Pragmatist<br>(deepseek-v4-pro)
+    participant Con as 🛡️ Conservative<br>(qwen3.7-plus)
+    participant WR as ✍️ Writer<br>(MiMo-V2.5)
+    participant FS as .triage/&lt;task&gt;/
+
+    User->>Main: Архитектурный вопрос
+    Main->>FS: Создать структуру папок
+
+    rect rgb(238, 242, 255)
+        Note over Inn,Con: Раунд 1 — PROPOSAL
+        par Параллельно
+            Main->>Inn: innovator, round-1: задача
+            Inn->>FS: round-1/01-innovator.md
+        and
+            Main->>Pra: pragmatist, round-1: задача
+            Pra->>FS: round-1/02-pragmatist.md
+        and
+            Main->>Con: conservative, round-1: задача
+            Con->>FS: round-1/03-conservative.md
+        end
+    end
+
+    rect rgb(240, 252, 244)
+        Note over Inn,Con: Раунд 2 — REBUTTAL
+        par Параллельно
+            Main->>Inn: innovator, round-2: задача
+            Inn->>FS: round-2/01-innovator-rebuttal.md
+        and
+            Main->>Pra: pragmatist, round-2: задача
+            Pra->>FS: round-2/02-pragmatist-rebuttal.md
+        and
+            Main->>Con: conservative, round-2: задача
+            Con->>FS: round-2/03-conservative-rebuttal.md
+        end
+    end
+
+    rect rgb(252, 248, 238)
+        Note over WR: СИНТЕЗ
+        Main->>WR: Синтезируй вердикт
+        WR->>FS: Чтение всех .md файлов
+        WR->>FS: verdict.html
+        WR-->>Main: Вердикт готов
+    end
+
+    Main-->>User: Готово: verdict.html
+        </div>
+    </div>
+
+    <h3>Два раунда</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 12px;">
+        <div style="background: var(--accent-light); border-radius: 10px; padding: 20px;">
+            <h4 style="color: var(--accent); margin-bottom: 6px;">Раунд 1: Proposal</h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0;">
+                Каждый архитектор пишет свою позицию (до 300 слов):
+                название подхода, технологии, плюсы и минусы.
+                Файлы: <code>01-innovator.md</code>, <code>02-pragmatist.md</code>, <code>03-conservative.md</code>.
+            </p>
+        </div>
+        <div style="background: var(--green-light); border-radius: 10px; padding: 20px;">
+            <h4 style="color: var(--green); margin-bottom: 6px;">Раунд 2: Rebuttal</h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0;">
+                Каждый читает чужие позиции и пишет ответ (до 200 слов):
+                с чем согласен, с чем нет, свой скорректированный вариант.
+                Файлы: <code>*-rebuttal.md</code>.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 5. ДИАГРАММА: АГЕНТЫ И ИХ МОДЕЛИ                             -->
+<!-- ============================================================ -->
+<section>
+    <h2>Агенты и их модели</h2>
+    <p class="sub">Какие модели используются и почему именно такие</p>
+
+    <div class="diagram-wrapper">
+        <div class="mermaid">
+flowchart LR
+    subgraph Models["Модели"]
+        M1["DeepSeek V4 Pro<br>мощная, средняя цена"]
+        M2["MiMo-V2.5<br>Xiaomi, agentic, дёшево"]
+        M3["MiniMax M3<br>дёшево, быстрое"]
+        M4["Qwen 3.7 Plus<br>дёшево, баланс"]
+        M5["inherit<br>наследует основную"]
+    end
+
+    subgraph MainAgent["Основной поток"]
+        MA["claude-go-deepseek-v4-flash"]
+    end
+
+    M5 --> MA
+
+    subgraph DocAgent["Документация"]
+        WA["✍️ writer-agent"]
+    end
+    M2 --> WA
+
+    subgraph Arch["Архитекторы"]
+        INN["🚀 innovator"]
+        PRA["⚖️ pragmatist"]
+        CON["🛡️ conservative"]
+    end
+    M3 --> INN
+    M1 --> PRA
+    M4 --> CON
+
+    subgraph Simple["Простые задачи"]
+        EX["🔍 explorer"]
+        ST["🖥️ statusline"]
+        OS["🧠 openspec-manager"]
+    end
+    M5 --> EX
+    M5 --> ST
+    M5 --> OS
+
+    style M1 fill:#eff3ff,stroke:#2563eb,stroke-width:2px
+    style M2 fill:#fef3c7,stroke:#d97706,stroke-width:2px
+    style M3 fill:#ecfdf5,stroke:#16a34a,stroke-width:2px
+    style M4 fill:#f0eeff,stroke:#7c3aed,stroke-width:2px
+    style M5 fill:#f1f5f9,stroke:#94a3b8,stroke-width:2px
+    style MA fill:#16213e,color:#fff,stroke:none
+    style WA fill:#eef2ff,stroke:#4f46e5
+    style INN fill:#ecfdf5,stroke:#16a34a
+    style PRA fill:#eff3ff,stroke:#2563eb
+    style CON fill:#f0eeff,stroke:#7c3aed
+    style EX fill:#ecfdf5,stroke:#16a34a
+    style ST fill:#fef2f2,stroke:#dc2626
+    style OS fill:#fef3c7,stroke:#d97706
+        </div>
+    </div>
+
+    <p>
+        Логика простая: <strong>простые задачи</strong> (чтение, поиск, настройка) делает inherit-модель
+        (без допзатрат). <strong>Документацию</strong> — дешёвая MiMo с высоким усилием (xhigh).
+        <strong>Архитектурные дебаты</strong> — три разные модели, чтобы получить три независимых взгляда.
+    </p>
+</section>
+
+<!-- ============================================================ -->
+<!-- 6. СРАВНИТЕЛЬНАЯ ТАБЛИЦА                                      -->
+<!-- ============================================================ -->
+<section>
+    <h2>Сравнительная таблица моделей</h2>
+    <p class="sub">Все модели, их агенты, назначение и примерная стоимость</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Модель</th>
+                <th>Агент</th>
+                <th>Где используется</th>
+                <th>Цена/Качество</th>
+                <th>Особенности</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>claude-go-deepseek-v4-flash</code></td>
+                <td>Основной агент</td>
+                <td>Главный поток, пользователь общается с ним</td>
+                <td><span class="price-tag medium">Среднее</span></td>
+                <td>Баланс скорости и качества, основная рабочая лошадка</td>
+            </tr>
+            <tr>
+                <td><code>claude-go-deepseek-v4-pro</code></td>
+                <td>pragmatist</td>
+                <td>Архитектурные дебаты (Triage)</td>
+                <td><span class="price-tag medium">Среднее</span></td>
+                <td>Самая мощная в Triage,лучший для cost-benefit анализа</td>
+            </tr>
+            <tr>
+                <td><code>claude-go-mimo-v2.5</code></td>
+                <td>writer-agent</td>
+                <td>Документация, README, CHANGELOG, HTML-страницы</td>
+                <td><span class="price-tag cheap">Дёшево</span></td>
+                <td>1M контекст, agentic reasoning, xhigh effort</td>
+            </tr>
+            <tr>
+                <td><code>claude-go-minimax-m3</code></td>
+                <td>innovator</td>
+                <td>Архитектурные дебаты (Triage)</td>
+                <td><span class="price-tag cheap">Дёшево</span></td>
+                <td>Быстрый, подходит для смелых идей</td>
+            </tr>
+            <tr>
+                <td><code>claude-go-qwen3.7-plus</code></td>
+                <td>conservative</td>
+                <td>Архитектурные дебаты (Triage)</td>
+                <td><span class="price-tag cheap">Дёшево</span></td>
+                <td>Хорош для анализа рисков</td>
+            </tr>
+            <tr>
+                <td><code>inherit</code></td>
+                <td>openspec-manager, explorer, statusline-setup</td>
+                <td>Специализированные утилиты</td>
+                <td><span class="price-tag inherit">Как основная</span></td>
+                <td>Наследует модель родителя, без допзатрат</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="highlight-box">
+        <h3>Экономика</h3>
+        <p>
+            Все три архитектора в Triage используют <strong>дешёвые модели</strong> (minimax-m3, qwen3.7-plus)
+            или <strong>среднюю</strong> (deepseek-v4-pro). Документация — на дешёвой MiMo с высоким усилием.
+            Простые агенты (explorer, statusline, openspec-manager) — inherit, без дополнительных затрат.
+            Это позволяет держать расходы низкими при высоком качестве.
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 7. MCP-СЕРВЕРЫ                                               -->
+<!-- ============================================================ -->
+<section>
+    <h2>MCP-серверы в экосистеме</h2>
+    <p class="sub">Какие внешние сервисы подключены к каким агентам</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>MCP-сервер</th>
+                <th>Тип</th>
+                <th>Агент</th>
+                <th>Назначение</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>openspec-mcp</code></td>
+                <td>Изолированный (uvx)</td>
+                <td>openspec-manager</td>
+                <td>Быстрые операции с OpenSpec: список изменений, чтение спек, валидация</td>
+            </tr>
+            <tr>
+                <td><code>poisk-mcp</code></td>
+                <td>Локальный</td>
+                <td>writer-agent</td>
+                <td>Поиск в интернете: search_web, browse_summarize, read_webpage</td>
+            </tr>
+            <tr>
+                <td><code>context7</code></td>
+                <td>Remote (облачный)</td>
+                <td>innovator, pragmatist, conservative</td>
+                <td>Актуальная документация библиотек через <code>npx ctx7 docs</code></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p style="margin-top: 12px;">
+        <strong>Изолированный MCP</strong> — объявлен в конфиге агента, доступен только ему.
+        <strong>Глобальный MCP</strong> (poisk-mcp) — добавлен через <code>claude mcp add</code>,
+        но подключён только к writer-agent.
+        <strong>Remote MCP</strong> (context7) — облачный сервис с API-ключом в заголовках.
+    </p>
+</section>
+
+<!-- ============================================================ -->
+<!-- 8. СВОДНАЯ ТАБЛИЦА АГЕНТОВ                                   -->
+<!-- ============================================================ -->
+<section>
+    <h2>Полная сводка: все 7 агентов</h2>
+    <p class="sub">Быстрый обзор для сравнения</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Агент</th>
+                <th>Роль</th>
+                <th>Модель</th>
+                <th>MCP</th>
+                <th>Инструменты</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td><strong>🧠 openspec-manager</strong></td>
+                <td>Spec-driven разработка</td>
+                <td><code>inherit</code></td>
+                <td>openspec-mcp</td>
+                <td>Read, Write, Edit, Bash, Glob, Skill</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td><strong>✍️ writer-agent</strong></td>
+                <td>Документация</td>
+                <td><code>mimo-v2.5</code> (xhigh)</td>
+                <td>poisk-mcp</td>
+                <td>Read, Write, Edit, Bash, Glob, Grep</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td><strong>🔍 explorer</strong></td>
+                <td>Поиск в коде (read-only)</td>
+                <td><code>inherit</code></td>
+                <td>—</td>
+                <td>Read, Glob, Grep, Bash</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td><strong>🖥️ statusline-setup</strong></td>
+                <td>Настройка статус-строки</td>
+                <td><code>inherit</code></td>
+                <td>—</td>
+                <td>Read, Write, Edit, Bash, Glob</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td><strong>🚀 innovator</strong></td>
+                <td>Архитектор-инноватор</td>
+                <td><code>minimax-m3</code></td>
+                <td>context7</td>
+                <td>Read, Write, Edit, Bash, Glob, Grep</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td><strong>⚖️ pragmatist</strong></td>
+                <td>Архитектор-прагматик</td>
+                <td><code>deepseek-v4-pro</code></td>
+                <td>context7</td>
+                <td>Read, Write, Edit, Bash, Glob, Grep</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td><strong>🛡️ conservative</strong></td>
+                <td>Архитектор-консерватор</td>
+                <td><code>qwen3.7-plus</code></td>
+                <td>context7</td>
+                <td>Read, Write, Edit, Bash, Glob, Grep</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ============================================================ -->
+<!-- 9. КОГДА ВЫЗЫВАТЬ КАЖДЫЙ АГЕНТ                               -->
+<!-- ============================================================ -->
+<section>
+    <h2>Шпаргалка: когда вызывать</h2>
+    <p class="sub">Быстрый гид для основного агента</p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px;">
+        <div style="background: var(--accent-light); border-radius: 10px; padding: 18px;">
+            <strong>🧠 openspec-manager</strong>
+            <p style="font-size: 0.88rem; margin: 6px 0 0;">«Начни работу над X»<br>«Создай proposal»<br>«Реализуй изменение»<br>«Архивируй завершённое»</p>
+        </div>
+        <div style="background: var(--amber-light); border-radius: 10px; padding: 18px;">
+            <strong>✍️ writer-agent</strong>
+            <p style="font-size: 0.88rem; margin: 6px 0 0;">«Обнови документацию»<br>«Напиши README»<br>«Допиши CHANGELOG»<br>«Создай HTML-страницу»</p>
+        </div>
+        <div style="background: var(--green-light); border-radius: 10px; padding: 18px;">
+            <strong>🔍 explorer</strong>
+            <p style="font-size: 0.88rem; margin: 6px 0 0;">«Где используется X?»<br>«Как устроен модуль Y?»<br>«Что за файлы в src/?»<br>«Покажи структуру проекта»</p>
+        </div>
+        <div style="background: var(--red-light); border-radius: 10px; padding: 18px;">
+            <strong>🖥️ statusline-setup</strong>
+            <p style="font-size: 0.88rem; margin: 6px 0 0;">«Настрой статус-строку»<br>«Покажи ветку в статусе»<br>«Добавь время в статус-строку»</p>
+        </div>
+        <div style="background: #f0f9ff; border-radius: 10px; padding: 18px;">
+            <strong>🚀⚖️🛡️ Архитектурный отдел</strong>
+            <p style="font-size: 0.88rem; margin: 6px 0 0;">«Какую БД выбрать?»<br>«Стоит ли менять стек?»<br>«Как спроектировать API?»<br>Любой архитектурный вопрос → Triage</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- FOOTER                                                        -->
+<!-- ============================================================ -->
+<footer>
+    Создано writer-agent на основе конфигураций всех 8 агентов из <code>~/.claude/agents/</code>.
+    <br>Актуально на 2026-06-16.
+    <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+</footer>
+
+</div>
+</body>
+</html>

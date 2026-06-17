@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Background Tasks — фоновые задачи в Claude Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .shortcut-table kbd {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>🔄 Background Tasks — фоновые задачи</h1>
+  <p class="subtitle">Пока ты работаешь над одним &mdash; в фоне может крутиться совсем другое</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое Background Tasks?</a></li>
+      <li><a href="#how">Как запустить фоновую задачу</a></li>
+      <li><a href="#when">Когда это нужно</a></li>
+      <li><a href="#limits">Ограничения</a></li>
+      <li><a href="#manage">Управление фоновыми задачами</a></li>
+      <li><a href="#workflow">Связь с Workflow</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ -->
+  <h2 id="what"><span class="emoji">🔄</span> Что такое Background Tasks?</h2>
+
+  <p>
+    Представь: ты готовишь ужин и одновременно слушаешь подкаст. Руки заняты едой, а уши &mdash;
+    подкастом. И то, и другое происходит параллельно, одно другому не мешает.
+  </p>
+
+  <p>
+    <strong>Background Tasks</strong> &mdash; это запуск задач в фоне. Пока Claude работает над твоим
+    текущим запросом, в фоне может параллельно выполняться другая задача. Ты не ждёшь, пока одна
+    закончится, чтобы начать другую.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> Background Tasks &mdash; это возможность запустить Claude
+    на одну задачу, а самому продолжить работать с другим Claude. Как открыть вторую вкладку
+    в браузере &mdash; одна страница грузится, пока ты смотришь другую.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. КАК ЗАПУСТИТЬ -->
+  <h2 id="how"><span class="emoji">🚀</span> Как запустить фоновую задачу</h2>
+
+  <p>Есть три способа &mdash; от самого простого до самого гибкого:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    USER(("👨‍💻 Пользователь")) --> METHOD{"Какой способ?"}
+
+    METHOD -->|"Флаг при старте"| CLI["claude --bg<br>\"исследуй этот баг\""]
+    METHOD -->|"В сессии"| SHORTCUT["Ctrl+B<br>текущая задача &rarr; фон"]
+    METHOD -->|"Через агента"| AGENT["Субагент<br>с background режимом"]
+
+    CLI --> BG1["&#x1f680; Фоновая задача #1"]
+    SHORTCUT --> BG2["&#x1f680; Фоновая задача #2"]
+    AGENT --> BG3["&#x1f680; Фоновая задача #3"]
+
+    BG1 --> RESULT["&#x1f4cb; Результат появится<br>в списке задач"]
+    BG2 --> RESULT
+    BG3 --> RESULT
+
+    style USER fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style METHOD fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style CLI fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style SHORTCUT fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style AGENT fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style BG1 fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style BG2 fill:#fff8e1,stroke:#ff8f00,stroke-width:2px
+    style BG3 fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    style RESULT fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    </div>
+  </div>
+
+  <h3>1. Флаг --bg при старте</h3>
+  <p>Запускаешь Claude сразу в фоновом режиме. Он уходит в фон и работает &mdash; ты пока занимаешься своим делом.</p>
+  <div class="code-block">
+    <code><span class="yaml-comment"># Запустить исследование бага в фоне</span>
+claude --bg "исследуй баг #123 в модуле auth"
+
+<span class="yaml-comment"># Анализ большого диффа в фоне</span>
+claude --bg "проанализируй git diff HEAD~10 и составь отчёт"
+
+<span class="yaml-comment"># Пока фоновая задача работает &mdash; можно открыть вторую сессию</span>
+claude  <span class="yaml-comment"># обычный режим, работаем параллельно</span></code>
+  </div>
+
+  <h3>2. Ctrl+B в сессии</h3>
+  <p>Сидишь в сессии, понимаешь что задача долгая &mdash; отправляешь её в фон одной комбинацией клавиш.</p>
+  <div class="card card-green">
+    <p><strong>Сценарий:</strong> Ты пишешь Claude длинный промпт. Вместо того чтобы ждать ответ
+    5 минут &mdash; нажимаешь <kbd>Ctrl+B</kbd>. Задача уходит в фон, а ты свободен
+    для новых запросов в этой же сессии.</p>
+  </div>
+
+  <h3>3. Через субагента</h3>
+  <p>Агент (например, через <code>/agents</code> или из конфига) может быть запущен в фоне по умолчанию. Это основа для мульти-агентных сценариев.</p>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. КОГДА НУЖНО -->
+  <h2 id="when"><span class="emoji">🎯</span> Когда это нужно</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>🔍 Параллельное исследование</h3>
+      <p>Два агента ищут баг в разных местах кода. Один проверяет backend, другой &mdash; frontend.
+      Результаты обаотчёт (сообщат) когда будут готовы.</p>
+    </div>
+
+    <div class="card card-orange">
+      <h3>📊 Долгая задача</h3>
+      <p>Разбор логов на 50к строк, анализ большого диффа, рефакторинг целого модуля.
+      Не хочется ждать &mdash; отправляем в фон и работаем дальше.</p>
+    </div>
+
+    <div class="card card-purple">
+      <h3>✅ Фоновая проверка</h3>
+      <p>Пока ты пишешь код, в фоне агент проверяет CI, запускает тесты, линтит.
+      Как только что-то упадёт &mdash; сразу узнаешь.</p>
+    </div>
+
+    <div class="card card-accent">
+      <h3>📝 Генерация документации</h3>
+      <p>Пока ты работаешь над фичей, фоновый агент генерирует доку, обновляет CHANGELOG.
+      Код и документация идут параллельно.</p>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ОГРАНИЧЕНИЯ -->
+  <h2 id="limits"><span class="emoji">🚫</span> Ограничения</h2>
+
+  <p>Background Tasks &mdash; мощная штука, но есть важные нюансы, которые надо знать:</p>
+
+  <div class="card card-red">
+    <h3>Что нужно помнить</h3>
+    <table>
+      <tr>
+        <th>Ограничение</th>
+        <th>Что значит</th>
+      </tr>
+      <tr>
+        <td>Разрешения при старте</td>
+        <td>Если при запуске фоновой задачи ты <strong>не выдал разрешение</strong> на инструмент
+        &mdash; задача будет действовать в режиме автозапрета. Не сможет писать файлы, запускать
+        команды и т.д. Всё важное &mdash; решай при запуске!</td>
+      </tr>
+      <tr>
+        <td>Не восстанавливается</td>
+        <td>При <code>--resume</code> фоновые задачи <strong>не поднимаются заново</strong>.
+        Если сессия упала &mdash; фоновые задачи пропали.</td>
+      </tr>
+      <tr>
+        <td>Время жизни</td>
+        <td>Фоновые задачи живут <strong>пока жива сессия</strong>. Закрыл терминал &mdash;
+        всё завершилось.</td>
+      </tr>
+      <tr>
+        <td>Ресурсы</td>
+        <td>Каждая фоновая задача &mdash; это отдельный контекст. Чем больше задач параллельно,
+        тем больше токенов и тем дороже по API.</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Важно:</strong> При запуске фоновой задачи Claude спросит разрешения
+    на нужные инструменты. Если ты пропустил этот момент &mdash; задача будет работать
+    в усеченном режиме. Лучше сразу выдать все нужные пермишены!</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. УПРАВЛЕНИЕ -->
+  <h2 id="manage"><span class="emoji">📋</span> Управление фоновыми задачами</h2>
+
+  <p>Два способа посмотреть, что происходит в фоне:</p>
+
+  <table>
+    <tr>
+      <th>Команда</th>
+      <th>Что показывает</th>
+    </tr>
+    <tr>
+      <td><code>/tasks</code></td>
+      <td>Список всех фоновых задач &mdash; статус, описание, время запуска</td>
+    </tr>
+    <tr>
+      <td><code>/bg</code></td>
+      <td>Панель управления: текущие задачи, возможность отменить или посмотреть результат</td>
+    </tr>
+  </table>
+
+  <div class="card card-purple">
+    <h3>Типичный workflow</h3>
+    <ol>
+      <li>Запустил фоновую задачу через <code>--bg</code> или <kbd>Ctrl+B</kbd></li>
+      <li>Продолжил работать в основной сессии</li>
+      <li>Через какое-то время написал <code>/tasks</code> &mdash; посмотрел статус</li>
+      <li>Задача готова &mdash; результат появился в списке</li>
+      <li>Прочитал результат, использовал информацию</li>
+    </ol>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. СВЯЗЬ С WORKFLOW -->
+  <h2 id="workflow"><span class="emoji">🏗️</span> Связь с Workflow</h2>
+
+  <p>
+    Background Tasks &mdash; это строительный блок для более сложных сценариев. Когда ты
+    комбинируешь несколько фоновых задач с основной сессией &mdash; получаешь
+    <strong>параллельный мульти-агентный workflow</strong>.
+  </p>
+
+  <div class="card card-accent">
+    <h3>Пример: разработка фичи</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Терминал 1: основная работа</span>
+claude  <span class="yaml-comment"># пишешь код фичи</span>
+
+<span class="yaml-comment"># Терминал 2: фоновая проверка тестов</span>
+claude --bg "запусти все тесты и сообщи что упало"
+
+<span class="yaml-comment"># Терминал 3: фоновый анализ зависимостей</span>
+claude --bg "проверь не устарели ли зависимости в package.json"
+
+<span class="yaml-comment"># Итого: пока ты кодишь &mdash; три параллельных потока работают на тебя</span></code>
+    </div>
+  </div>
+
+  <div class="card card-green">
+    <h3>Преимущества параллельного подхода</h3>
+    <ul>
+      <li><strong>Скорость:</strong> Вместо последовательного ожидания &mdash; всё идёт параллельно</li>
+      <li><strong>Покрытие:</strong> Разные агенты проверяют разные аспекты одновременно</li>
+      <li><strong>Фокус:</strong> Ты не отвлекаешься на второстепенные задачи &mdash; они в фоне</li>
+      <li><strong>Автоматизация:</strong> Меньше ручных шагов &mdash; агенты сами формируют отчёт</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Background Tasks &mdash; это способ запускать задачи параллельно, не блокируя
+      основную сессию. Используй <code>--bg</code> для запуска, <kbd>Ctrl+B</kbd> для отправки в фон,
+      <code>/tasks</code> для проверки статуса. Помни про ограничения: пермишены решаются при старте,
+      а при падении сессии фоновые задачи не восстанавливаются. 🔄
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

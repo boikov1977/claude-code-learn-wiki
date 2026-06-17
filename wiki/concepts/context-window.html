@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Управление контекстом — шпаргалка</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-teal {
+      border-left: 4px solid var(--teal);
+      background: #f0fffa;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .file-path {
+      font-weight: 700;
+      color: var(--accent);
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+
+    .level-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+
+    .level-green { background: #e8f5e9; color: #2e7d32; }
+    .level-orange { background: #fff3e0; color: #e65100; }
+    .level-red { background: #ffebee; color: #c62828; }
+    .level-purple { background: #f3e5f5; color: #7b1fa2; }
+
+    .progress-bar {
+      width: 100%;
+      height: 28px;
+      background: #eee;
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 12px 0;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 14px;
+      transition: width 0.6s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8em;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 32px;
+      margin: 20px 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-step {
+      position: relative;
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .timeline-step::before {
+      content: '';
+      position: absolute;
+      left: -26px;
+      top: 18px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--card-bg);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    .timeline-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent);
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a href="../../index.html" class="back-link">← Назад к вики</a>
+
+  <h1>🧩 Управление контекстом</h1>
+  <p class="subtitle">Как работает «рабочая память» Claude — и как не потерять важное, когда контекст забит под завязку</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое контекстное окно</a></li>
+      <li><a href="#fills">Что заполняет контекст</a></li>
+      <li><a href="#commands">Команды управления</a></li>
+      <li><a href="#compact-when">Когда компактить — а когда нет</a></li>
+      <li><a href="#keep-important">Как не терять важное</a></li>
+      <li><a href="#subagents">Субагенты как решение проблемы контекста</a></li>
+      <li><a href="#tips">Практические советы</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ КОНТЕКСТНОЕ ОКНО -->
+  <h2 id="what"><span class="emoji">🧩</span> Что такое контекстное окно</h2>
+
+  <p>
+    Контекстное окно (Context Window) — это <strong>рабочая память</strong> Claude. Всё, что находится внутри — я вижу, помню и могу использовать.
+    Всё, что оказалось за пределами — <strong>потеряно</strong> (пока ты не скажешь мне заново).
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> Представь письменный стол определённого размера.
+    На нём умещается только определённое количество бумаг. Положил новую — старую придётся убрать.
+    Контекст — это этот стол. У нас ~200K токенов, зависит от модели.</p>
+  </div>
+
+  <p>«Токен» — это примерноодна треть слова. На 200K токенов помещается примерно 500 страниц текста.
+  Звучит много, но когда ты читаешь десятки файлов, запускаешь команды и ведёшь длинный диалог — стол заполняется быстрее, чем кажется.</p>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Ключевое:</strong> Контекст не бесконечный. Это ресурс, которым нужно управлять.
+    Осознанное управление контекстом — один из главных навыков работы с Claude Code.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ЧТО ЗАПОЛНЯЕТ КОНТЕКСТ -->
+  <h2 id="fills"><span class="emoji">📦</span> Что заполняет контекст</h2>
+
+  <p>Контекст складывается из нескольких частей. Каждая занимает место — и всё суммарно.</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TB
+    subgraph INPUTS["📥 Что попадает в контекст"]
+        direction TB
+        SP["📜 Системный промпт<br><small>инструкции, CLAUDE.md, память</small>"]
+        DIALOG["💬 История диалога<br><small>твои вопросы и мои ответы</small>"]
+        FILES["📂 Прочитанные файлы<br><small>Read, @-ссылки, cat</small>"]
+        BASH["🖥️ Bash-команды<br><small>вывод терминала</small>"]
+        MCP["🔌 MCP-инструменты<br><small>поиск, внешние сервисы</small>"]
+        AGENTS["🤖 Субагенты<br><small>результаты дочерних вызовов</small>"]
+    end
+
+    subgraph WINDOW["🧩 Контекстное окно ~200K токенов"]
+        SLOT1["Системный промпт"]
+        SLOT2["История диалога"]
+        SLOT3["Инструменты + вывод"]
+        SLOT4["Свободное место"]
+    end
+
+    SP --> WINDOW
+    DIALOG --> WINDOW
+    FILES --> WINDOW
+    BASH --> WINDOW
+    MCP --> WINDOW
+    AGENTS --> WINDOW
+
+    WINDOW -.->|"не влезло → потеряно"| LOST["❌ За пределами<br><small>Claude не видит</small>"]
+
+    style INPUTS fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style WINDOW fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style LOST fill:#ffebee,stroke:#c62828,stroke-width:2px,stroke-dasharray:5 5
+    style SLOT1 fill:#e8f5e9,stroke:#2e7d32
+    style SLOT2 fill:#fff3e0,stroke:#e65100
+    style SLOT3 fill:#e3f2fd,stroke:#1565c0
+    style SLOT4 fill:#fafbfc,stroke:#ccc,stroke-dasharray:5 5
+    </div>
+  </div>
+
+  <p>Каждый элемент — детально:</p>
+
+  <div style="overflow-x: auto;">
+  <table>
+    <tr>
+      <th>Элемент</th>
+      <th>Сколько жрёт</th>
+      <th>Примеры</th>
+    </tr>
+    <tr>
+      <td><strong>Системный промпт</strong></td>
+      <td>~5-10K токенов</td>
+      <td>Инструкции Claude, <code>~/CLAUDE.md</code>, <code>./CLAUDE.md</code>, MEMORY.md, конфиги агентов</td>
+    </tr>
+    <tr>
+      <td><strong>История диалога</strong></td>
+      <td>Растёт линейно</td>
+      <td>Каждое твоё сообщение + каждый мой ответ. Чем длиннее сессия — тем больше места уходит сюда</td>
+    </tr>
+    <tr>
+      <td><strong>Прочитанные файлы</strong></td>
+      <td>Пропорционально размеру файла</td>
+      <td><code>Read</code>, <code>@путь</code>, <code>cat</code> — весь вывод целиком попадает в контекст</td>
+    </tr>
+    <tr>
+      <td><strong>Bash-команды</strong></td>
+      <td>Весь stdout/stderr</td>
+      <td>Вывод <code>git log</code>, <code>npm test</code>, логи сборки — всё туда</td>
+    </tr>
+    <tr>
+      <td><strong>MCP-инструменты</strong></td>
+      <td>Результаты запросов</td>
+      <td>Веб-поиск, чтение страниц, данные из внешних сервисов</td>
+    </tr>
+    <tr>
+      <td><strong>Субагенты</strong></td>
+      <td>Только финальный результат</td>
+      <td>Субагент работает в своём контексте. Ты получаешь только ответ — но он тоже занимает место</td>
+    </tr>
+  </table>
+  </div>
+
+  <div class="card card-orange">
+    <h3>⚠️ Biggest Consumer — история диалога</h3>
+    <p>История диалога — это то, что растёт <strong>быстрее всего</strong>.
+    Каждое сообщение, каждый ответ, каждый вызов инструмента с результатом — всё накапливается.
+    Именно поэтому длинные сессии «давят» контекст.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. КОМАНДЫ УПРАВЛЕНИЯ -->
+  <h2 id="commands"><span class="emoji">⚙️</span> Команды управления контекстом</h2>
+
+  <p>Claude Code даёт несколько команд для управления контекстом. Вот все:</p>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3><code>/compact</code></h3>
+      <p><strong>Сжатие истории.</strong> Claude пересказывает самое важное из прошлого и выбрасывает детали.</p>
+      <ul>
+        <li>Экономит место</li>
+        <li>Теряются нюансы (код, логи, конкретика)</li>
+        <li>Не стирает CLAUDE.md, память или системные инструкции</li>
+        <li>Можно указать что запомнить: <code>/compact запомни что мы выбрали PostgreSQL</code></li>
+      </ul>
+    </div>
+    <div class="card card-red">
+      <h3><code>/clear</code></h3>
+      <p><strong>Полная очистка.</strong> Начинаем с чистого листа. Ничего не помню.</p>
+      <ul>
+        <li>Контекст = только системный промпт</li>
+        <li>Идеально когда задача завершена</li>
+        <li>Нет способа вернуть удалённое</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="comparison-grid">
+    <div class="card card-purple">
+      <h3><code>/rewind</code></h3>
+      <p><strong>Откат на N шагов назад.</strong> Отменяет последние действия, как undo.</p>
+      <ul>
+        <li>Возвращает контекст к состоянию N ходов назад</li>
+        <li>Полезно когда что-то пошло не так</li>
+      </ul>
+    </div>
+    <div class="card card-accent">
+      <h3><code>--resume</code> / <code>-r</code></h3>
+      <p><strong>Продолжить прерванную сессию.</strong> Claude Code сохраняет историю на диск.</p>
+      <ul>
+        <li>Загружает предыдущий контекст</li>
+        <li>Можно вернуться к сессии через несколько дней</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card card-teal">
+    <h3><code>--continue</code> / <code>-c</code></h3>
+    <p><strong>Продолжить самую свежую сессию.</strong> Быстрый способ вернуться — без выбора из списка.</p>
+    <ul>
+      <li>Находит последнюю сессию в текущей папке</li>
+      <li>Загружает её контекст</li>
+      <li>Работает как <code>--resume</code>, только автоматически</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Всё про команды управления контекстом</span>
+
+<span class="yaml-comment"># Сжать историю (самая частая команда)</span>
+/compact
+
+<span class="yaml-comment"># Сжать, но сохранить важное</span>
+/compact запомни что мы обсудили архитектуру очереди
+
+<span class="yaml-comment"># Полная очистка — новая сессия</span>
+/clear
+
+<span class="yaml-comment"># Откат на 3 шага назад</span>
+/rewind 3
+
+<span class="yaml-comment"># Продолжить конкретную сессию по ID</span>
+claude --resume abc123
+
+<span class="yaml-comment"># Продолжить последнюю сессию в этой папке</span>
+claude --continue</code>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. КОГДА КОМПАКТИТЬ -->
+  <h2 id="compact-when"><span class="emoji">🤔</span> Когда компактить — а когда нет</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    START(("🔄 Контекст<br>заполняется")) --> Q1{Процент<br>> 80%?}
+
+    Q1 -->|"Да ⚠️"| COMPACT_NOW["⚡ Компактить сейчас"]
+    Q1 -->|"Нет"| Q2{Чувствуешь<br>«забывчивость»?}
+
+    Q2 -->|"Да"| SAVE_FIRST["💾 Сохрани важное в файл"]
+    SAVE_FIRST --> COMPACT
+    Q2 -->|"Нет"| Q3{Планируешь<br>долгий разговор?}
+
+    Q3 -->|"Да"| MAKE_ROOM["🧹 Освободи место заранее"]
+    MAKE_ROOM --> COMPACT
+    Q3 -->|"Нет"| Q4{Сессия<br>короткая?}
+
+    Q4 -->|"Да"| KEEP["✅ Не трогай<br><small>всё помещается</small>"]
+    Q4 -->|"Нет, долгая"| Q5{Важна каждая<br>деталь?}
+
+    Q5 -->|"Да"| SPLIT["✂️ Разбей на сессии"]
+    Q5 -->|"Нет"| SUBAGENT["🤖 Используй субагента<br><small>вынеси детали в его контекст</small>"]
+
+    COMPACT_NOW --> DONE(("✅ Готово"))
+    COMPACT["/compact"] --> DONE
+    KEEP --> DONE
+    SPLIT --> DONE
+    SUBAGENT --> DONE
+
+    style START fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style COMPACT_NOW fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style COMPACT fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style KEEP fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style SPLIT fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style SUBAGENT fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style SAVE_FIRST fill:#fff8f0,stroke:#e65100,stroke-width:2px
+    style MAKE_ROOM fill:#fff8f0,stroke:#e65100,stroke-width:2px
+    style DONE fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    </div>
+  </div>
+
+  <h3>✅ Компактить стоит когда:</h3>
+
+  <div class="card card-green">
+    <ul>
+      <li><strong>Процент заполнения > 80-90%</strong> — я сам скажу «контекст заполнен»</li>
+      <li><strong>Чувствуешь «забывчивость»</strong> — я стал повторяться или забывать то, что обсуждали в начале</li>
+      <li><strong>Планируешь долгий разговор</strong> — хочешь освободить место под текущую задачу</li>
+    </ul>
+  </div>
+
+  <h3>❌ Не надо компактить когда:</h3>
+
+  <div class="card card-red">
+    <ul>
+      <li><strong>Сессия короткая</strong> и всё помещается</li>
+      <li><strong>Важна каждая деталь</strong> — лучше разбей на несколько сессий</li>
+      <li><strong>Можно использовать субагента</strong> — вынеси детали в его контекст</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. КАК НЕ ТЕРЯТЬ ВАЖНОЕ -->
+  <h2 id="keep-important"><span class="emoji">💾</span> Как не терять важное</h2>
+
+  <p>Главный страх при компакте — потерять что-то ценное. Вот три способа обезопаситься:</p>
+
+  <div class="timeline">
+    <div class="timeline-step">
+      <strong>1. Скажи «запомни» перед /compact</strong>
+      <p>Самый простой способ. Прямо перед компактом напиши:
+      <code>/compact запомни что мы выбрали PostgreSQL и API будет REST</code>.
+      Я включу это в краткое резюме.</p>
+    </div>
+    <div class="timeline-step">
+      <strong>2. Попроси записать в файл</strong>
+      <p>«Запиши вывод анализа в <code>docs/analysis.md</code>» — и файл никуда не денется.
+      Даже после <code>/clear</code> он останется на диске.</p>
+    </div>
+    <div class="timeline-step">
+      <strong>3. Используй CLAUDE.md / память</strong>
+      <p>Если что-то критически важное — попроси записать в <code>MEMORY.md</code> или <code>CLAUDE.md</code>.
+      Это загружается при каждом старте сессии.</p>
+    </div>
+  </div>
+
+  <div class="card card-accent">
+    <p><strong>Главный принцип:</strong> Если информация важна — пусть она будет не в контексте, а <strong>на диске</strong>.
+    Файл никуда не денется. Контекст — временное хранилище.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. СУБАГЕНТЫ -->
+  <h2 id="subagents"><span class="emoji">🤖</span> Субагенты как решение проблемы контекста</h2>
+
+  <p>Каждый субагент имеет <strong>свой собственный контекст</strong>. Вся его «грязь» — логи, поиск, промежуточные чтения файлов — остаётся в нём. Я получаю только финальный результат.</p>
+
+  <div class="card card-purple">
+    <h3>Почему это круто</h3>
+    <ul>
+      <li>Субагент может прочитать 50 файлов, прогонять <code>grep</code> и <code>find</code> — а я увижу только ответ</li>
+      <li>Его контекст «грязный» — но мой остаётся чистым</li>
+      <li>Это <strong>главный инструмент</strong> управления контекстом в Claude Code</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Пример: субагент исследует код, а ты получаешь чистый ответ</span>
+
+<span class="yaml-comment"># Без субагента (засоряет контекст):</span>
+> Прочитай src/auth.py, src/models.py, src/api.py
+> Сравни подходы аутентификации
+<span class="yaml-comment"># = 3 файла × ~500 строк = ~1500 строк в контексте</span>
+
+<span class="yaml-comment"># С субагентом (контекст чистый):</span>
+> Запусти explorer с запросом: «сравни подходы аутентификации в src/»
+<span class="yaml-comment"># = 1-2 абзаца ответа в контексте</span></code>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ПРАКТИЧЕСКИЕ СОВЕТЫ -->
+  <h2 id="tips"><span class="emoji">🎯</span> Практические советы</h2>
+
+  <div class="card card-green">
+    <h3>1. Большие файлы — читай по частям</h3>
+    <p>Файл на 2000 строк? Используй <code>offset/limit</code>, чтобы читать кусками.
+    Прочитал первые 200 — этого достаточно? Не надо тащить остальные 1800 в контекст.</p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>2. Разбивай большие задачи на шаги</h3>
+    <p>Вместо «перепиши весь проект» — «обнови модуль auth».
+    Каждый шаг — отдельная фаза. Между ними можно компактить или начать новую сессию.</p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>3. Используй субагентов для исследований</h3>
+    <p>«Найди все места где используется X» — это задача для explorer, а не для основного контекста.
+    Субагент потратит свой контекст на поиск, а ты получишь только список.</p>
+  </div>
+
+  <div class="card card-accent">
+    <h3>4. Сохраняй выводы перед компактом</h3>
+    <p>Если ты получил ценную информацию из длинного процесса (анализ, тесты, сравнение) —
+    попроси записать её в файл <strong>до</strong> компакта. Потом обратно не вернёшь.</p>
+  </div>
+
+  <div class="card card-teal">
+    <h3>5. Новая тема — новая сессия</h3>
+    <p>Закончил с бэкендом и переходишь на фронтенд? Закрой сессию и открой новую.
+    Чистый контекст без «мусора» от предыдущей задачи.</p>
+  </div>
+
+  <div class="card card-red">
+    <h3>6. Следи за индикатором контекста</h3>
+    <p>Claude Code показывает процент заполнения контекста.
+    Если видишь что приближается к 90% — пора действовать: компактить, сохранять, начинать новую сессию.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ИТОГО -->
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Контекст — это рабочая память Claude. Видит только то, что внутри.
+      <code>/compact</code> сжимает, <code>/clear</code> очищает, субагенты выносят грязь в свой контекст.
+      Важное — сохраняй на диск. Файл не денется, а контекст — временный. 🧩
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

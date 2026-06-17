@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plan Mode — режим планирования Claude Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .shortcut-table kbd {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">← Назад к вики</a>
+
+  <h1>📋 Plan Mode — режим планирования</h1>
+  <p class="subtitle">Только читай и анализируй. Писать код пока рано &mdash; сначала план!</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое Plan Mode?</a></li>
+      <li><a href="#why">Зачем он нужен</a></li>
+      <li><a href="#how">Как работает</a></li>
+      <li><a href="#enter">Как войти и выйти</a></li>
+      <li><a href="#limits">Ограничения</a></li>
+      <li><a href="#when">Когда использовать, а когда нет</a></li>
+      <li><a href="#anatomy">Что внутри плана</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ PLAN MODE -->
+  <h2 id="what"><span class="emoji">📋</span> Что такое Plan Mode?</h2>
+
+  <p>
+    Представь стройку. Есть <strong>архитектор</strong> &mdash; он рисует чертежи, считает нагрузки,
+    проектирует фундамент. Но кирпичи он не кладёт и бетон не мешает. Это его работа &mdash;
+    <strong>спроектировать</strong>, а строить будут другие.
+  </p>
+
+  <p>
+    <strong>Plan Mode</strong> &mdash; это когда Claude Code превращается в такого архитектора.
+    Он <strong>только читает и анализирует</strong> код: смотрит файлы, ищет связи, изучает структуру.
+    Но писать, редактировать или запускать команды &mdash; <strong>не может</strong>.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> Plan Mode &mdash; это режим, в котором Claude Code
+    изучает задачу и предлагает тебе план действий, <strong>ничего не меняя</strong> в коде.
+    Как менеджер проекта, который собирает всё командой перед тем, как копать.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ЗАЧЕМ НУЖЕН -->
+  <h2 id="why"><span class="emoji">🎯</span> Зачем он нужен</h2>
+
+  <p>Знаешь, почему многие разработчики любят Plan Mode? Потому что он решает сразу несколько проблем:</p>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>🔬 Сложная задача</h3>
+      <p>Когда задача &mdash; не «поменяй кнопку», а «добавь авторизацию с ролями» &mdash;
+      нужно сначала <strong>понять</strong> код, а потом уже писать. Plan Mode даёт время на изучение.</p>
+    </div>
+
+    <div class="card card-accent">
+      <h3>🗺️ Незнакомый проект</h3>
+      <p>Попал в чужой код &mdash; не лезь сразу с пилой. Plan Mode поможет
+      разобраться как всё устроено, какие зависимости, где критичные места.</p>
+    </div>
+
+    <div class="card card-orange">
+      <h3>⚡ Опасные изменения</h3>
+      <p>Продакшн-код, миграции БД, тонкая логика &mdash; тут ошибка стоит дорого.
+      Plan Mode показывает куда приведут изменения <strong>до</strong> того как они произойдут.</p>
+    </div>
+
+    <div class="card card-purple">
+      <h3>🤝 Договориться заранее</h3>
+      <p>Когда не уверен в подходе &mdash; покажи план. Согласуй подход, обсуди альтернативы,
+      укажи на риски. Потом уже &mdash; кодить.</p>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. КАК РАБОТАЕТ -->
+  <h2 id="how"><span class="emoji">⚙️</span> Как работает</h2>
+
+  <p>Процесс простой и понятный:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    START(("📋 Пользователь<br>просит задачу")) --> PLAN_MODE["&#x1f3af; Входим в Plan Mode"]
+    PLAN_MODE --> ANALYZE["&#x1f50d; Claude изучает<br>код, структуру,<br>связи"]
+    ANALYZE --> DRAFT["&#x1f4dd; Составляем план:<br>файлы, изменения, риски"]
+    DRAFT --> SHOW["&#x1f4cb; Показываем план<br>тебе на экране"]
+    SHOW --> DECIDE{"👍 Утверждаешь?"}
+
+    DECIDE -->|"Да, план ок"| EXIT["&#x1f680; Выходим из Plan Mode"]
+    DECIDE -->|"Нет, исправь"| REVISE["&#x270f;&#xfe0f; Правим план"]
+    REVISE --> DRAFT
+
+    EXIT --> CODE["&#x1f4bb; Claude пишет код<br>по утверждённому плану"]
+    CODE --> DONE["&#x2705; Задача выполнена"]
+
+    style START fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style PLAN_MODE fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style ANALYZE fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style DRAFT fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style SHOW fill:#fffde6,stroke:#b08800,stroke-width:2px
+    style DECIDE fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style EXIT fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style CODE fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    style DONE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style REVISE fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    </div>
+  </div>
+
+  <p>Пошагово:</p>
+
+  <ol>
+    <li><strong>Вход.</strong> Ты включаешь Plan Mode &mdash; Claude переключается в «только чтение».</li>
+    <li><strong>Исследование.</strong> Claude изучает код: читает файлы, ищет по grep, смотрит структуру папок.</li>
+    <li><strong>План.</strong> Claude составляет план: какие файлы трогать, что в них менять, какие есть риски.</li>
+    <li><strong>Показ.</strong> Ты видишь план на экране &mdash; читable и понятный.</li>
+    <li><strong>Утверждение.</strong> Ты правишь (если нужно) и утверждаешь.</li>
+    <li><strong>Реализация.</strong> Claude выходит из Plan Mode и начинает кодить по плану.</li>
+  </ol>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. КАК ВОЙТИ И ВЫЙТИ -->
+  <h2 id="enter"><span class="emoji">🚪</span> Как войти и выйти</h2>
+
+  <p>Есть несколько способов &mdash; от самого быстрого до самого «настоящего»:</p>
+
+  <div class="card card-green">
+    <h3>1. Команда в чате</h3>
+    <p>Просто напиши <code>/plan</code> в поле ввода. Claude переключится в режим планирования.</p>
+    <p>Чтобы выйти и показать план на утверждение &mdash; используй <code>ExitPlanMode</code>.</p>
+  </div>
+
+  <div class="card card-accent">
+    <h3>2. Shift+Tab</h3>
+    <p>Нажал <kbd>Shift</kbd> + <kbd>Tab</kbd> &mdash; режим переключился циклически.
+    Удобно прямо во время работы, не отрываясь от задачи.</p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>3. Флаг при запуске</h3>
+    <p>Можно стартовать сразу в Plan Mode:</p>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Запуск сразу в режиме планирования</span>
+claude --permission-mode plan</code>
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <th>Действие</th>
+      <th>Как</th>
+    </tr>
+    <tr>
+      <td>Войти в Plan Mode</td>
+      <td><code>/plan</code> в чате, <kbd>Shift</kbd>+<kbd>Tab</kbd>, или флаг <code>--permission-mode plan</code></td>
+    </tr>
+    <tr>
+      <td>Выйти из Plan Mode</td>
+      <td><code>ExitPlanMode</code> &mdash; покажет план и переключит обратно</td>
+    </tr>
+    <tr>
+      <td>Переключить циклически</td>
+      <td><kbd>Shift</kbd> + <kbd>Tab</kbd></td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ОГРАНИЧЕНИЯ -->
+  <h2 id="limits"><span class="emoji">🚫</span> Ограничения</h2>
+
+  <p>Plan Mode &mdash; это не «бесплатный обед». Он что-то даёт, но и что-то забирает:</p>
+
+  <div class="card card-red">
+    <h3>Что нельзя делать</h3>
+    <table>
+      <tr>
+        <th>Действие</th>
+        <th>Доступно в Plan Mode?</th>
+      </tr>
+      <tr>
+        <td>Читать файлы</td>
+        <td>✅ Да</td>
+      </tr>
+      <tr>
+        <td>Искать по коду (grep, glob)</td>
+        <td>✅ Да</td>
+      </tr>
+      <tr>
+        <td>Веб-поиск (если разрешён)</td>
+        <td>✅ Да</td>
+      </tr>
+      <tr>
+        <td>Редактировать файлы</td>
+        <td>🚫 Нет</td>
+      </tr>
+      <tr>
+        <td>Создавать файлы</td>
+        <td>🚫 Нет</td>
+      </tr>
+      <tr>
+        <td>Запускать Bash-команды</td>
+        <td>🚫 Нет</td>
+      </tr>
+      <tr>
+        <td>Удалять файлы</td>
+        <td>🚫 Нет</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">⚠️</span>
+    <span><strong>«А если мне нужен быстрый фикс?»</strong> &mdash; тогда Plan Mode бесит.
+    Если ты знаешь что и где менять &mdash; просто правь код напрямую. Plan Mode хорош когда
+    <em>надо подумать</em>, а не когда <em>надо побыстрее</em>.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. КОГДА ИСПОЛЬЗОВАТЬ -->
+  <h2 id="when"><span class="emoji">🧭</span> Когда использовать, а когда нет</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TB
+    START["🤔 Какая задача?"] --> Q1{"Уверен<br>что делать?"}
+
+    Q1 -->|"Не уверен, нужно<br>подумать"| Q2{"Сколько<br>кода в проекте?"}
+    Q2 -->|"Много, незнакомый"| PLAN["&#x1f4cb; Plan Mode<br>Изучи → Спланируй → Покажи"]
+    Q2 -->|"Мало, свой"| THINK["&#x1f4ad; Подумай<br>и правь"]
+
+    Q1 -->|"Да, знаю<br>что делать"| Q3{"Насколько<br>опасно?"}
+
+    Q3 -->|"Опасно<br>(prod, миграции)"| PLAN_SAFETY["&#x1f4cb; Plan Mode<br>Для подстраховки"]
+    Q3 -->|"Безопасно<br>(свой код)"| CODE["&#x1f4bb; Сразу код<br>Plan Mode не нужен"]
+
+    PLAN --> APPROVE["&#x1f44d; Утверждаешь"]
+    PLAN_SAFETY --> APPROVE2["&#x1f44d; Утверждаешь"]
+    APPROVE --> IMPLEMENT["&#x1f680; Реализация"]
+    APPROVE2 --> IMPLEMENT
+
+    style START fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style PLAN fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style THINK fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style PLAN_SAFETY fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style CODE fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    style APPROVE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style APPROVE2 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style IMPLEMENT fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <th>Ситуация</th>
+      <th>Использовать Plan Mode?</th>
+      <th>Почему</th>
+    </tr>
+    <tr>
+      <td>Новая фича &mdash; «добавь авторизацию»</td>
+      <td><strong>Да</strong></td>
+      <td>Сложная задача, нужно спроектировать</td>
+    </tr>
+    <tr>
+      <td>Рефакторинг &mdash; «перепиши модуль»</td>
+      <td><strong>Да</strong></td>
+      <td>Много связей, нужно понять что затронется</td>
+    </tr>
+    <tr>
+      <td>Баг-фикс &mdash; «тут кривая логика»</td>
+      <td>Зависит</td>
+      <td>Если знаешь где &mdash; сразу код. Если нет &mdash; Plan Mode</td>
+    </tr>
+    <tr>
+      <td>Быстрый фикс &mdash; «поменяй одну строку»</td>
+      <td><strong>Нет</strong></td>
+      <td>Переключение в Plan Mode &mdash; больше времени чем сам фикс</td>
+    </tr>
+    <tr>
+      <td>Исследование чужого проекта</td>
+      <td><strong>Да</strong></td>
+      <td>Идеальный сценарий &mdash; изучить, не потревожив</td>
+    </tr>
+    <tr>
+      <td>OpenSpec-проект (наша вика)</td>
+      <td>Не нужен</td>
+      <td>OpenSpec сам включает планирование в workflow</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ЧТО ВНУТРИ ПЛАНА -->
+  <h2 id="anatomy"><span class="emoji">📐</span> Что внутри плана</h2>
+
+  <p>Когда Claude показывает план, он обычно выглядит так:</p>
+
+  <div class="card card-accent">
+    <h3>Пример типичного плана</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># План: Добавить страницу профиля пользователя</span>
+
+<span class="yaml-key">## Шаг 1: Создать компонент UserProfile</span>
+- Файл: <span class="yaml-val">src/components/UserProfile.tsx</span>
+- Импорт существующего <span class="yaml-val">UserContext</span> для данных
+- Типы: использовать <span class="yaml-val">interface User</span> из <span class="yaml-val">src/types/user.ts</span>
+
+<span class="yaml-key">## Шаг 2: Добавить роутинг</span>
+- Файл: <span class="yaml-val">src/App.tsx</span> &mdash; добавить <span class="yaml-val">/profile</span> маршрут
+- Защита маршрута через <span class="yaml-val">AuthGate</span>
+
+<span class="yaml-key">## Шаг 3: Стилизация</span>
+- Файл: <span class="yaml-val">src/styles/profile.css</span> &mdash; создать
+
+<span class="yaml-key">## Риски</span>
+- <span class="yaml-val">UserContext</span> может не содержать все нужные поля &mdash; нужно проверить
+- Роутер уже использует lazy loading &mdash; новый компонент тоже стоит загружать лениво
+
+<span class="yaml-key">## Время</span>
+- Примерно 15-20 минут</code>
+    </div>
+  </div>
+
+  <p>Хороший план от Claude всегда содержит:</p>
+
+  <ul>
+    <li><strong>Конкретные файлы</strong> &mdash; не «где-то в коде», а точные пути</li>
+    <li><strong>Что именно менять</strong> &mdash; импорты, функции, компоненты</li>
+    <li><strong>Зависимости</strong> &mdash; что уже есть и что нужно учесть</li>
+    <li><strong>Риски</strong> &mdash; что может пойти не так</li>
+    <li><strong>Оценку времени</strong> &mdash; грубую, но полезную</li>
+  </ul>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Совет:</strong> Если план показался слишком абстрактным или неполным &mdash;
+    скажи Claude: «Добавь больше деталей по шагу 2» или «Проверь что X не сломается».
+    Plan Mode как раз для этого и существует &mdash; чтобы править план <em>до</em> написания кода.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Plan Mode &mdash; это «сначала подумай, потом делай».
+      Используй для сложных задач, незнакомого кода и опасных изменений.
+      Для быстрых фиксов &mdash; не трать время, правь сразу.
+      Plan Mode не заменяет мозг &mdash; он даёт время его включить. 🧠
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

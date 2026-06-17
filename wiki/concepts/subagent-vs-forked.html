@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subagent vs Forked Subagent — два пути делегирования</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #2d3436;
+      --text-muted: #636e72;
+      --accent: #6c5ce7;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #00b894;
+      --orange: #e17055;
+      --red: #d73a49;
+      --purple: #6c5ce7;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-teal {
+      border-left: 4px solid var(--teal);
+      background: #f0fffa;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      margin: 16px 0;
+      line-height: 1.6;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.95em;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background: var(--accent-light);
+    }
+
+    ul, ol {
+      margin: 12px 0 16px 24px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.78em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #fff;
+    }
+
+    .badge-clean { background: var(--green); }
+    .badge-fork { background: var(--orange); }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      margin: 16px 0;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9em;
+      flex-shrink: 0;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-content strong {
+      color: var(--accent);
+    }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <a href="../../index.html" class="back-link">Назад к вики</a>
+
+  <h1>Subagent vs Forked Subagent</h1>
+  <p class="subtitle">Два встроенных механизма делегирования в Claude Code — один с чистого листа, другой с копией разговора</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое субагенты</a></li>
+      <li><a href="#subagent">Subagent (Agent tool)</a></li>
+      <li><a href="#forked">Forked Subagent</a></li>
+      <li><a href="#flowchart">Как это работает — схема</a></li>
+      <li><a href="#comparison">Сравнительная таблица</a></li>
+      <li><a href="#when">Когда какой использовать</a></li>
+      <li><a href="#pitfalls">Типичные ошибки</a></li>
+      <li><a href="#examples">Примеры из практики</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ СУБАГЕНТЫ -->
+  <h2 id="what"><span class="emoji">&#x1F916;</span> Что такое субагенты</h2>
+
+  <p>
+    Оба типа субагентов — это <strong>встроенные механизмы Claude Code</strong>, которые позволяют вынести часть работы в отдельный контекст.
+    Основной Claude вызывает субагента, тот работает, и возвращает результат.
+    Главное преимущество — <strong>грязь остаётся в субагенте</strong>: прочитанные файлы, логи, промежуточные команды не засоряют основной контекст.
+  </p>
+
+  <div class="card card-accent">
+    <strong>Ключевая идея:</strong> Субагент — это Claude в отдельном контекстном окне.
+    Он имеет свой системный промпт, свою историю диалога и свои инструменты.
+    Основной Claude получает только финальный результат.
+  </div>
+
+  <p>
+    Существует два варианта: <strong>обычный Subagent</strong> и <strong>Forked Subagent</strong>.
+    Разница — в том, что попадает в контекст субагента при запуске.
+  </p>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. SUBAGENT (AGENT TOOL) -->
+  <h2 id="subagent"><span class="emoji">&#x1F4E6;</span> Subagent (Agent tool)</h2>
+
+  <p>
+    Обычный субагент запускается через инструмент <code>Agent</code>.
+    Он получает <strong>чистый контекст</strong> — только системный промпт, описанный в frontmatter агента, и задачу, которую передал основной Claude.
+  </p>
+
+  <div class="card card-green">
+    <h3>Как работает</h3>
+    <ul>
+      <li>Основной Claude вызывает <code>Agent</code> с именем агента и задачей</li>
+      <li>Субагент стартует с <strong>чистого листа</strong> — без истории предыдущего разговора</li>
+      <li>Получает свой системный промпт из файла агента (<code>~/.claude/agents/agent-name.md</code>)</li>
+      <li>Имеет доступ к инструментам, описанным в <code>tools</code> секции frontmatter</li>
+      <li>Может использовать MCP-серверы, указанные в <code>mcpServers</code></li>
+      <li>Возвращает <strong>только финальный ответ</strong> — основной Claude не видит промежуточные шаги</li>
+    </ul>
+  </div>
+
+  <div class="code-block"><code># Пример вызова обычного субагента
+
+Agent({
+  "agent": "explorer",
+  "prompt": "Найди все функции, которые используют декоратор @cache в src/"
+})
+
+# Результат: список функций (чистый, без мусора)</code></div>
+
+  <div class="card card-purple">
+    <h3>Плюсы</h3>
+    <ul>
+      <li><strong>Минимальный расход токенов</strong> — в контекст субагента не копируется история</li>
+      <li><strong>Чистый контекст</strong> — субагент видит только свою задачу, без отвлекающих факторов</li>
+      <li><strong>Предсказуемость</strong> — субагент не зависит от того, что обсуждалось ранее</li>
+      <li><strong>Изоляция</strong> — субагент не может «случайно» использовать информацию, которую не должен видеть</li>
+    </ul>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Минусы</h3>
+    <ul>
+      <li><strong>Не знает контекст</strong> — если основной Claude уже принял решение, субагент о нём не узнает</li>
+      <li><strong>Нужно формулировать задачу подробно</strong> — всю необходимую информацию нужно передать в prompt</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. FORKED SUBAGENT -->
+  <h2 id="forked"><span class="emoji">&#x1F500;</span> Forked Subagent</h2>
+
+  <p>
+    Forked Subagent (форкнутый субагент) — это тот же механизм <code>Agent</code>, но с копией текущей истории диалога.
+    Субагент стартует <strong>не с чистого листа</strong>, а с полной копией того, что было в основном контексте на момент вызова.
+  </p>
+
+  <div class="card card-orange">
+    <h3>Как работает</h3>
+    <ul>
+      <li>Основной Claude вызывает <code>Agent</code> с параметром <code>fork: true</code></li>
+      <li>Субагент получает <strong>копию всей истории</strong> диалога на момент вызова</li>
+      <li>Также получает свой системный промпт из файла агента</li>
+      <li>Все инструменты и MCP доступны так же, как и в обычном субагенте</li>
+      <li>Возвращает финальный ответ</li>
+    </ul>
+  </div>
+
+  <div class="code-block"><code># Пример вызова форкнутого субагента
+
+Agent({
+  "agent": "pragmatist",
+  "prompt": "Пересмотри наш выбор архитектуры с точки зрения производительности",
+  "fork": true
+})
+
+# Субагент видит: все предыдущие решения, обсуждения, прочитанные файлы</code></div>
+
+  <div class="card card-purple">
+    <h3>Плюсы</h3>
+    <ul>
+      <li><strong>Полный контекст</strong> — субагент знает всё, что обсуждалось ранее</li>
+      <li><strong>Не нужно пересказывать</strong> — не нужно формулировать задачу с нуля</li>
+      <li><strong>Идеально для ревью</strong> — агент-критик может оценить решение в полном контексте</li>
+    </ul>
+  </div>
+
+  <div class="card card-red">
+    <h3>Минусы</h3>
+    <ul>
+      <li><strong>Высокий расход токенов</strong> — копируется вся история, включая прочитанные файлы и выводы команд</li>
+      <li><strong>Контекст может быть загрязнён</strong> — субагент получает весь мусор предыдущей работы</li>
+      <li><strong>Сложнее контролировать</strong> — субагент может «отвлечься» на детали, не относящиеся к задаче</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ФЛОУЧАРТ -->
+  <h2 id="flowchart"><span class="emoji">&#x1F4CA;</span> Как это работает — схема</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TB
+    START(("Основной Claude<br>контекст заполнен")) --> DECIDE{Какой тип<br>субагента?}
+
+    DECIDE -->|"Agent"| CLEAN["Чистый контекст<br>Только системный промпт + задача"]
+    DECIDE -->|"Agent + fork: true"| FORKED["Копия контекста<br>Вся история + системный промпт + задача"]
+
+    CLEAN --> WORK1["Субагент работает<br>в изолированном контексте"]
+    FORKED --> WORK2["Субагент работает<br>с полной историей"]
+
+    WORK1 --> RESULT1["Финальный ответ<br>чистый, без мусора"]
+    WORK2 --> RESULT2["Финальный ответ<br>с учётом контекста"]
+
+    RESULT1 --> PARENT1["Основной Claude<br>получает результат"]
+    RESULT2 --> PARENT2["Основной Claude<br>получает результат"]
+
+    PARENT1 --> DONE(("Контекст<br>остаётся чистым"))
+    PARENT2 --> DONE2(("Контекст<br>остаётся чистым"))
+
+    style START fill:#6c5ce7,color:#fff,stroke:#5a4bd1
+    style DECIDE fill:#f39c12,color:#fff,stroke:#e67e22
+    style CLEAN fill:#00b894,color:#fff,stroke:#00a381
+    style FORKED fill:#e17055,color:#fff,stroke:#d35400
+    style WORK1 fill:#e3f2fd,stroke:#1565c0
+    style WORK2 fill:#fff3e0,stroke:#e65100
+    style RESULT1 fill:#e8f5e9,stroke:#2e7d32
+    style RESULT2 fill:#fff8f0,stroke:#e65100
+    style PARENT1 fill:#f3e5f5,stroke:#7b1fa2
+    style PARENT2 fill:#f3e5f5,stroke:#7b1fa2
+    style DONE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style DONE2 fill:#fff8f0,stroke:#e65100,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="card card-accent">
+    <strong>Ключевое наблюдение:</strong> В обоих случаях контекст основного Claude остаётся чистым.
+    Субагент (обычный или форкнутый) получает только финальный ответ.
+    Разница — в том, <strong>с чего начинает</strong> субагент: с чистого листа или с копии разговора.
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. СРАВНИТЕЛЬНАЯ ТАБЛИЦА -->
+  <h2 id="comparison"><span class="emoji">&#x1F4CF;</span> Сравнительная таблица</h2>
+
+  <table>
+    <tr>
+      <th>Характеристика</th>
+      <th><span class="badge badge-clean">Subagent</span></th>
+      <th><span class="badge badge-fork">Forked Subagent</span></th>
+    </tr>
+    <tr>
+      <td><strong>Начальное состояние</strong></td>
+      <td>Чистый контекст (только system prompt)</td>
+      <td>Копия текущего контекста + system prompt</td>
+    </tr>
+    <tr>
+      <td><strong>Видит прошлые решения</strong></td>
+      <td>Нет — только то, что передано в prompt</td>
+      <td>Да — всю историю диалога</td>
+    </tr>
+    <tr>
+      <td><strong>Расход токенов</strong></td>
+      <td>Минимальный (только задача)</td>
+      <td>Высокий (вся история + задача)</td>
+    </tr>
+    <tr>
+      <td><strong>Изоляция</strong></td>
+      <td>Полная — субагент не знает о предыдущих обсуждениях</td>
+      <td>Нет — субагент видит всё, что было до него</td>
+    </tr>
+    <tr>
+      <td><strong>Точность формулировки задачи</strong></td>
+      <td>Критически важна — субагент знает только это</td>
+      <td>Менее критична — контекст подсказывает</td>
+    </tr>
+    <tr>
+      <td><strong>Риск «отвлечения»</strong></td>
+      <td>Низкий — фокусируется только на задаче</td>
+      <td>Высокий — может уйти в детали из прошлого</td>
+    </tr>
+    <tr>
+      <td><strong>Идеальный кейс</strong></td>
+      <td>Исследование, поиск, узкие задачи</td>
+      <td>Ревью, критика, альтернативные взгляды</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. КОГДА КАКОЙ -->
+  <h2 id="when"><span class="emoji">&#x1F4A1;</span> Когда какой использовать</h2>
+
+  <h3>Используй обычный Subagent когда:</h3>
+
+  <div class="card card-green">
+    <ul>
+      <li><strong>Исследование кода</strong> — «найди все места, где используется X» (explorer)</li>
+      <li><strong>Документирование</strong> — «напиши README для этого модуля» (writer-agent)</li>
+      <li><strong>Узкая задача</strong> — «запусти тесты и верни список упавших»</li>
+      <li><strong>Не нужен контекст</strong> — задача понятна без предыстории</li>
+      <li><strong>Экономия токенов</strong> — история большая, а задача простая</li>
+    </ul>
+  </div>
+
+  <div class="code-block"><code># Типичные вызовы
+
+# Быстрый поиск
+Agent({ agent: "explorer", prompt: "Где определена функция parseConfig?" })
+
+# Документирование
+Agent({ agent: "writer-agent", prompt: "Обнови CHANGELOG под последние изменения" })
+
+# Spec-driven разработка
+Agent({ agent: "openspec-manager", prompt: "Примени change-спеку auth-refactor" })</code></div>
+
+  <h3>Используй Forked Subagent когда:</h3>
+
+  <div class="card card-orange">
+    <ul>
+      <li><strong>Code review</strong> — «пересмотри наш выбор архитектуры» (pragmatist, conservative)</li>
+      <li><strong>Критический взгляд</strong> — «найди проблемы в том, что мы сделали» (innovator)</li>
+      <li><strong>Альтернативное решение</strong> — «предложи другой подход с учётом наших ограничений»</li>
+      <li><strong>Контекст критичен</strong> — задача ссылается на предыдущие обсуждения</li>
+      <li><strong>Дебаты</strong> — когда нужен взгляд «со стороны», но с полной информацией</li>
+    </ul>
+  </div>
+
+  <div class="code-block"><code># Типичные вызовы
+
+# Архитектурный критик
+Agent({
+  agent: "innovator",
+  prompt: "Что не так с нашей текущей архитектурой?",
+  fork: true
+})
+
+# Прагматичный взгляд
+Agent({
+  agent: "pragmatist",
+  prompt: "Оцени производительность нашего решения",
+  fork: true
+})
+
+# Консервативная проверка
+Agent({
+  agent: "conservative",
+  prompt: "Есть ли риски в том, что мы планируем?",
+  fork: true
+})</code></div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ТИПИЧНЫЕ ОШИБКИ -->
+  <h2 id="pitfalls"><span class="emoji">&#x26A0;&#xFE0F;</span> Типичные ошибки</h2>
+
+  <div class="card card-red">
+    <h3>1. Забыть передать контекст в обычном субагенте</h3>
+    <p>
+      <strong>Проблема:</strong> Вызываешь обычный <code>Agent</code> и ожидаешь, что субагент знает о предыдущих решениях.
+      Он не знает — его контекст чистый.
+    </p>
+    <p><strong>Решение:</strong> Либо передай всю необходимую информацию в <code>prompt</code>, либо используй <code>fork: true</code>.</p>
+  </div>
+
+  <div class="card card-red">
+    <h3>2. Использовать fork для простых задач</h3>
+    <p>
+      <strong>Проблема:</strong> Форк субагента копирует всю историю. Если история на 100K токенов, ты тратишь 100K+ на копию, даже если задача — «найди функцию».
+    </p>
+    <p><strong>Решение:</strong> Fork — для задач, которые реально нуждаются в контексте. Для простых задач — обычный субагент.</p>
+  </div>
+
+  <div class="card card-red">
+    <h3>3. Ожидать межсубагентной связи</h3>
+    <p>
+      <strong>Проблема:</strong> Думаешь, что два субагента могут общаться друг с другом. Не могут — каждый работает в своём изолированном контексте.
+    </p>
+    <p><strong>Решение:</strong> Если нужна связь — основной Claude координирует. Он получает результат от первого и передаёт второму.</p>
+  </div>
+
+  <div class="card card-red">
+    <h3>4. Путать fork с наследованием</h3>
+    <p>
+      <strong>Проблема:</strong> Думаешь, что форкнутый субагент «продолжает» разговор. Он не продолжает — он получает <strong>мёртвую копию</strong> на момент вызова. Дальнейшие изменения в основном контексте не влияют на субагента, и наоборот.
+    </p>
+    <p><strong>Решение:</strong> Fork — это снимок, а не продолжение. После возврата субагента основной Claude работает с обновлённым контекстом.</p>
+  </div>
+
+  <div class="card card-red">
+    <h3>5. Не учитывать лимиты токенов</h3>
+    <p>
+      <strong>Проблема:</strong> Forked Subagent получает копию контекста + свой собственный контекст. Суммарно может превысить лимит модели.
+    </p>
+    <p><strong>Решение:</strong> Следи за размером контекста. Если он близок к лимиту — обычный субагент безопаснее.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. ПРИМЕРЫ -->
+  <h2 id="examples"><span class="emoji">&#x1F4D6;</span> Примеры из практики</h2>
+
+  <h3>Сценарий 1: Исследование без контекста</h3>
+
+  <div class="card card-green">
+    <p><strong>Задача:</strong> «Найди все эндпоинты, которые используют middleware аутентификации»</p>
+    <p><strong>Решение:</strong> Обычный Subagent (explorer). Контекст не нужен — задача самодостаточна.</p>
+    <div class="code-block"><code>Agent({
+  agent: "explorer",
+  prompt: "Найди все файлы в src/api/ где используется auth middleware. Верни список путей и строк."
+})</code></div>
+  </div>
+
+  <h3>Сценарий 2: Критика решения</h3>
+
+  <div class="card card-orange">
+    <p><strong>Задача:</strong> «Мы только что выбрали архитектуру очередей на Redis. Есть ли проблемы?»</p>
+    <p><strong>Решение:</strong> Forked Subagent (innovator). Ему нужен контекст обсуждения.</p>
+    <div class="code-block"><code>Agent({
+  agent: "innovator",
+  prompt: "Оцени наш выбор Redis Queue. Какие есть альтернативы и риски?",
+  fork: true
+})</code></div>
+  </div>
+
+  <h3>Сценарий 3: Документирование</h3>
+
+  <div class="card card-teal">
+    <p><strong>Задача:</strong> «Напиши CHANGELOG под последние изменения»</p>
+    <p><strong>Решение:</strong> Обычный Subagent (writer-agent). Ему нужно прочитать git diff, а не всю историю разговора.</p>
+    <div class="code-block"><code>Agent({
+  agent: "writer-agent",
+  prompt: "Прочитай git diff HEAD~3 и допиши CHANGELOG.md"
+})</code></div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ИТОГО -->
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Оба типа субагентов — встроенные механизмы Claude Code для делегирования задач.
+      <strong>Subagent</strong> — чистый контекст, минимум токенов, полная изоляция.
+      <strong>Forked Subagent</strong> — копия разговора, нужен контекст, но дороже.
+      Выбирай в зависимости от задачи: исследование — обычный, ревью — форкнутый.
+    </p>
+  </div>
+
+  <footer style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.85em;text-align:center;">
+    Создано <strong>writer-agent</strong> через Workflow tool.
+    <br>Актуально на 2026-06-17.
+    <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+  </footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  })
+</script>
+
+</body>
+</html>

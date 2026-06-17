@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>claude-opencode — Claude Code через китайские модели</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    kbd {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>&#x1F916; claude-opencode &mdash; Claude Code через китайские модели</h1>
+  <p class="subtitle">Прокси-сервер, который позволяет Claude Code работать с DeepSeek, Qwen, MiniMax и другими моделями через OpenCode Go</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое claude-opencode?</a></li>
+      <li><a href="#why">Зачем это нужно</a></li>
+      <li><a href="#architecture">Архитектура</a></li>
+      <li><a href="#components">Компоненты</a></li>
+      <li><a href="#models">Поддерживаемые модели</a></li>
+      <li><a href="#install">Установка</a></li>
+      <li><a href="#usage">Использование</a></li>
+      <li><a href="#subagents">Связь с субагентами</a></li>
+      <li><a href="#where-code">Где код</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ -->
+  <h2 id="what"><span class="emoji">&#x1F916;</span> Что такое claude-opencode?</h2>
+
+  <p>
+    Claude Code &mdash; это CLI-инструмент от Anthropic. Он умеет читать файлы, писать код, запускать
+    команды, общаться с MCP-серверами. Но вот проблема: для работы ему нужна модель Claude (Haiku,
+    Sonnet, Opus), а для этого &mdash; подписка Claude Pro или Team. Если подписки нет &mdash;
+    Claude Code молчит.
+  </p>
+
+  <p>
+    <strong>claude-opencode</strong> &mdash; это система из двух компонентов (лаунчер + прокси),
+    которая позволяет обмануть Claude Code. Ты поднимаешь локальный прокси-сервер на порту 4000,
+    Claude Code думает, что общается с Anthropic API, а на самом деле запросы уходят на
+    <strong>OpenCode Go</strong> &mdash; сервис, который даёт доступ к моделям DeepSeek, Qwen,
+    MiniMax, GLM, Kimi, MiMo и другим.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> claude-opencode &mdash; это «переходник» между Claude Code
+    и китайскими моделями. Ты общаешься с Claude Code как обычно, он думает что работает с Claude,
+    а на самом деле запросы обрабатываются DeepSeek V4, Qwen 3.x или MiniMax M3. Подписка на
+    Claude не нужна.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ЗАЧЕМ НУЖНО -->
+  <h2 id="why"><span class="emoji">&#x1F4B0;</span> Зачем это нужно</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>&#x1F4B0; Экономия</h3>
+      <p>Не нужна подписка Claude Pro ($20/мес) или Team ($25/мес). OpenCode Go предоставляет
+      доступ к моделям по другому тарифу &mdash; часто значительно дешевле.</p>
+    </div>
+
+    <div class="card card-orange">
+      <h3>&#x1F1E8;&#x1F1F3; Китайские модели</h3>
+      <p>DeepSeek V4, Qwen 3.x, MiniMax M3, GLM 5, Kimi K2.7 &mdash; модели, которые по
+      качеству уже конкурируют с Claude, а по доступности &mdash; значительно выигрывают.</p>
+    </div>
+
+    <div class="card card-purple">
+      <h3>&#x1F527; Гибкость</h3>
+      <p>Переключение модели &mdash; одна переменная окружения. Сегодня DeepSeek, завтра Qwen,
+      послезавтра MiniMax. Claude Code не замечает подмены.</p>
+    </div>
+
+    <div class="card card-accent">
+      <h3>&#x1F504; Совместимость</h3>
+      <p>Прокси конвертирует Anthropic Messages API в OpenAI Chat Completions. Любой
+      OpenAI-совместимый API можно подключить &mdash; не только OpenCode Go.</p>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. АРХИТЕКТУРА -->
+  <h2 id="architecture"><span class="emoji">&#x1F3D7;&#xFE0F;</span> Архитектура</h2>
+
+  <p>Путь запроса от тебя до модели проходит через четыре этапа. Claude Code не знает, что
+  его обманывают &mdash; для него всё выглядит как обычный Anthropic API.</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    USER(("&#x1F468;&#x200D;&#x1F4BB; Ты")) -->|"пишешь промпт"| CC["&#x1F9E0; Claude Code<br>(CLI)"]
+    CC -->|"Anthropic Messages API<br>POST /v1/messages"| PROXY["&#x1F504; anthropic-proxy.py<br>localhost:4000"]
+    PROXY -->|"конвертирует в<br>OpenAI Chat Completions"| API["&#x2601;&#xFE0F; OpenCode Go<br>opencode.ai/zen/go/v1"]
+    API -->|"отправляет запрос"| MODEL["&#x1F916; Модель<br>DeepSeek / Qwen / MiniMax"]
+
+    MODEL -->|"ответ"| API
+    API -->|"ответ"| PROXY
+    PROXY -->|"конвертирует обратно<br>в Anthropic-формат"| CC
+    CC -->|"показывает результат"| USER
+
+    style USER fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style CC fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style PROXY fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style API fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style MODEL fill:#fce4ec,stroke:#c62828,stroke-width:2px
+    </div>
+  </div>
+
+  <p>Детальнее &mdash; что происходит на каждом этапе:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    A["1. Claude Code отправляет запрос<br>в формате Anthropic Messages API"] --> B["2. Прокси получает на localhost:4000"]
+    B --> C["3. Конвертация формата"]
+    C --> C1["Системный промпт &rarr; system message"]
+    C --> C2["Messages &rarr; messages array"]
+    C --> C3["Tool definitions &rarr; tools array"]
+    C --> C4["Изображения &rarr; base64 content"]
+
+    C1 --> D["4. Трансляция имени модели"]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+
+    D --> D1["claude-go-deepseek-v4-flash &rarr; deepseek-v4-flash"]
+    D --> D2["claude-go-qwen3.7-plus &rarr; qwen3.7-plus"]
+    D --> D3["claude-go-minimax-m3 &rarr; minimax-m3"]
+
+    D1 --> E["5. Отправка в OpenCode Go API"]
+    D2 --> E
+    D3 --> E
+
+    E --> F["6. Ответ конвертируется<br>обратно в Anthropic-формат"]
+    F --> G["7. Claude Code получает ответ<br>и работает как обычно"]
+
+    style A fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style B fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style C fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style C1 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px
+    style C2 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px
+    style C3 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px
+    style C4 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px
+    style D fill:#fff8e1,stroke:#ff8f00,stroke-width:2px
+    style D1 fill:#fff8e1,stroke:#ff8f00,stroke-width:1px
+    style D2 fill:#fff8e1,stroke:#ff8f00,stroke-width:1px
+    style D3 fill:#fff8e1,stroke:#ff8f00,stroke-width:1px
+    style E fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style F fill:#fce4ec,stroke:#c62828,stroke-width:2px
+    style G fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="card card-green">
+    <h3>Ключевой трюк: трансляция имён моделей</h3>
+    <p>Claude Code отправляет имя модели вроде <code>claude-go-deepseek-v4-flash</code>.
+    Прокси знает, что это значит &mdash; он отрезает префикс <code>claude-go-</code> и
+    отправляет <code>deepseek-v4-flash</code> в OpenCode Go. Для Claude Code это выглядит
+    как валидная модель Anthropic.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. КОМПОНЕНТЫ -->
+  <h2 id="components"><span class="emoji">&#x1F9E9;</span> Компоненты</h2>
+
+  <table>
+    <tr>
+      <th>Компонент</th>
+      <th>Тип</th>
+      <th>Что делает</th>
+    </tr>
+    <tr>
+      <td><code>claude-opencode</code></td>
+      <td>Bash-скрипт</td>
+      <td>Лаунчер: поднимает прокси в фоне, стартует Claude CLI, завершает прокси при выходе</td>
+    </tr>
+    <tr>
+      <td><code>anthropic-proxy.py</code></td>
+      <td>Python / FastAPI</td>
+      <td>Прокси-сервер: конвертирует Anthropic Messages API в OpenAI Chat Completions, транслирует имена моделей, обрабатывает streaming и ошибки</td>
+    </tr>
+    <tr>
+      <td><code>config.sh</code></td>
+      <td>Bash</td>
+      <td>Конфигурация: API-ключ OpenCode Go, порт прокси, модель по умолчанию</td>
+    </tr>
+    <tr>
+      <td><code>requirements.txt</code></td>
+      <td>Python</td>
+      <td>Зависимости: FastAPI, uvicorn, httpx</td>
+    </tr>
+  </table>
+
+  <div class="card card-purple">
+    <h3>Технические возможности прокси</h3>
+    <ul>
+      <li><strong>Streaming (SSE)</strong> &mdash; поддерживает серверные события, как и настоящий Anthropic API</li>
+      <li><strong>Non-streaming</strong> &mdash; обычные запрос-ответ</li>
+      <li><strong>Системные промпты</strong> &mdash; конвертирует <code>system</code> из Anthropic-формата в OpenAI</li>
+      <li><strong>Tool calls</strong> &mdash; конвертирует определения инструментов и их вызовы</li>
+      <li><strong>Изображения</strong> &mdash; передаёт base64-изображения в content blocks</li>
+      <li><strong>Обработка ошибок</strong> &mdash; ловит rate limits, таймауты upstream и возвращает в Anthropic-формате</li>
+      <li><strong>Карта моделей</strong> &mdash; <code>GET /v1/models</code> отдаёт список доступных моделей; Claude Code сам обнаруживает их</li>
+    </ul>
+  </div>
+
+  <div class="card card-accent">
+    <h3>Пример: что видит Claude Code</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Claude Code думает, что работает с Anthropic API:</span>
+POST http://localhost:4000/v1/messages
+{
+  <span class="yaml-key">"model"</span>: <span class="yaml-val">"claude-go-deepseek-v4-flash"</span>,
+  <span class="yaml-key">"max_tokens"</span>: <span class="yaml-val">4096</span>,
+  <span class="yaml-key">"messages"</span>: [
+    {<span class="yaml-key">"role"</span>: <span class="yaml-val">"user"</span>, <span class="yaml-key">"content"</span>: <span class="yaml-val">"Привет!"</span>}
+  ]
+}
+
+<span class="yaml-comment"># А прокси отправляет в OpenCode Go:</span>
+POST https://opencode.ai/zen/go/v1/chat/completions
+{
+  <span class="yaml-key">"model"</span>: <span class="yaml-val">"deepseek-v4-flash"</span>,
+  <span class="yaml-key">"max_tokens"</span>: <span class="yaml-val">4096</span>,
+  <span class="yaml-key">"messages"</span>: [
+    {<span class="yaml-key">"role"</span>: <span class="yaml-val">"user"</span>, <span class="yaml-key">"content"</span>: <span class="yaml-val">"Привет!"</span>}
+  ]
+}</code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ПОДДЕРЖИВАЕМЫЕ МОДЕЛИ -->
+  <h2 id="models"><span class="emoji">&#x1F4CA;</span> Поддерживаемые модели</h2>
+
+  <p>Прокси поддерживает около 20 моделей. Вот полный список &mdash; с тем, что каждая модель
+  из себя представляет и когда её использовать:</p>
+
+  <table>
+    <tr>
+      <th>Имя в Claude Code</th>
+      <th>Реальное имя</th>
+      <th>Разработчик</th>
+      <th>Когда использовать</th>
+    </tr>
+    <tr>
+      <td><code>claude-go-deepseek-v4-flash</code></td>
+      <td>deepseek-v4-flash</td>
+      <td>DeepSeek</td>
+      <td>Быстрые задачи, черновики, код-ревью. Самая быстрая модель.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-deepseek-v4-pro</code></td>
+      <td>deepseek-v4-pro</td>
+      <td>DeepSeek</td>
+      <td>Сложные задачи, архитектурные решения, длинный контекст.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-qwen3.7-plus</code></td>
+      <td>qwen3.7-plus</td>
+      <td>Alibaba (Qwen)</td>
+      <td>Сбалансированная модель для повседневных задач.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-qwen3.5-plus</code></td>
+      <td>qwen3.5-plus</td>
+      <td>Alibaba (Qwen)</td>
+      <td>Предыдущее поколение, стабильная и проверенная.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-minimax-m2.5</code></td>
+      <td>minimax-m2.5</td>
+      <td>MiniMax</td>
+      <td>Быстрая модель MiniMax, хороша для простых задач.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-minimax-m2.7</code></td>
+      <td>minimax-m2.7</td>
+      <td>MiniMax</td>
+      <td>Улучшенная версия, баланс скорость/качество.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-minimax-m3</code></td>
+      <td>minimax-m3</td>
+      <td>MiniMax</td>
+      <td>Топовая модель MiniMax, сложные рассуждения.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-glm-5</code></td>
+      <td>glm-5</td>
+      <td>Zhipu AI</td>
+      <td>Модель семейства GLM, хороша для кода.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-glm-5.1</code></td>
+      <td>glm-5.1</td>
+      <td>Zhipu AI</td>
+      <td>Улучшенная версия GLM, более длинный контекст.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-kimi-k2.5</code></td>
+      <td>kimi-k2.5</td>
+      <td>Moonshot AI</td>
+      <td>Модель Kimi, хороша для длинных текстов.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-kimi-k2.6</code></td>
+      <td>kimi-k2.6</td>
+      <td>Moonshot AI</td>
+      <td>Обновлённая Kimi, улучшенное рассуждение.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-kimi-k2.7</code></td>
+      <td>kimi-k2.7</td>
+      <td>Moonshot AI</td>
+      <td>Топовая Kimi, лучшая в семействе.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-mimo-v2</code></td>
+      <td>mimo-v2</td>
+      <td>Xiaomi</td>
+      <td>Базовая модель MiMo от Xiaomi.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-mimo-v2.5</code></td>
+      <td>mimo-v2.5</td>
+      <td>Xiaomi</td>
+      <td>Улучшенная MiMo, хорошая для документации и анализа.</td>
+    </tr>
+    <tr>
+      <td><code>claude-go-hy3-preview</code></td>
+      <td>hy3-preview</td>
+      <td>&mdash;</td>
+      <td>Превью-модель, экспериментальные возможности.</td>
+    </tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1F4A1;</span>
+    <span><strong>Как узнать актуальный список:</strong> Прокси отдаёт полный список моделей
+    по запросу <code>GET http://localhost:4000/v1/models</code>. Claude Code сам обнаруживает
+    их и показывает в интерфейсе. Добавление новой модели в OpenCode Go автоматически
+    делает её доступной &mdash; нужно только добавить запись в карту моделей прокси.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. УСТАНОВКА -->
+  <h2 id="install"><span class="emoji">&#x1F6E0;&#xFE0F;</span> Установка на новой машине</h2>
+
+  <p>Установка &mdash; пять шагов. Нужен Python 3.9+, git и API-ключ OpenCode Go.</p>
+
+  <h3>Шаг 1. Клонировать репозиторий</h3>
+  <div class="code-block">
+    <code>git clone https://github.com/boikov1977/claude-opencode.git
+cd claude-opencode</code>
+  </div>
+
+  <h3>Шаг 2. Создать виртуальное окружение и установить зависимости</h3>
+  <div class="code-block">
+    <code>python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt</code>
+  </div>
+
+  <h3>Шаг 3. Настроить API-ключ</h3>
+  <div class="code-block">
+    <code><span class="yaml-comment"># Отредактируй config.sh и вставь свой API-ключ</span>
+vim config.sh
+
+<span class="yaml-comment"># Содержимое:</span>
+<span class="yaml-key">OPENCODE_API_KEY</span>=<span class="yaml-val">"твой-ключ-здесь"</span>
+<span class="yaml-key">PROXY_PORT</span>=<span class="yaml-val">4000</span>
+<span class="yaml-key">DEFAULT_MODEL</span>=<span class="yaml-val">"claude-go-deepseek-v4-flash"</span></code>
+  </div>
+
+  <h3>Шаг 4. Создать symlink для удобного запуска</h3>
+  <div class="code-block">
+    <code><span class="yaml-comment"># Чтобы запускать claude-opencode из любой директории</span>
+ln -s /path/to/claude-opencode/claude-opencode.sh ~/.local/bin/claude-opencode
+
+<span class="yaml-comment"># Убедись, что ~/.local/bin в PATH</span>
+export PATH="$HOME/.local/bin:$PATH"</code>
+  </div>
+
+  <h3>Шаг 5. Запустить</h3>
+  <div class="code-block">
+    <code><span class="yaml-comment"># Просто запусти &mdash; прокси поднимется автоматически</span>
+claude-opencode
+
+<span class="yaml-comment"># Или с указанием модели</span>
+DEFAULT_MODEL="claude-go-qwen3.7-plus" claude-opencode</code>
+  </div>
+
+  <div class="card card-green">
+    <h3>Что происходит при запуске</h3>
+    <ol>
+      <li>Скрипт читает <code>config.sh</code> и получает API-ключ</li>
+      <li>Запускает <code>anthropic-proxy.py</code> в фоне на порту 4000</li>
+      <li>Ждёт секунду, пока прокси поднимется</li>
+      <li>Запускает <code>claude</code> с переменной <code>ANTHROPIC_BASE_URL=http://localhost:4000</code></li>
+      <li>При выходе из Claude Code завершает прокси</li>
+    </ol>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ИСПОЛЬЗОВАНИЕ -->
+  <h2 id="usage"><span class="emoji">&#x1F4AC;</span> Использование</h2>
+
+  <p>После запуска всё работает точно так же, как обычный Claude Code. Единственное отличие
+  &mdash; ты выбираешь модель из списка доступных в OpenCode Go, а не из Anthropic.</p>
+
+  <div class="card card-accent">
+    <h3>Переключение моделей</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Модель по умолчанию задаётся в config.sh</span>
+DEFAULT_MODEL="claude-go-deepseek-v4-flash"
+
+<span class="yaml-comment"># Можно переопределить при запуске</span>
+DEFAULT_MODEL="claude-go-minimax-m3" claude-opencode
+
+<span class="yaml-comment"># Или в .claude/settings.local.json для основной модели:</span>
+{
+  <span class="yaml-key">"model"</span>: <span class="yaml-val">"claude-go-deepseek-v4-flash"</span>
+}</code>
+    </div>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Примеры использования</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Быстрое код-ревью через DeepSeek</span>
+claude-opencode
+&gt; "Проверь модуль auth.py на ошибки"
+
+<span class="yaml-comment"># Документирование через MiMo</span>
+DEFAULT_MODEL="claude-go-mimo-v2.5" claude-opencode
+&gt; "Напиши README для этого проекта"
+
+<span class="yaml-comment"># Архитектурный анализ через DeepSeek Pro</span>
+DEFAULT_MODEL="claude-go-deepseek-v4-pro" claude-opencode
+&gt; "Спроектируй систему аутентификации"</code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. СВЯЗЬ С СУБАГЕНТАМИ -->
+  <h2 id="subagents"><span class="emoji">&#x1F3AF;</span> Связь с субагентами</h2>
+
+  <p>В конфигурации Claude Code можно указать, какую модель использовать каждому субагенту.
+  Это работает через frontmatter в YAML-шапке файла агента:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    MAIN["&#x1F9E0; Основной Claude<br>claude-go-deepseek-v4-flash"] --> WRITER["&#x270D;&#xFE0F; writer-agent<br>claude-go-mimo-v2.5"]
+    MAIN --> INNOVATOR["&#x1F4A1; innovator<br>claude-go-minimax-m3"]
+    MAIN --> PRAGMATIST["&#x1F4CB; pragmatist<br>claude-go-deepseek-v4-pro"]
+    MAIN --> CONSERVATIVE["&#x1F6E1;&#xFE0F; conservative<br>claude-go-qwen3.7-plus"]
+    MAIN --> EXPLORER["&#x1F50D; explorer<br>inherit (основная модель)"]
+    MAIN --> WRITESPEC["&#x1F4DD; openspec-manager<br>inherit (основная модель)"]
+
+    style MAIN fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style WRITER fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style INNOVATOR fill:#fff8e1,stroke:#ff8f00,stroke-width:2px
+    style PRAGMATIST fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style CONSERVATIVE fill:#fce4ec,stroke:#c62828,stroke-width:2px
+    style EXPLORER fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style WRITESPEC fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Как это работает</h3>
+    <p>Когда ты вызываешь субагента, Claude Code читает его frontmatter и отправляет запрос
+    с указанным именем модели. Прокси перехватывает это имя, транслирует и отправляет
+    в OpenCode Go. Каждый субагент может работать на своей модели:</p>
+    <ul>
+      <li><strong>writer-agent</strong> (MiMo V2.5) &mdash; хорошо генерирует текст и документацию</li>
+      <li><strong>innovator</strong> (MiniMax M3) &mdash; сильные рассуждения для архитектуры</li>
+      <li><strong>pragmatist</strong> (DeepSeek V4 Pro) &mdash; баланс качества и скорости</li>
+      <li><strong>conservative</strong> (Qwen 3.7 Plus) &mdash; стабильная модель для проверки</li>
+      <li><strong>explorer</strong>, <strong>openspec-manager</strong> (inherit) &mdash; берут модель основного Claude</li>
+    </ul>
+  </div>
+
+  <div class="card card-green">
+    <h3>Пример frontmatter агента</h3>
+    <div class="code-block">
+      <code>---
+name: writer-agent
+model: claude-go-mimo-v2.5
+effort: xhigh
+---
+
+Ты &mdash; документирующий агент. Твоя задача &mdash; на основе изменений
+в коде создавать и обновлять документацию.</code>
+    </div>
+    <p>Прокси увидит <code>claude-go-mimo-v2.5</code>, конвертирует в <code>mimo-v2.5</code>
+    и отправит в OpenCode Go. Claude Code не замечает подмены.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 9. ГДЕ КОД -->
+  <h2 id="where-code"><span class="emoji">&#x1F4C2;</span> Где код</h2>
+
+  <p>Репозиторий: <a href="https://github.com/boikov1977/claude-opencode">boikov1977/claude-opencode</a></p>
+
+  <table>
+    <tr>
+      <th>Файл</th>
+      <th>Что делает</th>
+    </tr>
+    <tr>
+      <td><code>claude-opencode.sh</code></td>
+      <td>Bash-лаунчер: поднимает прокси, стартует Claude, завершает всё при выходе</td>
+    </tr>
+    <tr>
+      <td><code>anthropic-proxy.py</code></td>
+      <td>FastAPI прокси: конвертация Anthropic &harr; OpenAI форматов, streaming, карта моделей</td>
+    </tr>
+    <tr>
+      <td><code>config.sh</code></td>
+      <td>Конфигурация: API-ключ, порт, модель по умолчанию</td>
+    </tr>
+    <tr>
+      <td><code>requirements.txt</code></td>
+      <td>Python-зависимости: fastapi, uvicorn, httpx</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> claude-opencode &mdash; это система из bash-лаунчера и Python-прокси,
+      которая позволяет Claude Code работать с китайскими моделями (DeepSeek, Qwen, MiniMax,
+      GLM, Kimi, MiMo) через OpenCode Go. Подписка на Claude не нужна. Прокси конвертирует
+      Anthropic Messages API в OpenAI Chat Completions, транслирует имена моделей и поддерживает
+      streaming. Установка &mdash; пять шагов. Субагенты могут работать на разных моделях
+      через frontmatter. &#x1F916;
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      &#x270D;&#xFE0F; Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) &#x00B7; июнь 2026
+    </p>
+  </div>
+</body>
+</html>

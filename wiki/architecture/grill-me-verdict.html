@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вердикт архитектурного совета: Grill-me skill</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --border: #e1e4e8;
+            --text: #1f2328;
+            --text-secondary: #656d76;
+            --accent: #0969da;
+            --accent-bg: #ddf4ff;
+            --green: #1a7f37;
+            --green-bg: #dafbe1;
+            --red: #d1242f;
+            --red-bg: #ffebe9;
+            --yellow: #9a6700;
+            --yellow-bg: #fff8c5;
+            --innovator: #8250df;
+            --innovator-bg: #fbefff;
+            --pragmatist: #0969da;
+            --pragmatist-bg: #ddf4ff;
+            --conservative: #6e7781;
+            --conservative-bg: #f6f8fa;
+            --radius: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #fff;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        .header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .header .subtitle { font-size: 1.1rem; color: #adb5bd; margin-bottom: 1.5rem; }
+        .header .meta { font-size: 0.85rem; color: #6c757d; }
+        .header .verdict-badge {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: #fff;
+            backdrop-filter: blur(4px);
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin: 1.2rem 0 0.6rem;
+            color: var(--text);
+        }
+
+        .diagram-wrapper {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 1rem 0;
+        }
+        .diagram-wrapper svg {
+            max-width: none !important;
+            height: auto !important;
+        }
+
+        /* Agent cards */
+        .agent-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius);
+            margin-bottom: 0.75rem;
+        }
+        .agent-card.innovator { background: var(--innovator-bg); border-left: 4px solid var(--innovator); }
+        .agent-card.pragmatist { background: var(--pragmatist-bg); border-left: 4px solid var(--pragmatist); }
+        .agent-card.conservative { background: var(--conservative-bg); border-left: 4px solid var(--conservative); }
+
+        .agent-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+        .agent-body { flex: 1; }
+        .agent-name { font-weight: 700; font-size: 0.95rem; }
+        .agent-model { font-size: 0.75rem; color: var(--text-secondary); font-family: monospace; }
+        .agent-text { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.25rem; }
+
+        /* Evolution tags */
+        .tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            vertical-align: middle;
+        }
+        .tag.r1 { background: #ffebe9; color: var(--red); }
+        .tag.r2 { background: var(--green-bg); color: var(--green); }
+        .tag.agree { background: var(--green-bg); color: var(--green); }
+        .tag.disagree { background: var(--red-bg); color: var(--red); }
+        .tag.partial { background: var(--yellow-bg); color: var(--yellow); }
+
+        /* Evolution blocks */
+        .evolution {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 0.5rem;
+            align-items: start;
+            margin: 0.75rem 0;
+        }
+        .evo-box {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.88rem;
+            border: 1px solid var(--border);
+        }
+        .evo-box.r1 { background: #fafafa; }
+        .evo-box.r2 { background: var(--green-bg); border-color: #aceebb; }
+        .evo-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            padding-top: 0.5rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        tr:nth-child(even) { background: #f8f9fa; }
+
+        .convergence-table td:last-child { font-weight: 600; }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 1rem;
+        }
+
+        p { margin-bottom: 0.75rem; }
+        p:last-child { margin-bottom: 0; }
+        ul { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+        li { margin-bottom: 0.3rem; font-size: 0.92rem; }
+
+        code {
+            background: var(--bg);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85em;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>Вердикт архитектурного совета</h1>
+    <div class="subtitle">Нужен ли нам Grill-me skill?</div>
+    <div class="meta">3 участника &middot; 2 раунда &middot; 6 позиций &middot; 15 июня 2026</div>
+    <div class="verdict-badge">Вердикт: УСЛОВНО ДА &mdash; интегрировать в openspec-manager, не отдельным скиллом</div>
+</div>
+
+<div class="container">
+
+<!-- ======================== DIAGRAM 1: Debate Flow ======================== -->
+<div class="section">
+    <h2>1. Процесс дебатов</h2>
+    <p>Три агента прошли через два раунда. После первого раунда проверяется наличие консенсуса. Если есть расхождения &mdash; запускается раунд 2 с rebuttals.</p>
+    <div class="diagram-wrapper">
+        <pre class="mermaid">
+flowchart TD
+    A["🎯 Триггер: предложение Grill-me skill"] --> B["📋 Раунд 1: Позиции"]
+    B --> C["🚀 Innovator<br/>Да, добавлять!"]
+    B --> D["⚖️ Pragmatist<br/>Да, но минимальным следом"]
+    B --> E["🛡️ Conservative<br/>Рисков много"]
+    C --> F{"Проверка консенсуса"}
+    D --> F
+    E --> F
+    F -->|"Расхождения найдены"| G["📋 Раунд 2: Rebuttals"]
+    F -->|"Полный консенсус"| K["🏁 Вердикт"]
+    G --> H["🚀 Innovator<br/>Сдал SKILL.md, согласился на интеграцию"]
+    G --> I["⚖️ Pragmatist<br/>Conditional grilling по триггеру"]
+    G --> J["🛡️ Conservative<br/>Friction снят, условия сохранены"]
+    H --> K
+    I --> K
+    J --> K
+
+    style A fill:#fff3cd,stroke:#ffc107
+    style B fill:#dbeafe,stroke:#3b82f6
+    style G fill:#dbeafe,stroke:#3b82f6
+    style K fill:#d1fae5,stroke:#10b981
+    style F fill:#fef3c7,stroke:#f59e0b
+        </pre>
+    </div>
+</div>
+
+<!-- ======================== Participants ======================== -->
+<div class="section">
+    <h2>2. Участники совета</h2>
+
+    <div class="agent-card innovator">
+        <div class="agent-icon">🚀</div>
+        <div class="agent-body">
+            <div class="agent-name">Innovator</div>
+            <div class="agent-model">claude-go-minimax-m3</div>
+            <div class="agent-text">Смелые решения, эксперименты, композиция скиллов.</div>
+        </div>
+    </div>
+
+    <div class="agent-card pragmatist">
+        <div class="agent-icon">⚖️</div>
+        <div class="agent-body">
+            <div class="agent-name">Pragmatist</div>
+            <div class="agent-model">claude-go-deepseek-v4-pro</div>
+            <div class="agent-text">Баланс и практичность. Минимальный footprint, лёгкий rollback.</div>
+        </div>
+    </div>
+
+    <div class="agent-card conservative">
+        <div class="agent-icon">🛡️</div>
+        <div class="agent-body">
+            <div class="agent-name">Conservative</div>
+            <div class="agent-model">claude-go-qwen3.7-plus</div>
+            <div class="agent-text">Риски и стабильность. Friction kills adoption.</div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================== DIAGRAM 2: Position Evolution ======================== -->
+<div class="section">
+    <h2>3. Эволюция позиций: от Round 1 к Round 2</h2>
+
+    <!-- Innovator -->
+    <h3>🚀 Innovator</h3>
+    <div class="evolution">
+        <div class="evo-box r1">
+            <span class="tag r1">Round 1</span><br/><br/>
+            Отдельный SKILL.md в <code>~/.claude/skills/</code>.<br/>
+            Ручной вызов <code>/grill-me</code>.<br/>
+            10-30 вопросов с рекомендованными ответами.<br/>
+            Фаза <em>перед</em> openspec-propose.
+        </div>
+        <div class="evo-arrow">→</div>
+        <div class="evo-box r2">
+            <span class="tag r2">Round 2</span><br/><br/>
+            Отдельный SKILL.md <strong>не нужен</strong> (забудется).<br/>
+            Интеграция в <code>openspec-manager propose</code>.<br/>
+            2-3 вопроса с пропуском через skip-флаг.<br/>
+            Интерактив сохраняется.
+        </div>
+    </div>
+
+    <!-- Pragmatist -->
+    <h3>⚖️ Pragmatist</h3>
+    <div class="evolution">
+        <div class="evo-box r1">
+            <span class="tag r1">Round 1</span><br/><br/>
+            Хук <code>PreToolUse</code> на Read (отвергнут).<br/>
+            Пункт в SKILL.md openspec-manager.<br/>
+            70% простых &mdash; тишина, 20% средних &mdash; 1 вопрос, 10% сложных &mdash; 2-3.
+        </div>
+        <div class="evo-arrow">→</div>
+        <div class="evo-box r2">
+            <span class="tag r2">Round 2</span><br/><br/>
+            Conditional grilling в <code>$BeforeCode</code>.<br/>
+            Триггер: <code>complexity >= medium &amp;&amp; risk >= medium</code>.<br/>
+            1-2 вопроса, ответ до старта кода.<br/>
+            Cost: 10-15 строк, 15 минут.
+        </div>
+    </div>
+
+    <!-- Conservative -->
+    <h3>🛡️ Conservative</h3>
+    <div class="evolution">
+        <div class="evo-box r1">
+            <span class="tag r1">Round 1</span><br/><br/>
+            Friction kills adoption.<br/>
+            False sense of coverage.<br/>
+            Context window overhead (2-5K токенов).<br/>
+            Альтернатива: 2-3 вопроса статической секцией.
+        </div>
+        <div class="evo-arrow">→</div>
+        <div class="evo-box r2">
+            <span class="tag r2">Round 2</span><br/><br/>
+            Friction снят (skip + conditional).<br/>
+            <strong>Но:</strong> false sense of coverage остаётся.<br/>
+            Context overhead остаётся (2-5K токенов).<br/>
+            Требование: чеклист вместо интерактива.
+        </div>
+    </div>
+</div>
+
+<!-- ======================== DIAGRAM 3: Sequence ======================== -->
+<div class="section">
+    <h2>4. Взаимодействие: я → агенты → файлы → writer → HTML</h2>
+    <div class="diagram-wrapper">
+        <pre class="mermaid">
+sequenceDiagram
+    actor User as 👤 Я (Андрей)
+    participant Inn as 🚀 Innovator
+    participant Pra as ⚖️ Pragmatist
+    participant Con as 🛡️ Conservative
+    participant Files as 📁 Файлы
+    participant Writer as 📝 Writer Agent
+    participant HTML as 🌐 verdict.html
+
+    User->>Inn: Оцени Grill-me skill
+    User->>Pra: Оцени Grill-me skill
+    User->>Con: Оцени Grill-me skill
+
+    Inn->>Files: Запись round-1/01-innovator.md
+    Pra->>Files: Запись round-1/02-pragmatist.md
+    Con->>Files: Запись round-1/03-conservative.md
+
+    Files-->>User: Позиции Round 1 готовы
+
+    User->>Inn: Rebuttal (реагируй на других)
+    User->>Pra: Rebuttal (реагируй на других)
+    User->>Con: Rebuttal (реагируй на других)
+
+    Inn->>Files: Запись round-2/01-innovator-rebuttal.md
+    Pra->>Files: Запись round-2/02-pragmatist-rebuttal.md
+    Con->>Files: Запись round-2/03-conservative-rebuttal.md
+
+    Files-->>User: Rebuttals Round 2 готовы
+
+    User->>Writer: Создай verdict.html
+    Writer->>Files: Чтение всех 6 файлов
+    Files-->>Writer: Содержимое позиций
+    Writer->>HTML: Генерация HTML + Mermaid
+        </pre>
+    </div>
+</div>
+
+<!-- ======================== Key Arguments Table ======================== -->
+<div class="section">
+    <h2>5. Ключевые аргументы по раундам</h2>
+
+    <h3><span class="tag r1">Round 1</span> Позиции</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Аспект</th>
+                <th>🚀 Innovator</th>
+                <th>⚖️ Pragmatist</th>
+                <th>🛡️ Conservative</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Отдельный SKILL.md?</strong></td>
+                <td><span class="tag agree">Да</span></td>
+                <td><span class="tag disagree">Нет</span></td>
+                <td><span class="tag disagree">Нет</span></td>
+            </tr>
+            <tr>
+                <td><strong>Формат</strong></td>
+                <td>Один вопрос за раз, 10-30 вопросов</td>
+                <td>Пункт в существующем SKILL.md</td>
+                <td>Статическая секция в propose</td>
+            </tr>
+            <tr>
+                <td><strong>Триггер</strong></td>
+                <td>Ручной вызов <code>/grill-me</code></td>
+                <td>PreToolUse хук на Read</td>
+                <td>Никогда (альтернатива вместо grilling)</td>
+            </tr>
+            <tr>
+                <td><strong>Главный аргумент</strong></td>
+                <td>Закрывает дыру: propose без рефлексии</td>
+                <td>Zero-cost entry, easy rollback</td>
+                <td>Friction kills adoption</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3><span class="tag r2">Round 2</span> Rebuttals</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Аспект</th>
+                <th>🚀 Innovator</th>
+                <th>⚖️ Pragmatist</th>
+                <th>🛡️ Conservative</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Отдельный SKILL.md?</strong></td>
+                <td><span class="tag disagree">Отозвал</span> — забудется</td>
+                <td><span class="tag disagree">Нет</span> — не нужен</td>
+                <td><span class="tag disagree">Нет</span> — согласен с Pragmatist</td>
+            </tr>
+            <tr>
+                <td><strong>Формат</strong></td>
+                <td>2-3 вопроса в propose, интерактив</td>
+                <td>Conditional grilling в $BeforeCode</td>
+                <td>Чеклист (статика) вместо диалога</td>
+            </tr>
+            <tr>
+                <td><strong>Триггер</strong></td>
+                <td>Сkip-флаг в change-файле</td>
+                <td>complexity &amp; risk >= medium</td>
+                <td>"Затрагивает бизнес-логику?"</td>
+            </tr>
+            <tr>
+                <td><strong>Новые аргументы</strong></td>
+                <td>Интерактив создаёт паузу для рефлексии</td>
+                <td>Динамические вопросы vs статические</td>
+                <td>False sense of coverage + context overhead</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ======================== Convergence / Divergence ======================== -->
+<div class="section">
+    <h2>6. Точки схождения и расхождения</h2>
+
+    <h3>Схождения (консенсус)</h3>
+    <table class="convergence-table">
+        <thead>
+            <tr>
+                <th>Утверждение</th>
+                <th>🚀</th>
+                <th>⚖️</th>
+                <th>🛡️</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Отдельный SKILL.md не нужен</td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td style="color:var(--green); font-weight:700;">КОНСЕНСУС</td>
+            </tr>
+            <tr>
+                <td>Триггер по сложности нужен</td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td style="color:var(--green); font-weight:700;">КОНСЕНСУС</td>
+            </tr>
+            <tr>
+                <td>Skip-флаг для микрозадач</td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td style="color:var(--green); font-weight:700;">КОНСЕНСУС</td>
+            </tr>
+            <tr>
+                <td>Grill-me &mdash; перед propose, не замена OpenSpec</td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td style="color:var(--green); font-weight:700;">КОНСЕНСУС</td>
+            </tr>
+            <tr>
+                <td>Минимальный footprint (10-15 строк)</td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td style="color:var(--green); font-weight:700;">КОНСЕНСУС</td>
+            </tr>
+            <tr>
+                <td>Масштаб вопросов: 2-3 (не 10-30)</td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td><span class="tag agree">да</span></td>
+                <td style="color:var(--green); font-weight:700;">КОНСЕНСУС</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Расхождения</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Вопрос</th>
+                <th>🚀 Innovator + ⚖️ Pragmatist</th>
+                <th>🛡️ Conservative</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Интерактив vs Чеклист?</strong></td>
+                <td>Интерактивный диалог: вопросы в чат с вариантами ответов, разработчик отвечает последовательно</td>
+                <td>Статический чеклист: 3 вопроса с готовыми ответами, подсветка слабых мест. Без диалога.</td>
+                <td style="color:var(--red); font-weight:700;">РАСХОЖДЕНИЕ</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p style="margin-top:1rem; color:var(--text-secondary); font-size:0.9rem;">
+        <strong>Аргументы по расхождению:</strong><br/>
+        <em>За интерактив:</em> пауза для рефлексии, динамические вопросы, формат "с рекомендованным ответом" снижает трение.<br/>
+        <em>За чеклист:</em> тот же эффект без context overhead, нет риска "прожать enter", статика надёжнее на слабых моделях.
+    </p>
+</div>
+
+<!-- ======================== Remaining Risks ======================== -->
+<div class="section">
+    <h2>7. Оставшиеся риски (позиция Conservative)</h2>
+    <ul>
+        <li><strong>False sense of coverage</strong> — список вопросов предсказуем, разработчик выучит "правильные" ответы. Скилл превращается в ритуал.</li>
+        <li><strong>Context window overhead</strong> — 2-5K токенов на каждый запуск, даже если вопросы не дали пользы. На DeepSeek-прокси idle-токены жгут бюджет.</li>
+        <li><strong>Модель не гарантирует глубину</strong> — на прокси качество вопросов может быть ниже ожидаемого.</li>
+        <li><strong>Кто решает, когда grill включать?</strong> — триггер по complexity предполагает, что агент корректно оценивает сложность. Это не гарантировано.</li>
+    </ul>
+</div>
+
+<!-- ======================== Implementation ======================== -->
+<div class="section">
+    <h2>8. Рекомендация по внедрению</h2>
+    <p>На основе консенсуса:</p>
+    <ul>
+        <li>Добавить секцию в <code>openspec-manager</code> SKILL.md (не отдельный файл).</li>
+        <li>Триггер: <code>complexity >= medium &amp;&amp; risk >= medium</code>.</li>
+        <li>Skip-флаг: <code>skip-grill: true</code> в change-файле.</li>
+        <li>2-3 вопроса с вариантами ответов.</li>
+        <li>Вопросы до генерации proposal (не в $BeforeCode).</li>
+        <li>Cost: 10-15 строк. Time: 15 минут.</li>
+        <li>Rollback: удаление секции без последствий.</li>
+    </ul>
+    <p style="margin-top:1rem; color:var(--text-secondary); font-style:italic;">
+        Открытым остаётся вопрос интерактив vs чеклист. Рекомендуется начать с интерактива (Innovator + Pragmatist),
+        через месяц оценить usage и при необходимости перейти на чеклист (Conservative).
+    </p>
+</div>
+
+</div>
+
+<div class="footer">
+    Сгенерировано Writer Agent &middot; claude-go-mimo-v2.5 &middot; 15 июня 2026
+</div>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        flowchart: { useMaxWidth: false },
+        sequence: { useMaxWidth: false }
+    });
+</script>
+
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

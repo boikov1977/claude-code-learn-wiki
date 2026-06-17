@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Система памяти Claude Code — шпаргалка</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-teal {
+      border-left: 4px solid var(--teal);
+      background: #f0fffa;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .file-path {
+      font-weight: 700;
+      color: var(--accent);
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .tag-global {
+      display: inline-block;
+      background: var(--accent-light);
+      color: var(--accent);
+      border: 1px solid #c6ddf8;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-project {
+      display: inline-block;
+      background: #f6fff8;
+      color: var(--green);
+      border: 1px solid #c3e6cb;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-auto {
+      display: inline-block;
+      background: #f8f4ff;
+      color: var(--purple);
+      border: 1px solid #d5c4f0;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-on-demand {
+      display: inline-block;
+      background: #fff8f0;
+      color: var(--orange);
+      border: 1px solid #f0d5a8;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .level-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+
+    .level-global { background: #e3f2fd; color: #1565c0; }
+    .level-project { background: #e8f5e9; color: #2e7d32; }
+    .level-auto { background: #f3e5f5; color: #7b1fa2; }
+    .level-on-demand { background: #fff3e0; color: #e65100; }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 32px;
+      margin: 20px 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-step {
+      position: relative;
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .timeline-step::before {
+      content: '';
+      position: absolute;
+      left: -26px;
+      top: 18px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--card-bg);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    .timeline-step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a href="../../index.html" class="back-link">← Назад к вики</a>
+
+  <h1>🧠 Система памяти Claude Code</h1>
+  <p class="subtitle">Как Claude Code «помнит» информацию между сессиями — и почему это просто markdown-файлы</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое память в Claude Code?</a></li>
+      <li><a href="#hierarchy">Уровни памяти — иерархия</a></li>
+      <li><a href="#global">🌍 Глобальная память — ~/CLAUDE.md</a></li>
+      <li><a href="#project">📁 Проектная память</a></li>
+      <li><a href="#auto">🤖 Auto-memory — Claude запоминает сам</a></li>
+      <li><a href="#ondemand">📄 Подгрузка по запросу — @-ссылки</a></li>
+      <li><a href="#boot">⚡ Как память загружается при старте</a></li>
+      <li><a href="#links">🔗 Связи между записями</a></li>
+      <li><a href="#our-setup">🛠️ Как мы настроили</a></li>
+      <li><a href="#tips">🎯 Практические советы</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ ПАМЯТЬ -->
+  <h2 id="what"><span class="emoji">🧠</span> Что такое память в Claude Code?</h2>
+
+  <p>
+    Забудь всё, что знаешь про «память» в человеческом смысле. Модель <strong>ничего не помнит</strong>
+    между сессиями. Каждый раз когда ты запускаешь Claude Code — это чистый лист.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> Память Claude Code — это <strong>текстовые markdown-файлы</strong>,
+    которые загружаются в контекст при старте сессии. Никакой магии. Просто файлы.
+    Claude читает их и «знает» то, что ты туда записал.</p>
+  </div>
+
+  <p>Представь: каждый раз при запуске Claude Code «открывает книгу» и читает несколько глав.
+  Вот эти главы — и есть твоя память. Где они лежат и кто их читает — разбираемся дальше.</p>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ИЕРАРХИЯ -->
+  <h2 id="hierarchy"><span class="emoji">🏗️</span> Уровни памяти — иерархия</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TB
+    subgraph GLOBAL["🌍 Глобальная память"]
+        direction LR
+        GM["~/CLAUDE.md<br><small>профиль, настройки, инструкции</small>"]
+    end
+
+    subgraph PROJECT["📁 Проектная память"]
+        direction LR
+        CLAUDE_MD["./CLAUDE.md<br><small>инструкции проекта</small>"]
+        SETTINGS[".claude/settings.json<br><small>пермишены, хуки</small>"]
+        MEMORY[".claude/projects/*/MEMORY.md<br><small>auto-memory</small>"]
+    end
+
+    subgraph ONDEMAND["📄 Подгрузка по запросу"]
+        direction LR
+        ATREF["@путь/к/файлу<br><small>любой файл в чате</small>"]
+    end
+
+    GM -->|чтение| SESSION(("🧠 Сессия<br>Claude Code"))
+    CLAUDE_MD -->|чтение| SESSION
+    SETTINGS -->|чтение| SESSION
+    MEMORY -->|авто-чтение| SESSION
+    ATREF -->|по запросу| SESSION
+
+    style GLOBAL fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style PROJECT fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style ONDEMAND fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style SESSION fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,stroke-dasharray:5 5
+    </div>
+  </div>
+
+  <p>Три уровня, три типа файлов:</p>
+
+  <div style="overflow-x: auto;">
+  <table>
+    <tr>
+      <th>Уровень</th>
+      <th>Где лежит</th>
+      <th>Что содержит</th>
+      <th>Когда читается</th>
+    </tr>
+    <tr>
+      <td><span class="level-badge level-global">🌍 Глобальная</span></td>
+      <td><code>~/CLAUDE.md</code></td>
+      <td>Профиль, настройки инструментов, список агентов</td>
+      <td>Всегда, в каждой сессии</td>
+    </tr>
+    <tr>
+      <td><span class="level-badge level-project">📁 Проектная</span></td>
+      <td><code>./CLAUDE.md</code>, <code>.claude/</code></td>
+      <td>Контекст проекта, настройки, auto-memory</td>
+      <td>Когда работаешь в этом проекте</td>
+    </tr>
+    <tr>
+      <td><span class="level-badge level-on-demand">📄 По запросу</span></td>
+      <td>Любой файл</td>
+      <td>Что угодно — подгружается через <code>@</code></td>
+      <td>Когда ты явно указал</td>
+    </tr>
+  </table>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ГЛОБАЛЬНАЯ ПАМЯТЬ -->
+  <h2 id="global"><span class="emoji">🌍</span> Глобальная память — ~/CLAUDE.md</h2>
+
+  <p>
+    Единственный файл. Лежит в домашней папке. Загружается в <strong>каждой сессии</strong>,
+    независимо от того, в каком проекте ты работаешь.
+  </p>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Структура ~/CLAUDE.md (у нас)</span>
+
+# Глобальные инструкции для Андрея
+
+## О пользователе
+- Меня зовут Андрей
+- Русскоязычный, неформальный стиль
+- Экспериментатор, прямолинейный
+
+## Инструменты
+- Поиск: только poisk-mcp (встроенный WebSearch не работает)
+- Модель: claude-go-deepseek-v4-flash
+
+## Агенты — ~/.claude/agents/
+- openspec-manager — spec-driven разработка
+- writer-agent — документация
+- explorer — быстрый поиск по коду
+- ...ещё несколько
+
+## Глобальная конфигурация
+- Хуки: бэкапы + автоформатирование
+- MCP: poisk-mcp
+- Пермишены: auto</code>
+  </div>
+
+  <div class="card card-green">
+    <strong>Зачем глобальная?</strong><br>
+    Чтобы не повторять одно и то же в каждом проекте. Профиль, настройки инструментов,
+    список агентов — это общее для всех проектов. Написал один раз в <code>~/CLAUDE.md</code> —
+    и Claude знает тебя везде.
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Главное правило:</strong> Держи <code>~/CLAUDE.md</code> коротким — лучше меньше
+    50 строк. Claude читает его каждый раз, и длинный файл жрёт контекст.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ПРОЕКТНАЯ ПАМЯТЬ -->
+  <h2 id="project"><span class="emoji">📁</span> Проектная память</h2>
+
+  <p>Живёт в корне проекта и загружается только когда ты работаешь именно в нём.</p>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3><code>./CLAUDE.md</code></h3>
+      <ul>
+        <li>Инструкции специфичные для проекта</li>
+        <li>Как запускать, как тестировать</li>
+        <li>Архитектурные решения</li>
+        <li>Ты пишешь сам или через <code>/init</code></li>
+      </ul>
+    </div>
+    <div class="card card-purple">
+      <h3><code>.claude/</code> директория</h3>
+      <ul>
+        <li><code>settings.json</code> — пермишены, хуки</li>
+        <li><code>agents/</code> — кастомные агенты проекта</li>
+        <li><code>memory/MEMORY.md</code> — auto-memory</li>
+        <li>Часть настроек автоматическая</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. AUTO-MEMORY -->
+  <h2 id="auto"><span class="emoji">🤖</span> Auto-memory — Claude запоминает сам</h2>
+
+  <p>
+    Claude Code умеет <strong>сам</strong> записывать в <code>MEMORY.md</code> то, что узнал о проекте
+    в процессе работы. Ты не просишь — он сам решает что стоит запомнить.
+  </p>
+
+  <div class="card card-purple">
+    <h3>Как это работает</h3>
+    <ol>
+      <li>Claude работает с проектом и замечает что-то важное</li>
+      <li>Пишет запись в <code>.claude/projects/*/memory/MEMORY.md</code></li>
+      <li>При следующем старте — загружает первые 200 строк этого файла</li>
+      <li>Получается: Claude «учится» на предыдущих сессиях</li>
+    </ol>
+  </div>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Пример записей в MEMORY.md (auto-generated)</span>
+
+## Архитектура
+- Проект использует FastAPI + PostgreSQL
+- Миграции через Alembic
+- Тесты на pytest
+
+## Ключевые файлы
+- `app/main.py` — точка входа
+- `app/models.py` — SQLAlchemy модели
+- `tests/conftest.py` — фикстуры</code>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">⚠️</span>
+    <span><strong>Важно:</strong> Auto-memory — это <strong>не волшебная телепатия</strong>.
+    Claude записывает в файл то, что кажется ему важным. Иногда он угадывает, иногда — нет.
+    Всегда можно подредактировать <code>MEMORY.md</code> вручную.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. ПОДГРУЗКА ПО ЗАПРОСУ -->
+  <h2 id="ondemand"><span class="emoji">📄</span> Подгрузка по запросу — @-ссылки</h2>
+
+  <p>
+    Самый простой способ дать Claude доступ к любому файлу — написать <code>@путь/к/файлу</code>
+    прямо в чате. Файл прочитается и его содержимое попадёт в контекст.
+  </p>
+
+  <div class="card card-orange">
+    <h3>Примеры</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Просто файл</span>
+@src/utils/helpers.py
+
+<span class="yaml-comment"># С папкой</span>
+@docs/api-spec.md
+
+<span class="yaml-comment"># С-relative путём</span>
+../shared/config.yaml
+
+<span class="yaml-comment"># Или прямо в сообщении</span>
+Прочитай @config.json и объясни структуру</code>
+    </div>
+  </div>
+
+  <div class="card card-accent">
+    <p><strong>Ключевое отличие от остальных уровней:</strong> @-ссылки не постоянные.
+    Они подгружают файл <strong>один раз</strong> — для текущего сообщения. В следующем
+    сообщении этого файла уже не будет, если снова не указать.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ПРОЦЕСС ЗАГРУЗКИ -->
+  <h2 id="boot"><span class="emoji">⚡</span> Как память загружается при старте</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    START(("🚀 Запуск<br>Claude Code")) --> GLOB["📖 Читает ~/CLAUDE.md<br><small>глобальный контекст</small>"]
+    GLOB --> CHECK{Есть<br>проект?}
+    CHECK -->|Нет| WORK["💬 Работает<br><small>только глобальный контекст</small>"]
+    CHECK -->|Да| PROJ["📂 Читает ./CLAUDE.md<br><small>контекст проекта</small>"]
+    PROJ --> SETTINGS["⚙️ Читает .claude/settings.json<br><small>пермишены, хуки</small>"]
+    SETTINGS --> AUTO["🤖 Загружает MEMORY.md<br><small>первые 200 строк auto-memory</small>"]
+    AUTO --> WORK
+
+    style START fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style GLOB fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style PROJ fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style SETTINGS fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style AUTO fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style WORK fill:#fafbfc,stroke:#24292e,stroke-width:2px
+    </div>
+  </div>
+
+  <p>Пошагово:</p>
+
+  <div class="timeline">
+    <div class="timeline-step">
+      <strong>1. Глобальный контекст</strong>
+      Читается <code>~/CLAUDE.md</code> — профиль, настройки, инструменты. Это происходит <strong>всегда</strong>.
+    </div>
+    <div class="timeline-step">
+      <strong>2. Определение проекта</strong>
+      Claude проверяет, в какой директории ты находишься. Если это проект — загружается его контекст.
+    </div>
+    <div class="timeline-step">
+      <strong>3. Проектный контекст</strong>
+      Читаются <code>./CLAUDE.md</code> и <code>.claude/settings.json</code>.
+      Эти файлы специфичны для проекта.
+    </div>
+    <div class="timeline-step">
+      <strong>4. Auto-memory</strong>
+      Загружаются первые 200 строк <code>MEMORY.md</code> — то, что Claude запомнил о проекте.
+    </div>
+    <div class="timeline-step">
+      <strong>5. Готово к работе</strong>
+      Claude имеет полный контекст и готов отвечать. @-ссылки подгружаются по необходимости позже.
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Контекст — это ресурс.</strong> Каждый прочитанный файл занимает место в контекстном окне.
+    Чем короче <code>~/CLAUDE.md</code> и <code>MEMORY.md</code> — тем больше места для реальной работы.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. СВЯЗИ -->
+  <h2 id="links"><span class="emoji">🔗</span> Связи между записями</h2>
+
+  <p>
+    В <code>MEMORY.md</code> можно ссылаться на другие записки двойными скобками:
+    <code>[[имя-записи]]</code>. Это просто маркер связи — работает как ссылка на другую запись.
+  </p>
+
+  <div class="card card-teal">
+    <div class="code-block">
+      <code><span class="yaml-comment"># Пример связей в MEMORY.md</span>
+
+## Архитектура
+- Система аутентификации описана в [[auth-setup]]
+- Деплой настраивался в [[deploy-notes]]
+
+## Решения
+- Выбрали PostgreSQL вместо MySQL — см. [[db-choice]]
+- API версионирование через URL: [[api-versioning]]</code>
+    </div>
+    <p style="margin-top: 12px; margin-bottom: 0;">
+      Ссылки могут вести на записи, которые <strong>ещё не созданы</strong>. Это просто маркеры —
+      потом можно будет добавить содержимое по этим именам.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 9. КАК МЫ НАСТРОИЛИ -->
+  <h2 id="our-setup"><span class="emoji">🛠️</span> Как мы настроили</h2>
+
+  <p>Наша стратегия простая: <strong>всё общее — в глобал, ничего лишнего — в проекты</strong>.</p>
+
+  <div class="card card-green">
+    <h3>Что мы сделали</h3>
+    <ol>
+      <li><strong>Написали <code>~/CLAUDE.md</code></strong> — профиль, инструкции по поиску, список агентов, модель</li>
+      <li><strong>Удалили проектные MEMORY.md</strong> — старые файлы вроде <code>-home-andrei-...</code> больше не нужны</li>
+      <li><strong>Весь общий контекст уехал глобально</strong> — чтобы не дублировать в каждом проекте</li>
+    </ol>
+  </div>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>✅ До</h3>
+      <ul>
+        <li>Каждый проект имел свою MEMORY.md</li>
+        <li>Дублирование настроек между проектами</li>
+        <li>Старые файлы вида <code>-home-andrei-...</code></li>
+        <li>Путаница: где что лежит?</li>
+      </ul>
+    </div>
+    <div class="card card-accent">
+      <h3>🎯 После</h3>
+      <ul>
+        <li>Один <code>~/CLAUDE.md</code> на все проекты</li>
+        <li>Проектные файлы чистые и по делу</li>
+        <li>Нет мусора</li>
+        <li>Понятная структура</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 10. СОВЕТЫ -->
+  <h2 id="tips"><span class="emoji">🎯</span> Практические советы</h2>
+
+  <div class="card card-green">
+    <h3>1. Держи ~/CLAUDE.md коротким</h3>
+    <p>Меньше 50 строк. Каждая строка жрёт контекст. Если информация нужна редко —
+    подгружай через <code>@</code>, а не держи в глобальном файле.</p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>2. Не дублируй то, что уже есть в коде</h3>
+    <p>Если структура проекта видна из файловой системы — не пиши про неё в MEMORY.md.
+    Claude сам разберётся. Записывай только то, что <strong>нельзя</strong> узнать из кода:
+    архитектурные решения, контекст, историю выбора.</p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>3. Используй даты для ротации</h3>
+    <p>Когда обновляешь запись — ставь дату. Устаревшее можно удалить или архивировать.</p>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Хорошо — видно когда обновлено</span>
+## Настройка деплоя (обновлено 2025-06-10)
+- Используем Docker Compose
+- Порт: 8080
+
+<span class="yaml-comment"># Плохо — непонятно актуально ли</span>
+## Настройка деплоя
+- Используем Docker Compose</code>
+    </div>
+  </div>
+
+  <div class="card card-accent">
+    <h3>4. Односложные записи лучше длинных</h3>
+    <p>Claude не нуждается в красивых предложениях. Короткие, ёмкие записи работают лучше:</p>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Плохо — много воды</span>
+В проекте используется база данных PostgreSQL, которая была выбрана после
+долгого обсуждения различных вариантов, включая MySQL и SQLite...
+
+<span class="yaml-comment"># Хорошо — по делу</span>
+БД: PostgreSQL. Выбор — см. [[db-choice]]</code>
+    </div>
+  </div>
+
+  <div class="card card-red">
+    <h3>5. Проверяй auto-memory</h3>
+    <p>Claude записывает не всегда то, что ты хочешь. Периодически заглядывай в
+    <code>MEMORY.md</code> и правь: убирай лишнее, добавляй важное, обновляй устаревшее.</p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">⚡</span>
+    <span><strong>Лайфхак:</strong> Если Claude «забыл» что-то важное — скорее всего ты просто не
+    написал это в <code>~/CLAUDE.md</code> или <code>MEMORY.md</code>. Он не угадывает —
+    он читает файлы. Запиши — и запомнит.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Память Claude Code — это markdown-файлы, которые читаются при старте.
+      <code>~/CLAUDE.md</code> — глобально, <code>./CLAUDE.md</code> — для проекта,
+      <code>@</code> — по запросу. Claude сам запоминает через auto-memory.
+      Простая система, если знаешь где копать. 🧠
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+</body>
+</html>

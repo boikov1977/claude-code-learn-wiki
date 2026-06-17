@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool Use — инструменты Claude Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>&#x1f9f0; Tool Use &mdash; инструменты Claude Code</h1>
+  <p class="subtitle">Как Claude выбирает, вызывает и комбинирует инструменты &mdash; и почему это важно</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое Tool Use?</a></li>
+      <li><a href="#how">Как Claude выбирает инструмент</a></li>
+      <li><a href="#chains">Цепочки вызовов (Tool Chains)</a></li>
+      <li><a href="#catalog">Каталог инструментов</a></li>
+      <li><a href="#limits">Рейт-лимиты и ограничения</a></li>
+      <li><a href="#tool-constraints">Ограничения отдельных инструментов</a></li>
+      <li><a href="#modes">Режимы и инструменты</a></li>
+      <li><a href="#examples">Практические примеры</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ TOOL USE -->
+  <h2 id="what"><span class="emoji">&#x1f50d;</span> Что такое Tool Use?</h2>
+
+  <p>
+    Claude Code &mdash; это не просто чат-бот, который отвечает текстом.
+    Он умеет <strong>делать</strong>: читать файлы, писать код, запускать команды, искать по проекту.
+    Всё это &mdash; инструменты (tools). Каждый раз, когда Claude хочет что-то сделать, он
+    <em>вызывает инструмент</em>.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Простыми словами:</strong> Представь, что Claude &mdash; это программист за рабочим
+    столом. У него есть отвёртки, ключи, линейки. Когда он хочет прочитать файл &mdash;
+    берёт «лупу», когда хочет написать &mdash; берёт «ручку». Tool Use &mdash; это механизм,
+    с помощью Claude <em>берёт нужный инструмент</em> и <em>делает дело</em>.</p>
+  </div>
+
+  <p>
+    Это принципиально отличает Claude Code от обычного LLM-чата. Там ты просишь &mdash;
+    он отвечает текстом. Здесь ты просишь &mdash; он <strong>выполняет</strong>, используя
+    инструменты, и возвращает результат.
+  </p>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. КАК CLAUDE ВЫБИРАЕТ ИНСТРУМЕНТ -->
+  <h2 id="how"><span class="emoji">&#x1f916;</span> Как Claude выбирает инструмент</h2>
+
+  <p>Процесс выглядит так:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    USER["&#x1f464; Пользователь:<br>&laquo;Найди все TODO в проекте&raquo;"] --> MODEL["&#x1f9e0; Модель получает<br>список доступных инструментов"]
+    MODEL --> DECIDE["&#x1f4cb; Решает: какой инструмент<br>подходит для задачи"]
+    DECIDE --> FORMAT["&#x1f4e6; Формирует вызов<br>в формате JSON"]
+    FORMAT --> EXECUTE["&#x2699;&#xfe0f; Claude Code<br>выполняет вызов"]
+    EXECUTE --> RESULT["&#x1f4e5; Результат<br>возвращается модели"]
+    RESULT --> THINK["&#x1f4ad; Claude думает:<br>&laquo;Хватит или ещё раз?&raquo;"]
+    THINK -->|"Ещё"| DECIDE
+    THINK -->|"Достаточно"| ANSWER["&#x1f4ac; Ответ<br>пользователю"]
+
+    style USER fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style MODEL fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style DECIDE fill:#fffde6,stroke:#b08800,stroke-width:2px
+    style FORMAT fill:#f6f8fa,stroke:#586069,stroke-width:2px
+    style EXECUTE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style RESULT fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style THINK fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style ANSWER fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    </div>
+  </div>
+
+  <p>Пошагово:</p>
+
+  <ol>
+    <li><strong>Список инструментов.</strong> При начале сессии Claude Code отправляет модели
+    список доступных инструментов &mdash; каждый со своим описанием, именем и набором параметров.</li>
+    <li><strong>Решение.</strong> Модель анализирует задачу и выбирает подходящий инструмент.
+    Например, для поиска файла &mdash; <code>Glob</code>, для чтения &mdash; <code>Read</code>.</li>
+    <li><strong>JSON-вызов.</strong> Модель формирует вызов в формате JSON: имя инструмента + параметры.
+    Это не текст, а структурированные данные.</li>
+    <li><strong>Выполнение.</strong> Claude Code (клиент) получает JSON, находит нужный инструмент
+    и выполняет действие.</li>
+    <li><strong>Результат.</strong> Результат (содержимое файла, вывод команды и т.д.)
+    возвращается модели как следующее сообщение.</li>
+    <li><strong>Цикл.</strong> Модель решает: достаточно ли информации или нужно вызвать
+    ещё один инструмент.</li>
+  </ol>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Ключевой момент:</strong> Модель не видит файлов напрямую. Она получает
+    только <em>список инструментов</em> и <em>результаты их вызова</em>. Вся «магия» &mdash;
+    в правильном выборе инструмента и интерпретации результатов.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ЦЕПОЧКИ ВЫЗОВОВ -->
+  <h2 id="chains"><span class="emoji">&#x1f517;</span> Цепочки вызовов (Tool Chains)</h2>
+
+  <p>
+    Одно действие почти всегда запускает цепочку. Claude не просто вызывает один инструмент
+    и останавливается &mdash; он <em>комбинирует</em> их, как мастер комбинирует инструменты.
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    R["&#x1f4d6; Read<br>прочитал файл"] --> T["&#x1f4ad; Подумал<br>найшёл баг"]
+    T --> E["&#x270f;&#xfe0f; Edit<br>исправил код"]
+    E --> B["&#x1f4bb; Bash<br>запустил тесты"]
+    B --> OK{"&#x2705; Тесты<br>прошли?"}
+    OK -->|"Да"| DONE["&#x1f389; Готово!"]
+    OK -->|"Нет"| R2["&#x1f4d6; Read<br>посмотрел ошибку"]
+    R2 --> E
+
+    style R fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style T fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style E fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style B fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style OK fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style DONE fill:#e8f5e9,stroke:#28a745,stroke-width:2px
+    style R2 fill:#ffeef0,stroke:#d73a49,stroke-width:2px
+    </div>
+  </div>
+
+  <p>Типичные цепочки:</p>
+
+  <table>
+    <tr>
+      <th>Цель</th>
+      <th>Цепочка</th>
+      <th>Пояснение</th>
+    </tr>
+    <tr>
+      <td>Найти и исправить баг</td>
+      <td><code>Glob</code> &rarr; <code>Grep</code> &rarr; <code>Read</code> &rarr; <code>Edit</code> &rarr; <code>Bash</code></td>
+      <td>Найти файлы &rarr; найти строку &rarr; прочитать контекст &rarr; исправить &rarr; проверить</td>
+    </tr>
+    <tr>
+      <td>Написать документацию</td>
+      <td><code>Read</code> &rarr; <code>Write</code> &rarr; <code>Bash</code></td>
+      <td>Прочитать код &rarr; написать README &rarr; проверить форматирование</td>
+    </tr>
+    <tr>
+      <td>Исследовать архитектуру</td>
+      <td><code=Bash</code> &rarr; <code>Glob</code> &rarr; <code>Grep</code> &rarr; <code>Read</code> (x N)</td>
+      <td>Посмотреть структуру &rarr; найти файлы &rarr; искать по содержимому &rarr; читать</td>
+    </tr>
+    <tr>
+      <td>Настроить MCP-сервер</td>
+      <td><code>Read</code> &rarr; <code>Write</code> &rarr; <code>Bash</code> &rarr; <code>MCP-tool</code></td>
+      <td>Прочитать конфиг &rarr; записать настройки &rarr; перезапустить &rarr; проверить</td>
+    </tr>
+  </table>
+
+  <div class="card card-green">
+    <h3>Claude сам решает, когда остановиться</h3>
+    <p>
+      Цепочка не задана жёстко. Модель после каждого шага оценивает: «Получил ли я достаточно
+      информации? Достаточно ли я сделал?» Если да &mdash; отвечает пользователю. Если нет &mdash;
+      вызывает следующий инструмент. Именно поэтому Claude Code может работать
+      «автономно» 5-10 минут, выполняя десятки вызовов за один запрос.
+    </p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x26a0;&#xfe0f;</span>
+    <span><strong>Осторожно с длинными цепочками:</strong> Чем длиннее цепочка, тем больше
+    расходует токенов в context window. Если Claude зациклился &mdash; напиши
+    <code>/compact</code> или останови через <code>Esc</code>.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. КАТАЛОГ ИНСТРУМЕНТОВ -->
+  <h2 id="catalog"><span class="emoji">&#x1f4e6;</span> Каталог инструментов</h2>
+
+  <p>Инструменты делятся на три категории:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    subgraph BUILT["&#x1f3e2; Built-in инструменты"]
+        direction LR
+        READ["&#x1f4d6; Read"]
+        WRITE["&#x270f;&#xfe0f; Write"]
+        EDIT["&#x1f4dd; Edit"]
+        BASH["&#x1f4bb; Bash"]
+        GLOB["&#x1f50d; Glob"]
+        GREP["&#x1f50e; Grep"]
+        AGENT["&#x1f916; Agent"]
+        WEB["&#x1f310; WebSearch"]
+    end
+
+    subgraph MCP_TOOLS["&#x1f50c; MCP-инструменты"]
+        direction LR
+        MCP1["search_web"]
+        MCP2["custom_mcp_tool"]
+        MCP3["..."]
+    end
+
+    subgraph SKILLS["&#x1f4e6; Skills"]
+        direction LR
+        SKILL1["openspec-apply"]
+        SKILL2["openspec-propose"]
+        SKILL3["custom skill"]
+    end
+
+    ALL["&#x1f52c; Всё видно в<br>/tools и /mcp"]
+
+    BUILT --> ALL
+    MCP_TOOLS --> ALL
+    SKILLS --> ALL
+
+    style BUILT fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style MCP_TOOLS fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style SKILLS fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style ALL fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    </div>
+  </div>
+
+  <h3>Built-in инструменты</h3>
+
+  <p>Встроены в Claude Code и доступны всегда (если не отключены):</p>
+
+  <table>
+    <tr>
+      <th>Инструмент</th>
+      <th>Что делает</th>
+      <th>Тип</th>
+    </tr>
+    <tr>
+      <td><code>Read</code></td>
+      <td>Читает файл (или его часть)</td>
+      <td>Read-only</td>
+    </tr>
+    <tr>
+      <td><code>Write</code></td>
+      <td>Создаёт или перезаписывает файл</td>
+      <td>Write</td>
+    </tr>
+    <tr>
+      <td><code>Edit</code></td>
+      <td>Частичное изменение файла (замена строки)</td>
+      <td>Write</td>
+    </tr>
+    <tr>
+      <td><code>Bash</code></td>
+      <td>Запускает shell-команду</td>
+      <td>Exec</td>
+    </tr>
+    <tr>
+      <td><code>Glob</code></td>
+      <td>Поиск файлов по шаблону</td>
+      <td>Read-only</td>
+    </tr>
+    <tr>
+      <td><code>Grep</code></td>
+      <td>Поиск по содержимому файлов (regex)</td>
+      <td>Read-only</td>
+    </tr>
+    <tr>
+      <td><code>Agent</code></td>
+      <td>Запуск субагента</td>
+      <td>Agent</td>
+    </tr>
+    <tr>
+      <td><code>WebSearch</code></td>
+      <td>Поиск в интернете</td>
+      <td>Read-only</td>
+    </tr>
+    <tr>
+      <td><code>WebFetch</code></td>
+      <td>Загрузка и парсинг URL</td>
+      <td>Read-only</td>
+    </tr>
+    <tr>
+      <td><code>ListFiles</code></td>
+      <td>Список файлов в директории</td>
+      <td>Read-only</td>
+    </tr>
+  </table>
+
+  <h3>MCP-инструменты</h3>
+
+  <p>
+    Подключаются через MCP-серверы (Model Context Protocol). Это те инструменты, которые
+    появляются, когда ты добавляешь внешние серверы через <code>claude mcp add</code>
+    или настраиваешь в <code>.mcp.json</code>.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Пример:</strong> Наш <code>poisk-mcp</code> добавляет инструмент
+    <code>search_web</code> &mdash; поиск в интернете. Без этого сервера этого инструмента
+    просто нет в списке.</p>
+  </div>
+
+  <h3>Skills (инструменты из скиллов)</h3>
+
+  <p>
+    Кастомные скиллы (в <code>~/.claude/skills/</code>) тоже предоставляют инструменты.
+    Например, OpenSpec-скиллы добавляют <code>openspec-propose</code>, <code>openspec-apply</code>
+    и другие. Они вызываются через <code>Agent</code> или напрямую.
+  </p>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Как посмотреть все доступные инструменты:</strong> Напиши <code>/tools</code>
+    &mdash; Claude покажет built-in инструменты. <code>/mcp</code> &mdash; покажет MCP-инструменты.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. РЕЙТ-ЛИМИТЫ -->
+  <h2 id="limits"><span class="emoji">&#x23f3;</span> Рейт-лимиты и ограничения</h2>
+
+  <p>Tool Use &mdash; это не безлимитный карнавал. Есть границы:</p>
+
+  <div class="card card-red">
+    <h3>Лимиты на вызовы</h3>
+    <table>
+      <tr>
+        <th>Ограничение</th>
+        <th>Значение</th>
+      </tr>
+      <tr>
+        <td>Вызовов за один запрос</td>
+        <td><strong>~60-80</strong> (зависит от модели и провайдера)</td>
+      </tr>
+      <tr>
+        <td>Пауза между вызовами</td>
+        <td>Есть <strong>delay/backoff</strong> &mdash; искусственная задержка</td>
+      </tr>
+      <tr>
+        <td>Контекстное окно</td>
+        <td>Каждый вызов и результат расходуют токены. При заполнении &mdash; <code>/compact</code></td>
+      </tr>
+      <tr>
+        <td>Таймаут Bash</td>
+        <td><strong>120 секунд</strong> (по умолчанию), максимум <strong>600 секунд</strong></td>
+      </tr>
+      <tr>
+        <td>Размер файла (Write)</td>
+        <td>Нет жёсткого лимита, но очень большие файлы расходуют много токенов</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Что происходит при превышении</h3>
+    <ul>
+      <li><strong>Рейт-лимит API:</strong> Ошибка 429 (Too Many Requests). Claude Code автоматически
+      делает retry с exponential backoff.</li>
+      <li><strong>Контекст заполнен:</strong> Claude начнёт «забывать» старые части диалога.
+      Помогает <code>/compact</code>.</li>
+      <li><strong>Слишком длинная цепочка:</strong> Модель может сама остановиться, решив что
+      информации достаточно.</li>
+      <li><strong>Таймаут Bash:</strong> Команда принудительно завершается.</li>
+    </ul>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Лайфхак:</strong> Если Claude «застрял» и зациклился &mdash; нажми
+    <strong>Esc</strong> (прервать текущий ответ) или напиши <code>/compact</code>
+    (сжать контекст). Это не ломает ничего &mdash; просто останавливает бесконечный цикл.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. ОГРАНИЧЕНИЯ ОТДЕЛЬНЫХ ИНСТРУМЕНТОВ -->
+  <h2 id="tool-constraints"><span class="emoji">&#x1f6ab;</span> Ограничения отдельных инструментов</h2>
+
+  <p>Каждый инструмент имеет свои «хотелки» и ограничения:</p>
+
+  <table>
+    <tr>
+      <th>Инструмент</th>
+      <th>Ограничение</th>
+      <th>Почему</th>
+    </tr>
+    <tr>
+      <td><code>Write</code></td>
+      <td>Не может перезаписать файл без предварительного <code>Read</code></td>
+      <td>Защита от потери данных. Клиент проверяет, что файл был прочитан.</td>
+    </tr>
+    <tr>
+      <td><code>Edit</code></td>
+      <td>Точное совпадение <code>old_string</code></td>
+      <td>Строка должна совпадать <em>точно</em>, включая пробелы и переносы.</td>
+    </tr>
+    <tr>
+      <td><code>Bash</code></td>
+      <td>Не поддерживает интерактивные команды</td>
+      <td>Нет TTY: <code>htop</code>, <code>vim</code>, <code>git rebase -i</code> не работают.</td>
+    </tr>
+    <tr>
+      <td><code>Bash</code></td>
+      <td>Запрещённые команды (по умолчанию)</td>
+      <td><code>rm -rf /</code>, <code>sudo</code> и другие опасные команды блокируются.</td>
+    </tr>
+    <tr>
+      <td><code>Agent</code></td>
+      <td>Субагент в изолированной песочнице</td>
+      <td>Не видит весь контекст основной сессии. Каждый субагент начинает «с чистого листа».</td>
+    </tr>
+    <tr>
+      <td><code>Read</code></td>
+      <td>Максимум 2000 строк за вызов</td>
+      <td>Ограничение на размер. Для больших файлов нужен offset + limit.</td>
+    </tr>
+    <tr>
+      <td>MCP-инструменты</td>
+      <td>Зависят от доступности сервера</td>
+      <td>Если MCP-сервер упал &mdash; инструмент недоступен.</td>
+    </tr>
+    <tr>
+      <td><code>WebSearch</code></td>
+      <td>Не работает через все провайдеры</td>
+      <td>Например, DeepSeek выдаёт ошибку схемы (у нас решено через <code>poisk-mcp</code>).</td>
+    </tr>
+  </table>
+
+  <div class="card card-purple">
+    <h3>allowedTools и deniedTools</h3>
+    <p>
+      В настройках сессии можно явно разрешить или запретить конкретные инструменты:
+    </p>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Пример: разрешить только чтение и поиск</span>
+<span class="yaml-comment"># В .claude/settings.local.json или через CLI</span>
+{
+  "allowedTools": ["Read", "Glob", "Grep", "Bash(git log:*)"],
+  "deniedTools": ["Write", "Edit"]
+}</code>
+    </div>
+    <p>
+      Это полезно, когда хочешь чтобы Claude <em>только анализировал</em>, но не трогал код.
+      Также можно ограничить Bash конкретными командами через паттерн: <code>Bash(git log:*)</code>
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. РЕЖИМЫ И ИНСТРУМЕНТЫ -->
+  <h2 id="modes"><span class="emoji">&#x1f3af;</span> Режимы и инструменты</h2>
+
+  <p>Режим работы Claude Code определяет, какие инструменты доступны:</p>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>&#x1f4d6; Plan Mode</h3>
+      <p><strong>Только read-only инструменты:</strong></p>
+      <ul>
+        <li><code>Read</code> &mdash; чтение файлов</li>
+        <li><code>Glob</code> &mdash; поиск файлов</li>
+        <li><code>Grep</code> &mdash; поиск по содержимому</li>
+        <li><code>Bash</code> &mdash; только безопасные команды</li>
+      </ul>
+      <p>Цель: исследовать, не трогая код. Составить план перед работой.</p>
+    </div>
+
+    <div class="card card-accent">
+      <h3>&#x2699;&#xfe0f; Auto Mode</h3>
+      <p><strong>Все разрешённые инструменты:</strong></p>
+      <ul>
+        <li>Read, Write, Edit, Bash</li>
+        <li>Glob, Grep</li>
+        <li>Agent, WebSearch</li>
+        <li>MCP-инструменты</li>
+      </ul>
+      <p>Цель: полная работа. Claude читает, пишет, запускает, проверяет.</p>
+    </div>
+
+    <div class="card card-orange">
+      <h3>&#x26a1; bypassPermissions</h3>
+      <p><strong>Все инструменты без подтверждения:</strong></p>
+      <ul>
+        <li>Никаких промптов «Подтвердить?»</li>
+        <li>Claude действует сразу</li>
+        <li>Риск: может случайно удалить файл</li>
+      </ul>
+      <p>Цель: максимальная скорость. Для опытных пользователей.</p>
+    </div>
+
+    <div class="card card-purple">
+      <h3>&#x1f512; Ручное подтверждение</h3>
+      <p><strong>Стандартный режим:</strong></p>
+      <ul>
+        <li>Read, Glob, Grep &mdash; автоматически</li>
+        <li>Write, Edit, Bash &mdash; с подтверждением</li>
+        <li>Ты контролируешь каждый шаг</li>
+      </ul>
+      <p>Цель: баланс скорости и контроля. Рекомендуется по умолчанию.</p>
+    </div>
+  </div>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    P["&#x1f464; Пользователь<br>пишет задачу"] --> CHECK{"&#x1f3af; Какой<br>режим?"}
+
+    CHECK -->|"Plan"| PLAN["&#x1f4d6; Только Read-only<br>Read / Glob / Grep"]
+    CHECK -->|"Auto"| AUTO["&#x2699;&#xfe0f; Все инструменты<br>Write / Edit / Bash / ..."]
+    CHECK -->|"bypass"| BYPASS["&#x26a1; Все без<br>подтверждения"]
+    CHECK -->|"Default"| DEFAULT["&#x1f512; Read-only авто,<br>Write/Edit с вопросом"]
+
+    PLAN --> WORK["&#x1f4bb; Claude<br>работает"]
+    AUTO --> WORK
+    BYPASS --> WORK
+    DEFAULT --> WORK
+
+    WORK --> RESULT["&#x1f4ac; Результат"]
+
+    style P fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style CHECK fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style PLAN fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style AUTO fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style BYPASS fill:#fff3e0,stroke:#e36209,stroke-width:2px
+    style DEFAULT fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style WORK fill:#f6f8fa,stroke:#586069,stroke-width:2px
+    style RESULT fill:#e8f5e9,stroke:#28a745,stroke-width:2px
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. ПРАКТИЧЕСКИЕ ПРИМЕРЫ -->
+  <h2 id="examples"><span class="emoji">&#x1f469;&#x200d;&#x1f4bb;</span> Практические примеры</h2>
+
+  <h3>Пример 1: «Найди все TODO в проекте»</h3>
+
+  <div class="card card-green">
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+flowchart LR
+    G1["&#x1f50d; Glob<br>найти все .ts файлы"] --> G2["&#x1f50e; Grep<br>найти 'TODO' в них"]
+    G2 --> R1["&#x1f4d6; Read<br>прочитать файлы с TODO"]
+    R1 --> ANSWER["&#x1f4ac; Список TODO<br>пользователю"]
+
+    style G1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style G2 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style R1 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style ANSWER fill:#fff3e0,stroke:#e65100,stroke-width:2px
+      </div>
+    </div>
+    <p>Claude: «Сейчас найду. Сначала определю какие файлы есть, потом поищу TODO
+    в каждом. Покажу тебе список с файлами и строками.»</p>
+  </div>
+
+  <h3>Пример 2: «Исправь баг и проверь»</h3>
+
+  <div class="card card-orange">
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+flowchart LR
+    R1["&#x1f4d6; Read<br>прочитал баг-репорт"] --> R2["&#x1f4d6; Read<br>прочитал код"]
+    R2 --> E1["&#x270f;&#xfe0f; Edit<br>исправил баг"]
+    E1 --> B1["&#x1f4bb; Bash<br>npm test"]
+    B1 --> CHECK{"&#x2705; Ок?"}
+    CHECK -->|"Да"| DONE["&#x1f389; Готово!"]
+    CHECK -->|"Нет"| R3["&#x1f4d6; Read<br>посмотрел ошибку"]
+    R3 --> E2["&#x270f;&#xfe0f; Edit<br>допилил"]
+    E2 --> B2["&#x1f4bb; Bash<br>npm test"]
+
+    style R1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style R2 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style E1 fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style B1 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style CHECK fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style DONE fill:#e8f5e9,stroke:#28a745,stroke-width:2px
+    style R3 fill:#ffeef0,stroke:#d73a49,stroke-width:2px
+    style E2 fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style B2 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+      </div>
+    </div>
+    <p>Claude: «Прочитаю баг-репорт, найду где ошибка, исправлю и запущу тесты.
+    Если тесты упадут &mdash; посмотрю что пошло не так и попробую снова.»</p>
+  </div>
+
+  <h3>Пример 3: «Напиши документацию»</h3>
+
+  <div class="card card-purple">
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+flowchart LR
+    R1["&#x1f4d6; Read<br>прочитал исходники"] --> W1["&#x270f;&#xfe0f; Write<br>написал README"]
+    W1 --> B1["&#x1f4bb; Bash<br>prettier --check"]
+    B1 --> FIX["&#x270f;&#xfe0f; Write<br>поправил формат"]
+    FIX --> DONE["&#x1f4cb; Готово!"]
+
+    style R1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style W1 fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style B1 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style FIX fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style DONE fill:#e8f5e9,stroke:#28a745,stroke-width:2px
+      </div>
+    </div>
+    <p>Claude: «Прочитаю код, опишу API, напишу README и проверю форматирование
+    через prettier. Если что-то не так &mdash; автоматически поправлю.»</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Tool Use &mdash; это ядро Claude Code. Без инструментов это просто LLM
+      с контекстом. С инструментами &mdash; это рабочий, который читает, пишет, запускает и проверяет.
+      Знай ограничения, используй режимы с умом, и Claude сделает за тебя чёрную работу.
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

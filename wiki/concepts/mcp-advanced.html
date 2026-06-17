@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Advanced — транспорты, scope, команды, пермишены</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #2d3436;
+      --text-muted: #636e72;
+      --accent: #6c5ce7;
+      --accent-light: #f0edfc;
+      --code-bg: #f6f8fa;
+      --green: #00b894;
+      --orange: #e17055;
+      --red: #d63031;
+      --purple: #6c5ce7;
+      --teal: #008080;
+      --yellow: #fdcb6e;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), #a29bfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f0fff4;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff5f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-teal {
+      border-left: 4px solid var(--teal);
+      background: #f0fffa;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Transport tags */
+    .tag-stdio {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-http {
+      display: inline-block;
+      background: #e3f2fd;
+      color: #1565c0;
+      border: 1px solid #bbdefb;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-sse {
+      display: inline-block;
+      background: #fce4ec;
+      color: #c62828;
+      border: 1px solid #f8bbd0;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    /* Scope tags */
+    .tag-local {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-user {
+      display: inline-block;
+      background: #e3f2fd;
+      color: #1565c0;
+      border: 1px solid #bbdefb;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-project {
+      display: inline-block;
+      background: #fff3e0;
+      color: #e65100;
+      border: 1px solid #ffe0b2;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    /* Priority arrow */
+    .priority-flow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px 0;
+      font-size: 1em;
+      font-weight: 600;
+    }
+
+    .priority-item {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 2px solid;
+    }
+
+    .priority-arrow {
+      font-size: 1.4em;
+      color: var(--text-muted);
+    }
+
+    .footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85em;
+      text-align: center;
+    }
+    .footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>MCP Advanced</h1>
+  <p class="subtitle">Транспорты, scope, управление серверами и пермишены — всё, что нужно знать сверх базового MCP</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#transports">Транспорты: stdio, HTTP, SSE</a></li>
+      <li><a href="#transport-flowchart">Как выбирать транспорт</a></li>
+      <li><a href="#scope">Scope: Local, User, Project</a></li>
+      <li><a href="#priority">Приоритеты scope</a></li>
+      <li><a href="#cli">Управление через Claude CLI</a></li>
+      <li><a href="#permissions">Пермишены для MCP-инструментов</a></li>
+      <li><a href="#env-in-config">Переменные окружения в конфигах</a></li>
+      <li><a href="#best-practices">Best practices</a></li>
+      <li><a href="#pitfalls">Типичные ошибки</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ТРАНСПОРТЫ -->
+  <h2 id="transports"><span class="emoji">&#x1f50c;</span> Транспорты: stdio, HTTP, SSE</h2>
+
+  <p>
+    MCP-серверы общаются с Claude Code через <strong>транспорт</strong> — способ передачи данных.
+    Claude Code поддерживает три типа транспорта. Разница — в том, <em>где</em> живёт сервер
+    и <em>как</em> к нему подключаются.
+  </p>
+
+  <hr class="hr-dashed">
+
+  <h3><span class="tag-stdio">stdio</span> Локальный процесс (stdin/stdout)</h3>
+
+  <div class="card card-green">
+    <p><strong>Как работает:</strong> Claude Code запускает процесс на твоей машине.
+    Общение идёт через стандартные потоки ввода-вывода — Claude пишет JSON в <code>stdin</code> процесса,
+    процесс отвечает в <code>stdout</code>. Никакого HTTP, никакой сети.</p>
+  </div>
+
+  <div class="code-block"><code><span class="yaml-comment"># Формат конфигурации</span>
+{
+  <span class="yaml-key">"type"</span>: <span class="yaml-val">"stdio"</span>,
+  <span class="yaml-key">"command"</span>: <span class="yaml-val">"python"</span>,
+  <span class="yaml-key">"args"</span>: [<span class="yaml-val">"server.py"</span>],
+  <span class="yaml-key">"env"</span>: {
+    <span class="yaml-key">"API_KEY"</span>: <span class="yaml-val">"sk-..."</span>
+  }
+}</code></div>
+
+  <table>
+    <tr><th>Характеристика</th><th>Значение</th></tr>
+    <tr><td>Скорость</td><td>Быстрая — нет сетевого оверхеда</td></tr>
+    <tr><td>Зависимости</td><td>Только локальное окружение (Python, Node, Go...)</td></tr>
+    <tr><td>Безопасность</td><td>Высокая — данные не покидают машину</td></tr>
+    <tr><td>Ограничение</td><td>Занимает ресурсы твоей машины (CPU, RAM)</td></tr>
+    <tr><td>Примеры</td><td><code>poisk-mcp</code>, <code>openspec-mcp</code>, любые локальные серверы</td></tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Стандартный выбор.</strong> Большинство MCP-серверов используют stdio.
+    Это самый простой и надёжный транспорт — запустил и забыл. Используй stdio, пока нет причин
+    делать по-другому.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <h3><span class="tag-http">http</span> Удалённый сервер (JSON-RPC)</h3>
+
+  <div class="card card-accent">
+    <p><strong>Как работает:</strong> Сервер живёт на удалённом URL. Claude Code отправляет
+    JSON-RPC-запросы по HTTP(S), получает ответы. Тот же принцип, что и REST API,
+    но с фиксированным форматом JSON-RPC 2.0.</p>
+  </div>
+
+  <div class="code-block"><code><span class="yaml-comment"># Формат конфигурации</span>
+{
+  <span class="yaml-key">"type"</span>: <span class="yaml-val">"http"</span>,
+  <span class="yaml-key">"url"</span>: <span class="yaml-val">"https://mcp.example.com/mcp"</span>,
+  <span class="yaml-key">"headers"</span>: {
+    <span class="yaml-key">"Authorization"</span>: <span class="yaml-val">"Bearer sk-..."</span>
+  }
+}</code></div>
+
+  <table>
+    <tr><th>Характеристика</th><th>Значение</th></tr>
+    <tr><td>Скорость</td><td>Зависит от сети и латентности сервера</td></tr>
+    <tr><td>Зависимости</td><td>Только HTTP(S) — работает из любого окружения</td></tr>
+    <tr><td>Безопасность</td><td>Зависит от провайдера. Данные идут через сеть</td></tr>
+    <tr><td>Ограничение</td><td>Нужен интернет и, как правило, API-ключ</td></tr>
+    <tr><td>Примеры</td><td><code>context7</code>, <code>brave-search</code>, <code>github-mcp</code></td></tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">&#x26a0;&#xfe0f;</span>
+    <span><strong>Новый стандарт.</strong> <code>http</code> заменяет устаревший <code>sse</code>.
+    Если провайдер предоставляет оба варианта — выбирай <code>http</code>.
+    Формат <code>http</code> поддерживает stateless-режим (без сессий) и stateful-режим
+    (с session ID в заголовках).</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <h3><span class="tag-sse">sse</span> Server-Sent Events (deprecated)</h3>
+
+  <div class="card card-red">
+    <p><strong>Как работает:</strong> Клиент открывает долгоживущее HTTP-соединение для получения
+    событий от сервера (SSE), а запросы отправляет через отдельный POST-эндпоинт.
+    Два канала: один для получения событий (GET), другой для отправки команд (POST).</p>
+  </div>
+
+  <div class="code-block"><code><span class="yaml-comment"># Формат конфигурации (устаревший)</span>
+{
+  <span class="yaml-key">"type"</span>: <span class="yaml-val">"sse"</span>,
+  <span class="yaml-key">"url"</span>: <span class="yaml-val">"https://mcp.example.com/sse"</span>,
+  <span class="yaml-key">"headers"</span>: {
+    <span class="yaml-key">"API_KEY"</span>: <span class="yaml-val">"..."</span>
+  }
+}</code></div>
+
+  <div class="card card-red">
+    <h3>&#x1f6a8; Устаревший транспорт</h3>
+    <p><code>sse</code> объявлен <strong>deprecated</strong> в MCP-спеке. Новые серверы
+    должны использовать <code>http</code>. Если провайдер всё ещё отдаёт только <code>sse</code>
+    — подключай, но планируй миграцию. <code>http</code> проще, надёжнее и не требует
+    двух отдельных эндпоинтов.</p>
+  </div>
+
+  <table>
+    <tr><th>Характеристика</th><th>Значение</th></tr>
+    <tr><td>Статус</td><td><strong>Deprecated</strong> — не используй для новых серверов</td></tr>
+    <tr><td>Особенность</td><td>Два эндпоинта: GET для событий, POST для команд</td></tr>
+    <tr><td>Проблема</td><td>Сложнее отлаживать, проблемы с прокси и балансировщиками</td></tr>
+    <tr><td>Альтернатива</td><td><code>http</code> — один эндпоинт, stateless или stateful</td></tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ТРАНСПОРТ: СРАВНИТЕЛЬНАЯ ТАБЛИЦА -->
+  <h2><span class="emoji">&#x1f4ca;</span> Сравнение транспортов</h2>
+
+  <table>
+    <tr>
+      <th>Транспорт</th>
+      <th>Где живёт сервер</th>
+      <th>Канал связи</th>
+      <th>Статус</th>
+      <th>Когда использовать</th>
+    </tr>
+    <tr>
+      <td><span class="tag-stdio">stdio</span></td>
+      <td>На твоей машине</td>
+      <td>stdin/stdout (JSON)</td>
+      <td>&#x2705; Актуален</td>
+      <td>Локальные инструменты, быстрый доступ, приватные данные</td>
+    </tr>
+    <tr>
+      <td><span class="tag-http">http</span></td>
+      <td>На сервере провайдера</td>
+      <td>HTTP(S) (JSON-RPC)</td>
+      <td>&#x2705; Рекомендуется</td>
+      <td>Онлайн-сервисы, обновляемые данные, SaaS-инструменты</td>
+    </tr>
+    <tr>
+      <td><span class="tag-sse">sse</span></td>
+      <td>На сервере провайдера</td>
+      <td>SSE + POST</td>
+      <td>&#x26a0;&#xfe0f; Deprecated</td>
+      <td>Только старые серверы без HTTP-поддержки</td>
+    </tr>
+  </table>
+
+  <!-- 3. FLOWCHART ВЫБОРА ТРАНСПОРТА -->
+  <h2 id="transport-flowchart"><span class="emoji">&#x1f9ed;</span> Как выбирать транспорт</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    START["&#x1f50c; Какой MCP-сервер<br>нужен?"] --> Q1{"Сервер работает<br>на твоей машине?"}
+
+    Q1 -->|"Да"| STDIO["&#x1f7e2; <b>stdio</b><br><small>Запускаем процесс<br>общаемся через stdin/stdout</small>"]
+    Q1 -->|"Нет, онлайн"| Q2{"Провайдер поддерживает<br>JSON-RPC через HTTP?"}
+
+    Q2 -->|"Да"| HTTP["&#x1f535; <b>http</b><br><small>Отправляем JSON-RPC<br>по HTTP(S)</small>"]
+    Q2 -->|"Нет, только SSE"| SSE["&#x1f534; <b>sse</b><br><small>Deprecated.<br>Используй если другого варианта нет</small>"]
+
+    Q2 -.->|"Планируй миграцию"| HTTP
+
+    STDIO --> TIP1["&#x1f4a1; Типичные stdio-серверы:<br>poisk-mcp, openspec-mcp,<br>sqlite-mcp, filesystem"]
+    HTTP --> TIP2["&#x1f4a1; Типичные HTTP-серверы:<br>context7, brave-search,<br>github-mcp, linear"]
+    SSE --> TIP3["&#x26a0;&#xfe0f; Некоторые старые серверы<br>всё ещё только SSE"]
+
+    style START fill:#f8f4ff,stroke:#6c5ce7,stroke-width:2px
+    style STDIO fill:#f0fff4,stroke:#2e7d32,stroke-width:2px
+    style HTTP fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style SSE fill:#ffebee,stroke:#c62828,stroke-width:2px
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. SCOPE -->
+  <h2 id="scope"><span class="emoji">&#x1f3e0;</span> Scope: Local, User, Project</h2>
+
+  <p>
+    MCP-серверы можно подключить на <strong>трёх уровнях</strong> (scope).
+    От зависит, кто видит сервер и где хранится конфигурация.
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    subgraph LOCAL["&#x1f512; Local — уровень агента"]
+        direction TB
+        L1["~/.claude/agents/<b>my-agent</b>.md"]
+        L2["<small>поле mcpServers во frontmatter</small>"]
+        L1 --> L2
+    end
+
+    subgraph USER["&#x1f30e; User — глобальный уровень"]
+        direction TB
+        U1["~/.claude.json"]
+        U2["<small>команда: claude mcp add</small>"]
+        U1 --> U2
+    end
+
+    subgraph PROJECT["&#x1f4c1; Project — проектный уровень"]
+        direction TB
+        P1[".mcp.json <small>(в корне проекта)</small>"]
+        P2["<small>или: claude mcp add -s project</small>"]
+        P1 --> P2
+    end
+
+    LOCAL -->|"видит только<br>этот агент"| AGENT["&#x1f464; Субагент"]
+    USER -->|"видит основной<br>агент везде"| MAIN["&#x1f916; Основной Claude"]
+    PROJECT -->|"видят все<br>в этом проекте"| TEAM["&#x1f465; Все в проекте"]
+
+    style LOCAL fill:#f0fff4,stroke:#2e7d32,stroke-width:2px
+    style USER fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style PROJECT fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <h3><span class="tag-local">Local</span> Уровень агента</h3>
+
+  <div class="card card-green">
+    <p><strong>Где живёт:</strong> Во frontmatter файла агента в <code>~/.claude/agents/</code></p>
+    <p><strong>Кто видит:</strong> Только конкретный агент. Основной Claude Code про него не знает.</p>
+    <p><strong>Когда использовать:</strong> Когда инструмент нужен только одному субагенту
+    и не должен засорять контекст основного агента.</p>
+
+    <div class="code-block"><code><span class="yaml-comment"># ~/.claude/agents/openspec-manager.md</span>
+---
+name: openspec-manager
+model: inherit
+<span class="yaml-key">mcpServers</span>:
+  <span class="yaml-key">openspec-mcp</span>:
+    <span class="yaml-key">type</span>: <span class="yaml-val">stdio</span>
+    <span class="yaml-key">command</span>: <span class="yaml-val">uvx</span>
+    <span class="yaml-key">args</span>:
+      - <span class="yaml-val">"openspec-mcp"</span>
+---</code></div>
+
+    <p>Этот сервер <strong>виден только</strong> openspec-manager. Никто другой его не поднимает.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <h3><span class="tag-user">User</span> Глобальный уровень</h3>
+
+  <div class="card card-accent">
+    <p><strong>Где живёт:</strong> <code>~/.claude.json</code> (в поле <code>mcpServers</code>)</p>
+    <p><strong>Кто видит:</strong> Основной Claude Code во <strong>всех проектах</strong>.</p>
+    <p><strong>Когда использовать:</strong> Инструменты, которые нужны всегда — поиск, базы знаний,
+    универсальные утилиты.</p>
+
+    <div class="code-block"><code><span class="yaml-comment"># ~/.claude.json</span>
+{
+  <span class="yaml-key">"mcpServers"</span>: {
+    <span class="yaml-key">"poisk-mcp"</span>: {
+      <span class="yaml-key">"type"</span>: <span class="yaml-val">"stdio"</span>,
+      <span class="yaml-key">"command"</span>: <span class="yaml-val">"/home/user/mcp/poisk-mcp/venv/bin/python"</span>,
+      <span class="yaml-key">"args"</span>: [<span class="yaml-val">"/home/user/mcp/poisk-mcp/server.py"</span>],
+      <span class="yaml-key">"env"</span>: {
+        <span class="yaml-key">"HF_HUB_OFFLINE"</span>: <span class="yaml-val">"1"</span>
+      }
+    }
+  }
+}</code></div>
+
+    <p>Добавляется командой <code>claude mcp add</code> (см. раздел CLI).</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <h3><span class="tag-project">Project</span> Проектный уровень</h3>
+
+  <div class="card card-orange">
+    <p><strong>Где живёт:</strong> <code>.mcp.json</code> в корне проекта</p>
+    <p><strong>Кто видит:</strong> Все Claude Code-сессии в этом проекте.</p>
+    <p><strong>Когда использовать:</strong> Серверы, специфичные для проекта — документация проекта,
+    внутренние API, тестовые базы данных.</p>
+
+    <div class="code-block"><code><span class="yaml-comment"># .mcp.json в корне проекта</span>
+{
+  <span class="yaml-key">"mcpServers"</span>: {
+    <span class="yaml-key">"project-docs"</span>: {
+      <span class="yaml-key">"type"</span>: <span class="yaml-val">"stdio"</span>,
+      <span class="yaml-key">"command"</span>: <span class="yaml-val">"npx"</span>,
+      <span class="yaml-key">"args"</span>: [<span class="yaml-val">"@my-org/project-docs-mcp"</span>]
+    }
+  }
+}</code></div>
+
+    <p>Команда: <code>claude mcp add -s project ...</code></p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x26a0;&#xfe0f;</span>
+    <span><strong>Безопасность:</strong> Файл <code>.mcp.json</code> может содержать токены и ключи.
+    Если проект публичный — <strong>добавь его в <code>.gitignore</code></strong>.
+    Используй переменные окружения (см. раздел «Переменные окружения»).</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ПРИОРИТЕТЫ -->
+  <h2 id="priority"><span class="emoji">&#x1f3af;</span> Приоритеты scope</h2>
+
+  <p>Когда MCP-сервер с одним именем определён на нескольких уровнях — побеждает
+  <strong>более узкий scope</strong>:</p>
+
+  <div class="priority-flow">
+    <div class="priority-item" style="border-color: #2e7d32; background: #f0fff4;">
+      <span class="tag-local">Local</span> <strong>#1</strong>
+    </div>
+    <span class="priority-arrow">&gt;</span>
+    <div class="priority-item" style="border-color: #e65100; background: #fff3e0;">
+      <span class="tag-project">Project</span> <strong>#2</strong>
+    </div>
+    <span class="priority-arrow">&gt;</span>
+    <div class="priority-item" style="border-color: #1565c0; background: #e3f2fd;">
+      <span class="tag-user">User</span> <strong>#3</strong>
+    </div>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Пример конфликта</h3>
+    <p>Допустим, сервер <code>search</code> определён в трёх местах:</p>
+    <div class="code-block"><code><span class="yaml-comment"># 1. User (~/.claude.json) — глобальный</span>
+{ "search": { "type": "stdio", "command": "search-v1" } }
+
+<span class="yaml-comment"># 2. Project (.mcp.json) — проектный</span>
+{ "search": { "type": "stdio", "command": "search-v2" } }
+
+<span class="yaml-comment"># 3. Agent (frontmatter) — локальный агента</span>
+{ "search": { "type": "stdio", "command": "search-v3" } }</code></div>
+
+    <p><strong>Для основного агента</strong> — используется <code>search-v2</code> (Project > User).</p>
+    <p><strong>Для агента с Local-определением</strong> — используется <code>search-v3</code> (Local > всё).</p>
+    <p>Приоритет <strong>Local > Project > User</strong> — более узкий scope перекрывает широкий.</p>
+  </div>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph RESOLVE["&#x1f50d; Разрешение имён"]
+        direction TB
+        A["Запрос: сервер <b>search</b>"] --> B{"Есть в<br><b>Local</b> scope?"}
+        B -->|"Да"| C["&#x2705; Используем<br>Local-версию"]
+        B -->|"Нет"| D{"Есть в<br><b>Project</b> scope?"}
+        D -->|"Да"| E["&#x2705; Используем<br>Project-версию"]
+        D -->|"Нет"| F{"Есть в<br><b>User</b> scope?"}
+        F -->|"Да"| G["&#x2705; Используем<br>User-версию"]
+        F -->|"Нет"| H["&#x274c; Сервер<br>не найден"]
+    end
+
+    style A fill:#f8f4ff,stroke:#6c5ce7,stroke-width:2px
+    style C fill:#f0fff4,stroke:#2e7d32,stroke-width:2px
+    style E fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style G fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style H fill:#ffebee,stroke:#c62828,stroke-width:2px
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. CLI -->
+  <h2 id="cli"><span class="emoji">&#x1f4bb;</span> Управление через Claude CLI</h2>
+
+  <p>Claude Code предоставляет команды для управления MCP-серверами из терминала.
+  Все команды работают через <code>claude mcp</code>:</p>
+
+  <hr class="hr-dashed">
+
+  <h3><code>claude mcp add</code> — добавить сервер</h3>
+
+  <div class="card card-green">
+    <div class="code-block"><code><span class="yaml-comment"># Добавить stdio-сервер (по умолчанию — user scope)</span>
+claude mcp add search-server \
+  -s user \
+  -- python /path/to/server.py
+
+<span class="yaml-comment"># Добавить с переменными окружения</span>
+claude mcp add my-server \
+  -s user \
+  -e API_KEY=sk-xxx \
+  -e DEBUG=true \
+  -- node /path/to/server.js
+
+<span class="yaml-comment"># Добавить HTTP-сервер</span>
+claude mcp add context7 \
+  -s user \
+  --transport http \
+  --url https://mcp.context7.com/mcp
+
+<span class="yaml-comment"># Добавить в проект (.mcp.json)</span>
+claude mcp add project-tool \
+  -s project \
+  -- npx @my-org/project-mcp</code></div>
+
+    <p><strong>Флаги:</strong></p>
+    <table>
+      <tr><th>Флаг</th><th>Описание</th></tr>
+      <tr><td><code>-s, --scope</code></td><td><code>user</code> (по умолчанию), <code>project</code></td></tr>
+      <tr><td><code>-e, --env</code></td><td>Переменная окружения (можно указать несколько)</td></tr>
+      <tr><td><code>--transport</code></td><td><code>stdio</code> (по умолчанию), <code>http</code>, <code>sse</code></td></tr>
+      <tr><td><code>--url</code></td><td>URL для HTTP/SSE транспорта</td></tr>
+    </table>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <h3><code>claude mcp list</code> — список серверов</h3>
+
+  <div class="card card-accent">
+    <div class="code-block"><code><span class="yaml-comment"># Показать все настроенные MCP-серверы</span>
+claude mcp list
+
+<span class="yaml-comment"># Вывод:</span>
+<span class="yaml-comment"># poisk-mcp (stdio) — /home/user/mcp/poisk-mcp/server.py</span>
+<span class="yaml-comment"># context7 (http) — https://mcp.context7.com/mcp</span></code></div>
+    <p>Показывает все серверы со всеми scope: user, project, local (в frontmatter агентов).</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <h3><code>claude mcp get</code> — посмотреть конфиг сервера</h3>
+
+  <div class="card card-accent">
+    <div class="code-block"><code><span class="yaml-comment"># Посмотреть конфиг конкретного сервера</span>
+claude mcp get poisk-mcp
+
+<span class="yaml-comment"># Вывод покажет type, command, args, env, scope</span></code></div>
+    <p>Полезно для отладки — убедиться, что сервер подключён правильно.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <h3><code>claude mcp remove</code> — удалить сервер</h3>
+
+  <div class="card card-red">
+    <div class="code-block"><code><span class="yaml-comment"># Удалить сервер по имени</span>
+claude mcp remove poisk-mcp
+
+<span class="yaml-comment"># Удалить из конкретного scope</span>
+claude mcp remove poisk-mcp -s project</code></div>
+    <p>Удаляет запись из <code>~/.claude.json</code> (user scope) или <code>.mcp.json</code> (project scope).
+    Из <code>~/.claude/settings.json</code> удаляется вручную (старый формат).</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <h3><code>claude mcp reset</code> — сбросить индекс</h3>
+
+  <div class="card card-teal">
+    <div class="code-block"><code><span class="yaml-comment"># Сбросить кэш MCP-серверов (полезно при багах)</span>
+claude mcp reset</code></div>
+    <p>Сбрасывает внутренний кэш инструментов. Используй, если Claude Code «не видит»
+    инструменты от подключённого сервера.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ПЕРМИШЕНЫ -->
+  <h2 id="permissions"><span class="emoji">&#x1f512;</span> Пермишены для MCP-инструментов</h2>
+
+  <p>
+    MCP-инструменты подчиняются системе пермишенов Claude Code. Каждый инструмент
+    идентифицируется по формату <code>mcp__{server}__{tool}</code>, и его можно
+    разрешить глобально или вручную.
+  </p>
+
+  <h3>Формат именования</h3>
+
+  <div class="card card-purple">
+    <div class="code-block"><code><span class="yaml-comment"># Формат:</span>
+mcp__<server-name>__<tool-name>
+
+<span class="yaml-comment"># Примеры:</span>
+mcp__poisk-mcp__search_web
+mcp__poisk-mcp__read_webpage
+mcp__context7__resolve-library-id
+mcp__context7__get-library-docs
+mcp__openspec-mcp__create_change</code></div>
+
+    <p>Два подчёркивания <code>__</code> — разделитель между namespace-ами.
+    Первый — имя MCP-сервера, второй — имя инструмента на этом сервере.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <h3>Автоматическое разрешение с wildcard-ами</h3>
+
+  <div class="card card-green">
+    <p>Вместо того чтобы разрешать каждый инструмент по отдельности,
+    можно использовать паттерны с <code>*</code>:</p>
+
+    <div class="code-block"><code><span class="yaml-comment"># ~/.claude/settings.local.json</span>
+{
+  <span class="yaml-key">"permissions"</span>: {
+    <span class="yaml-key">"allow"</span>: [
+      <span class="yaml-comment"># Разрешить все инструменты от poisk-mcp</span>
+      <span class="yaml-val">"mcp__poisk-mcp__*"</span>,
+
+      <span class="yaml-comment"># Разрешить конкретный инструмент от context7</span>
+      <span class="yaml-val">"mcp__context7__get-library-docs"</span>,
+
+      <span class="yaml-comment"># Разрешить все инструменты от всех MCP-серверов</span>
+      <span class="yaml-val">"mcp__*__*"</span>
+    ]
+  }
+}</code></div>
+
+    <p><strong>Паттерны:</strong></p>
+    <table>
+      <tr><th>Паттерн</th><th>Что разрешает</th></tr>
+      <tr><td><code>mcp__poisk-mcp__*</code></td><td>Все инструменты от <code>poisk-mcp</code></td></tr>
+      <tr><td><code>mcp__*__*</code></td><td>Все инструменты от всех MCP-серверов</td></tr>
+      <tr><td><code>mcp__context7__get-library-docs</code></td><td>Только конкретный инструмент</td></tr>
+    </table>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Подсказка:</strong> Когда Claude Code впервые вызывает MCP-инструмент,
+    он покажет запрос разрешения. Если нажать «Allow always» — правило добавится
+    в <code>settings.local.json</code> автоматически. Но ручная настройка надёжнее.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <h3>Полный пример из нашего конфига</h3>
+
+  <div class="card card-accent">
+    <div class="code-block"><code><span class="yaml-comment"># ~/.claude/settings.local.json</span>
+{
+  <span class="yaml-key">"permissions"</span>: {
+    <span class="yaml-key">"allow"</span>: [
+      <span class="yaml-val">"mcp__poisk-mcp__search_web"</span>,      <span class="yaml-comment"># поиск</span>
+      <span class="yaml-val">"mcp__poisk-mcp__read_webpage"</span>,     <span class="yaml-comment"># чтение страниц</span>
+      <span class="yaml-val">"Bash(claude mcp *)"</span>,                <span class="yaml-comment"># управление MCP</span>
+      <span class="yaml-val">"Bash(env)"</span>,                         <span class="yaml-comment"># переменные окружения</span>
+      <span class="yaml-val">"WebSearch"</span>                          <span class="yaml-comment"># встроенный поиск</span>
+    ]
+  }
+}</code></div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ -->
+  <h2 id="env-in-config"><span class="emoji">&#x1f321;&#xfe0f;</span> Переменные окружения в конфигах</h2>
+
+  <p>Передавать API-ключи и секреты напрямую в JSON — плохая идея. Claude Code поддерживает
+  подстановку переменных окружения:</p>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>&#x2705; Правильно: через env</h3>
+      <div class="code-block"><code>{
+  <span class="yaml-key">"type"</span>: <span class="yaml-val">"stdio"</span>,
+  <span class="yaml-key">"command"</span>: <span class="yaml-val">"node"</span>,
+  <span class="yaml-key">"args"</span>: [<span class="yaml-val">"server.js"</span>],
+  <span class="yaml-key">"env"</span>: {
+    <span class="yaml-key">"API_KEY"</span>: <span class="yaml-val">"${MY_API_KEY}"</span>
+  }
+}</code></div>
+      <p>Ключ берётся из переменной окружения <code>$MY_API_KEY</code>.
+      Не хранится в файле, не попадёт в git.</p>
+    </div>
+
+    <div class="card card-red">
+      <h3>&#x274c; Неправильно: хардкод</h3>
+      <div class="code-block"><code>{
+  <span class="yaml-key">"type"</span>: <span class="yaml-val">"stdio"</span>,
+  <span class="yaml-key">"command"</span>: <span class="yaml-val">"node"</span>,
+  <span class="yaml-key">"args"</span>: [<span class="yaml-val">"server.js"</span>],
+  <span class="yaml-key">"env"</span>: {
+    <span class="yaml-key">"API_KEY"</span>: <span class="yaml-val">"sk-live-abc123secretkey"</span>
+  }
+}</code></div>
+      <p>Токен в открытом виде в файле. Если проект в git — токен утек.</p>
+    </div>
+  </div>
+
+  <div class="card card-accent">
+    <h3>Где задавать переменные</h3>
+    <table>
+      <tr><th>Способ</th><th>Для какого scope</th></tr>
+      <tr><td><code>~/.bashrc</code> / <code>~/.zshrc</code></td><td>Все scope — переменная доступна везде</td></tr>
+      <tr><td><code>claude mcp add -e KEY=val</code></td><td>User scope — задаётся при добавлении</td></tr>
+      <tr><td><code>.env</code> файл + <code>export</code></td><td>Проектный scope — только в этом проекте</td></tr>
+      <tr><td>Блок <code>env</code> в конфиге MCP</td><td>Только для конкретного сервера</td></tr>
+    </table>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 9. BEST PRACTICES -->
+  <h2 id="best-practices"><span class="emoji">&#x2b50;</span> Best Practices</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>&#x2705; Делай</h3>
+      <ul>
+        <li>Используй <code>stdio</code> для локальных серверов — проще и быстрее</li>
+        <li>Храни токены в переменных окружения, не в JSON</li>
+        <li>Используй <code>claude mcp add</code> вместо ручного редактирования <code>.claude.json</code></li>
+        <li>Разделяй серверы по scope: глобальные в user, проектные — в project</li>
+        <li>Изолируй MCP-серверы субагентов через frontmatter</li>
+        <li>Добавляй <code>.mcp.json</code> в <code>.gitignore</code> если проект публичный</li>
+        <li>Используй wildcard <code>mcp__server__*</code> для автоматического разрешения</li>
+        <li>Проверяй конфиг через <code>claude mcp get &lt;name&gt;</code> после добавления</li>
+      </ul>
+    </div>
+
+    <div class="card card-red">
+      <h3>&#x274c; Не делай</h3>
+      <ul>
+        <li>Не хардкодь API-ключи в <code>.mcp.json</code> или <code>.claude.json</code></li>
+        <li>Не дублируй один сервер в <code>settings.json</code> и <code>.claude.json</code></li>
+        <li>Не используй <code>sse</code> для новых серверов — только <code>http</code></li>
+        <li>Не подключай все MCP-серверы глобально — засоряешь контекст</li>
+        <li>Не используй <code>mcp__*__*</code> если не доверяешь всем серверам</li>
+        <li>Не коммить <code>.mcp.json</code> с секретами</li>
+        <li>Не используй старый <code>~/.claude/settings.json</code> для MCP — лучше <code>.claude.json</code></li>
+        <li>Не запускай MCP-серверы без <code>|| true</code> в хуках — могут заблокировать запись</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card card-purple">
+    <h3>&#x1f4cb; Чек-лист перед коммитом</h3>
+    <ol>
+      <li>Проверь, что <code>.mcp.json</code> в <code>.gitignore</code> (если содержит секреты)</li>
+      <li>Проверь, что токены заданы через переменные окружения</li>
+      <li>Проверь, что нет дублей серверов в разных scope</li>
+      <li>Проверь командой <code>claude mcp list</code> — всё на месте?</li>
+      <li>Если проект团队ный — убедись, что <code>.mcp.json</code> содержит только публичные серверы</li>
+    </ol>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 10. ТИПИЧНЫЕ ОШИБКИ -->
+  <h2 id="pitfalls"><span class="emoji">&#x26a0;&#xfe0f;</span> Типичные ошибки</h2>
+
+  <div class="card card-red">
+    <h3>1. Токены в .mcp.json</h3>
+    <p><strong>Симптом:</strong> API-ключи в открытом виде в файле <code>.mcp.json</code>,
+    который попал в git.</p>
+    <p><strong>Решение:</strong></p>
+    <div class="code-block"><code><span class="yaml-comment"># 1. Убери токен из .mcp.json</span>
+<span class="yaml-comment"># 2. Перенеси его в переменную окружения</span>
+export MY_API_KEY="sk-xxx"
+
+<span class="yaml-comment"># 3. Обнови .mcp.json — используй подстановку</span>
+{
+  "env": { "API_KEY": "${MY_API_KEY}" }
+}
+
+<span class="yaml-comment"># 4. Добавь в .gitignore</span>
+echo ".mcp.json" >> .gitignore
+
+<span class="yaml-comment"># 5. Если токен уже в истории git — rotated!</span></code></div>
+  </div>
+
+  <div class="card card-orange">
+    <h3>2. Авто-approve всех инструментов</h3>
+    <p><strong>Симптом:</strong> Используешь <code>mcp__*__*</code> и позволяешь всем MCP-серверам
+    всё без подтверждения.</p>
+    <p><strong>Проблема:</strong> Если подключён новый MCP-сервер (даже временно) — он автоматически
+    получает полный доступ. Небезопасно.</p>
+    <p><strong>Решение:</strong> Разрешай серверы точечно:</p>
+    <div class="code-block"><code><span class="yaml-comment"># Плохо:</span>
+"mcp__*__*"
+
+<span class="yaml-comment"># Хорошо:</span>
+"mcp__poisk-mcp__*"
+"mcp__context7__*"
+"mcp__openspec-mcp__create_change"</code></div>
+  </div>
+
+  <div class="card card-purple">
+    <h3>3. Дублирование серверов</h3>
+    <p><strong>Симптом:</strong> Один и тот же сервер прописан и в <code>~/.claude.json</code>,
+    и в <code>~/.claude/settings.json</code>. Сервер отваливается или ведёт себя странно.</p>
+    <p><strong>Решение:</strong> Используй <strong>только</strong> один источник. Рекомендуется
+    <code>~/.claude.json</code> через <code>claude mcp add</code>.</p>
+    <div class="code-block"><code><span class="yaml-comment"># Проверь, нет ли дубля:</span>
+cat ~/.claude.json | python3 -c "import sys,json; print(json.dumps(json.load(sys.stdin).get('mcpServers',{}), indent=2))"
+
+<span class="yaml-comment"># Если сервер есть и там, и в settings.json — удали из settings.json</span></code></div>
+  </div>
+
+  <div class="card card-orange">
+    <h3>4. MCP-сервер не виден</h3>
+    <p><strong>Симптом:</strong> <code>claude mcp list</code> показывает сервер, но Claude Code
+    не видит его инструменты.</p>
+    <p><strong>Возможные причины:</strong></p>
+    <ul>
+      <li>Сервер упал при запуске (проверь stderr)</li>
+      <li>Неверный путь к исполняемому файлу</li>
+      <li>Не хватает зависимостей (Python-пакеты, Node-модули)</li>
+      <li>Проблема с сетью (для HTTP/SSE серверов)</li>
+      <li>Кэш — попробуй <code>claude mcp reset</code></li>
+    </ul>
+  </div>
+
+  <div class="card card-accent">
+    <h3>5. Переменные окружения не подставляются</h3>
+    <p><strong>Симптом:</strong> В конфиге MCP написано <code>"${MY_KEY}"</code>, но сервер
+    получает пустую строку.</p>
+    <p><strong>Причина:</strong> Переменная задана в <code>.bashrc</code>, но Claude Code запущена
+    из другого терминала / через systemd / через IDE.</p>
+    <p><strong>Решение:</strong> Проверь через <code>env | grep MY_KEY</code>. Если переменной нет —
+    задай в <code>~/.profile</code> или через <code>claude mcp add -e MY_KEY=value</code>.</p>
+  </div>
+
+  <div class="card card-teal">
+    <h3>6. SSE вместо HTTP</h3>
+    <p><strong>Симптом:</strong> Провайдер предоставляет оба варианта, а ты подключил <code>sse</code>.</p>
+    <p><strong>Почему это плохо:</strong> <code>sse</code> deprecated, сложнее отлаживать,
+    проблемы с прокси и балансировщиками, два эндпоинта вместо одного.</p>
+    <p><strong>Решение:</strong> Переключись на <code>http</code>:</p>
+    <div class="code-block"><code><span class="yaml-comment"># Удали старый</span>
+claude mcp remove my-server
+
+<span class="yaml-comment"># Добавь заново с http</span>
+claude mcp add my-server \
+  -s user \
+  --transport http \
+  --url https://example.com/mcp</code></div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ИТОГО -->
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> MCP в Claude Code — это три транспорта
+      (<span class="tag-stdio">stdio</span> <span class="tag-http">http</span> <span class="tag-sse">sse</span>),
+      три scope (<span class="tag-local">Local</span> <span class="tag-user">User</span> <span class="tag-project">Project</span>)
+      с приоритетом узкого над широким.
+      Управляй серверами через <code>claude mcp add/list/get/remove</code>.
+      Разрешай инструменты через <code>mcp__server__tool</code>.
+      Храни токены в переменных окружения, не дублируй серверы.
+    </p>
+  </div>
+
+  <footer class="footer">
+    Создано <strong>writer-agent</strong> через Workflow tool.
+    <br>Актуально на 2026-06-17.
+    <br><a href="../../index.html">Назад к вики</a>
+  </footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  })
+</script>
+</body>
+</html>

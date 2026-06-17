@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenSpec Manager — описание агента</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: { useMaxWidth: false }
+        });
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.6;
+            color: #1a1a2e;
+            background: #f7f8fc;
+            padding: 40px 24px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        header h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #16213e;
+            letter-spacing: -0.03em;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: #4a4a6a;
+            margin-top: 8px;
+        }
+
+        .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #e8ecf4;
+            color: #2d3a6e;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge.primary { background: #16213e; color: #f7f8fc; }
+        .badge.accent  { background: #0f3460; color: #f7f8fc; }
+        .badge.green   { background: #1a6b4c; color: #f7f8fc; }
+
+        section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 32px 36px;
+            margin-bottom: 28px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #16213e;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8ecf4;
+        }
+
+        section h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #0f3460;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        section p {
+            margin-bottom: 12px;
+        }
+
+        ul, ol {
+            margin: 8px 0 16px 24px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        code {
+            background: #eef0f6;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #c7254e;
+        }
+
+        pre {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            padding: 16px 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 12px 0;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+            font-size: inherit;
+        }
+
+        .diagram-wrapper {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 16px 0;
+            margin: 16px -16px 8px;
+        }
+
+        .diagram-wrapper svg {
+            max-width: none !important;
+            height: auto !important;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 1px solid #e8ecf4;
+        }
+
+        th {
+            background: #f0f2f8;
+            font-weight: 600;
+            color: #16213e;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: #f7f8fc;
+            border-radius: 8px;
+            padding: 18px 20px;
+            border: 1px solid #e8ecf4;
+        }
+
+        .card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #16213e;
+            margin-bottom: 8px;
+        }
+
+        .card ul {
+            margin: 4px 0 0 18px;
+        }
+
+        .card li {
+            margin-bottom: 3px;
+            font-size: 0.92rem;
+        }
+
+        footer {
+            text-align: center;
+            color: #7a7a9a;
+            font-size: 0.85rem;
+            padding: 24px 0;
+        }
+
+        .skill-tag {
+            display: inline-block;
+            background: #eef0f6;
+            color: #0f3460;
+            padding: 4px 12px;
+            border-radius: 14px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            margin: 3px 4px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 700px) {
+            body { padding: 20px 12px; }
+            section { padding: 20px 16px; }
+            header h1 { font-size: 1.7rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ===== HEADER ===== -->
+    <header>
+        <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>OpenSpec Manager</h1>
+        <p>Агент для spec-driven разработки: управление изменениями от proposal до архивации</p>
+        <div class="badge-row">
+            <span class="badge primary">model: inherit</span>
+            <span class="badge accent">permissionMode: auto</span>
+            <span class="badge green">11 skills</span>
+            <span class="badge">изолированный MCP</span>
+        </div>
+    </header>
+
+    <!-- ===== 1. КТО ТАКОЙ ===== -->
+    <section>
+        <h2>1. Кто такой OpenSpec Manager</h2>
+        <p>
+            <strong>OpenSpec Manager</strong> — это специализированный субагент, который управляет
+            <em>spec-driven development (SDD)</em> ворклоу по методологии OpenSpec. Он берёт на себя
+            всю организационную работу: от создания proposal и проектирования до реализации задач
+            и финальной архивации завершённых изменений.
+        </p>
+        <h3>Когда вызывать</h3>
+        <ul>
+            <li>Начало новой фичи — нужен proposal, дизайн и план задач</li>
+            <li>Рефакторинг или изменение архитектуры — требуется структурированный подход</li>
+            <li>Любая работа, где нужны спецификации и план перед написанием кода</li>
+            <li>Когда есть активное изменение — агент предложит продолжить</li>
+        </ul>
+        <h3>Роль в экосистеме</h3>
+        <p>
+            Родительский агент (пользовательский Claude Code) делегирует OpenSpec Manager-у
+            управление изменениями. Менеджер не начинает реализацию без явной команды,
+            спрашивает уточнения при неясностях, и после каждого этапа возвращает сводку:
+            что сделано, какие артефакты созданы, сколько задач выполнено.
+        </p>
+    </section>
+
+    <!-- ===== 2. ИНСТРУМЕНТЫ ===== -->
+    <section>
+        <h2>2. Инструменты</h2>
+        <p>Агент имеет доступ к шести базовым инструментам, которые позволяют читать, писать, редактировать и исполнять команды в проекте.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Инструмент</th>
+                    <th>Назначение</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>Read</strong></td><td>Чтение файлов: код, spec-файлы, конфиги</td></tr>
+                <tr><td><strong>Write</strong></td><td>Создание новых файлов (proposal, design, tasks, specs)</td></tr>
+                <tr><td><strong>Edit</strong></td><td>Точечное редактирование существующих файлов</td></tr>
+                <tr><td><strong>Bash</strong></td><td>Исполнение команд: <code>openspec list</code>, <code>git</code>, <code>mkdir</code>, <code>mv</code></td></tr>
+                <tr><td><strong>Glob</strong></td><td>Поиск файлов по шаблону для навигации по проекту</td></tr>
+                <tr><td><strong>Skill</strong></td><td>Запуск скиллов — основной способ работы с OpenSpec</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ===== 3. ИЗОЛИРОВАННЫЙ MCP ===== -->
+    <section>
+        <h2>3. Изолированный MCP: openspec-mcp</h2>
+        <p>
+            OpenSpec Manager имеет собственный MCP-сервер <code>openspec-mcp</code>, который запускается
+            через <code>uvx openspec-mcp</code>. Этот сервер объявлен непосредственно в конфигурации агента,
+            а не в глобальном <code>settings.json</code>, что делает его <strong>изолированным</strong> —
+            доступным только этому агенту.
+        </p>
+        <div class="grid-2">
+            <div class="card">
+                <h4>Чтение и навигация</h4>
+                <ul>
+                    <li><code>list_changes</code> — список активных изменений</li>
+                    <li><code>list_specs</code> — список спек по доменам</li>
+                    <li><code>show_change</code> — детальная информация об изменении</li>
+                    <li><code>read_spec</code> — чтение spec-файла по пути</li>
+                    <li><code>read_tasks</code> — чтение задач из tasks.md</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h4>Действия и валидация</h4>
+                <ul>
+                    <li><code>validate_change</code> — проверка корректности структуры изменения</li>
+                    <li><code>archive_change</code> — быстрая архивация завершённого изменения</li>
+                </ul>
+            </div>
+        </div>
+        <p style="margin-top: 12px;">
+            MCP-сервер удобен для быстрых read-only запросов. Для полноценного workflow
+            (создание proposal, реализация, синхронизация) используются скиллы.
+        </p>
+    </section>
+
+    <!-- ===== 4. НАВЫКИ (SKILLS) ===== -->
+    <section>
+        <h2>4. Навыки (Skills)</h2>
+        <p>
+            Всего у агента <strong>11 скиллов</strong>, покрывающих полный lifecycle изменения.
+            Вызываются через инструмент <strong>Skill</strong>.
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Скилл</th>
+                    <th>Назначение</th>
+                    <th>Этап</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>openspec-propose</code></td>
+                    <td>Создание proposal для нового изменения</td>
+                    <td>Propose</td>
+                </tr>
+                <tr>
+                    <td><code>openspec-explore</code></td>
+                    <td>Исследование кодовой базы перед изменениями</td>
+                    <td>Propose</td>
+                </tr>
+                <tr>
+                    <td><code>openspec-new-change</code></td>
+                    <td>Расширенное создание нового изменения (полный набор артефактов)</td>
+                    <td>Propose</td>
+                </tr>
+                <tr>
+                    <td><code>openspec-continue-change</code></td>
+                    <td>Продолжение прерванного изменения</td>
+                    <td>Apply</td>
+                </tr>
+                <tr>
+                    <td><code>openspec-apply-change</code></td>
+                    <td>Реализация задач изменения</td>
+                    <td>Apply</td>
+                </tr>
+                <tr>
+                    <td><code>openspec-ff-change</code></td>
+                    <td>Fast-forward реализация (ускоренный режим)</td>
+                    <td>Apply</td>
+                </tr>
+                <tr>
+                    <td><code>openspec-sync-specs</code></td>
+                    <td>Синхронизация дельта-спек с основными specs/</td>
+                    <td>Sync</td>
+                </tr>
+                <tr>
+                    <td><code>openspec-archive-change</code></td>
+                    <td>Архивация завершённого изменения</td>
+                    <td>Archive</td>
+                </tr>
+                <tr>
+                    <td><code>openspec-bulk-archive-change</code></td>
+                    <td>Массовая архивация нескольких изменений</td>
+                    <td>Archive</td>
+                </tr>
+                <tr>
+                    <td><code>openspec-verify-change</code></td>
+                    <td>Верификация корректности изменения</td>
+                    <td>Quality</td>
+                </tr>
+                <tr>
+                    <td><code>openspec-onboard</code></td>
+                    <td>Онбординг нового разработчика в проект</td>
+                    <td>Meta</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ===== 5. СТРУКТУРА ПРОЕКТА ===== -->
+    <section>
+        <h2>5. Структура проекта OpenSpec</h2>
+        <p>
+            Корень OpenSpec-проекта — директория <code>openspec/</code> в репозитории.
+            Она содержит три ключевые зоны: спек-файлы (source of truth), активные изменения
+            и архив завершённых.
+        </p>
+
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+                flowchart TD
+                    Root["openspec/"] --> Specs["specs/"]
+                    Root --> Changes["changes/"]
+                    Root --> Config["config.yaml"]
+
+                    Specs --> Domain["&lt;domain&gt;/"]
+                    Domain --> SpecMd["spec.md &mdash; source of truth"]
+
+                    Changes --> ChangeName["&lt;change-name&gt;/"]
+                    Changes --> Archive["archive/"]
+
+                    ChangeName --> Proposal["proposal.md &mdash; что и почему"]
+                    ChangeName --> Design["design.md &mdash; как делаем"]
+                    ChangeName --> Tasks["tasks.md &mdash; чеклист задач"]
+                    ChangeName --> DeltaSpecs["specs/ &mdash; дельта-спеки"]
+
+                    Archive --> Archived["YYYY-MM-DD-&lt;name&gt;/"]
+
+                    style Root fill:#16213e,color:#fff,stroke:none,font-weight:700
+                    style Specs fill:#0f3460,color:#fff,stroke:none
+                    style Changes fill:#0f3460,color:#fff,stroke:none
+                    style Archive fill:#1a6b4c,color:#fff,stroke:none
+                    style ChangeName fill:#533483,color:#fff,stroke:none
+                    style SpecMd fill:#e8ecf4,stroke:none
+                    style Proposal fill:#e8ecf4,stroke:none
+                    style Design fill:#e8ecf4,stroke:none
+                    style Tasks fill:#e8ecf4,stroke:none
+                    style DeltaSpecs fill:#e8ecf4,stroke:none
+                    style Archived fill:#e8ecf4,stroke:none
+                    style Config fill:#e8ecf4,stroke:none
+                    style Domain fill:#e8ecf4,stroke:none
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 16px;">
+            <div class="card">
+                <h4>specs/ — основные спецификации</h4>
+                <p style="font-size:0.92rem;">
+                    Source of truth по доменам. Каждый домен — директория с файлом <code>spec.md</code>.
+                    Сюда вливаются дельта-спеки после синхронизации.
+                </p>
+            </div>
+            <div class="card">
+                <h4>changes/ — активные и завершённые</h4>
+                <p style="font-size:0.92rem;">
+                    Активные изменения лежат в <code>changes/&lt;name&gt;/</code>. Каждое содержит
+                    proposal, design, tasks.md и папку specs/ с дельта-спеками. Завершённые
+                    перемещаются в <code>changes/archive/</code> с префиксом даты.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 6. WORKFLOW (диаграмма 1) ===== -->
+    <section>
+        <h2>6. Workflow: полный жизненный цикл изменения</h2>
+        <p>
+            Работа над любым изменением проходит через четыре обязательных этапа.
+            Каждый этап имеет свои артефакты и использует определённые скиллы.
+        </p>
+
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+                flowchart TD
+                    Start(( )) --> P[Propose]
+                    P --> A[Apply]
+                    A --> S[Sync]
+                    S --> ARC[Archive]
+                    ARC --> End(( ))
+
+                    subgraph PBlock["1. Propose — создание"]
+                        P1["Чтение контекста кода"]
+                        P2["openspec-propose / openspec-new-change"]
+                        P3["Артефакты: proposal.md, design.md, tasks.md, specs/"]
+                        P1 --> P2 --> P3
+                    end
+
+                    subgraph ABlock["2. Apply — реализация"]
+                        A1["Чтение proposal, design, tasks"]
+                        A2["openspec-apply-change / openspec-ff-change"]
+                        A3{"Задача ясна?"}
+                        A4["Выполнение задачи"]
+                        A5["Запрос к родительскому агенту"]
+                        A6["Отметка задачи"]
+                        A7["Ещё задачи?"]
+                        A1 --> A2
+                        A2 --> A3
+                        A3 -->|Да| A4
+                        A3 -->|Нет| A5
+                        A5 --> A3
+                        A4 --> A6
+                        A6 --> A7
+                        A7 -->|Да| A2
+                    end
+
+                    subgraph SBlock["3. Sync — синхронизация"]
+                        S1["openspec-sync-specs"]
+                        S2["Слияние дельта-спек в specs/"]
+                        S3["Проверка результата"]
+                        S1 --> S2 --> S3
+                    end
+
+                    subgraph ARCBlock["4. Archive — архивация"]
+                        ARC1["openspec-archive-change"]
+                        ARC2["Перемещение в archive/YYYY-MM-DD-name"]
+                        ARC3["Сводка родительскому агенту"]
+                        ARC1 --> ARC2 --> ARC3
+                    end
+
+                    P3 -.-> A1
+                    A7 -->|Нет| S1
+                    S3 -.-> ARC1
+
+                    style Start fill:#16213e,color:#fff,stroke:none
+                    style End fill:#16213e,color:#fff,stroke:none
+                    style P fill:#0f3460,color:#fff,stroke:none
+                    style A fill:#533483,color:#fff,stroke:none
+                    style S fill:#1a6b4c,color:#fff,stroke:none
+                    style ARC fill:#8b3a3a,color:#fff,stroke:none
+                    style P3 fill:#e8ecf4,stroke:none
+                    style A1 fill:#e8ecf4,stroke:none
+            </div>
+        </div>
+
+        <h3>Этап 1: Propose</h3>
+        <p>
+            Родительский агент даёт команду «Начни работу над X». OpenSpec Manager читает
+            контекст кода, затем через скилл <code>openspec-propose</code> создаёт полный
+            набор артефактов в <code>openspec/changes/&lt;name&gt;/</code>: proposal (что и почему),
+            design (как делаем), tasks.md (чеклист задач) и дельта-спеки.
+        </p>
+
+        <h3>Этап 2: Apply</h3>
+        <p>
+            После утверждения proposal родительский агент говорит «Реализуй изменение X».
+            Менеджер читает tasks.md, затем последовательно выполняет задачи через
+            <code>openspec-apply-change</code>. Если задача неясна — не гадает, а запрашивает
+            уточнение. После каждой задачи отмечает прогресс.
+        </p>
+
+        <h3>Этап 3: Sync</h3>
+        <p>
+            После реализации всех задач дельта-спеки из <code>changes/&lt;name&gt;/specs/</code>
+            синхронизируются с основными <code>specs/</code> через <code>openspec-sync-specs</code>.
+        </p>
+
+        <h3>Этап 4: Archive</h3>
+        <p>
+            Финальный этап — архивация. Изменение перемещается в <code>changes/archive/YYYY-MM-DD-&lt;name&gt;/</code>
+            через <code>openspec-archive-change</code>. Родительский агент получает сводку.
+        </p>
+    </section>
+
+    <!-- ===== 7. ДИАГРАММА ПОСЛЕДОВАТЕЛЬНОСТИ (диаграмма 2) ===== -->
+    <section>
+        <h2>7. Взаимодействие: родительский агент и OpenSpec Manager</h2>
+        <p>
+            Ниже — типичная последовательность вызовов при работе над изменением.
+            OpenSpec Manager выступает оркестратором: принимает команды от родительского
+            агента, вызывает нужные скиллы или MCP-инструменты, и возвращает результат.
+        </p>
+
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+                sequenceDiagram
+                    participant Parent as Parent Agent
+                    participant OM as OpenSpec Manager
+                    participant Skill as Skill Tool
+                    participant MCP as openspec-mcp
+                    participant FS as File System
+
+                    rect rgb(240, 242, 248)
+                        Note over Parent,FS: 1. PROPOSE
+                        Parent->>OM: Начни работу над X
+                        OM->>FS: Чтение контекста кода
+                        OM->>Skill: openspec-propose
+                        Skill->>FS: Создание changes/name/proposal.md
+                        Skill->>FS: Создание changes/name/design.md
+                        Skill->>FS: Создание changes/name/tasks.md
+                        Skill->>FS: Создание changes/name/specs/
+                        Skill-->>OM: Артефакты созданы
+                        OM-->>Parent: Сводка: proposal, дизайн, задачи
+                    end
+
+                    rect rgb(248, 245, 240)
+                        Note over Parent,FS: 2. APPLY
+                        Parent->>OM: Реализуй изменение X
+                        OM->>MCP: read_tasks
+                        MCP->>FS: Чтение tasks.md
+                        MCP-->>OM: Список задач
+                        loop Последовательно
+                            OM->>Skill: openspec-apply-change (задача N)
+                            Skill->>FS: Модификация кода
+                            Skill-->>OM: Задача выполнена
+                            OM->>MCP: update_task_status
+                        end
+                        OM-->>Parent: Прогресс: N/M задач
+                    end
+
+                    rect rgb(240, 248, 242)
+                        Note over Parent,FS: 3. SYNC
+                        OM->>Skill: openspec-sync-specs
+                        Skill->>FS: Слияние дельта-спек
+                        Skill-->>OM: Синхронизация завершена
+                    end
+
+                    rect rgb(248, 240, 240)
+                        Note over Parent,FS: 4. ARCHIVE
+                        OM->>Skill: openspec-archive-change
+                        Skill->>FS: Перемещение в archive/
+                        Skill-->>OM: Изменение архивировано
+                        OM-->>Parent: Изменение завершено
+                    end
+            </div>
+        </div>
+
+        <p>
+            После каждого этапа менеджер возвращает родительскому агенту сводку с указанием
+            созданных артефактов, количества выполненных задач и расположения файлов.
+        </p>
+    </section>
+
+    <!-- ===== 8. ЭКОСИСТЕМА (диаграмма 3) ===== -->
+    <section>
+        <h2>8. Экосистема агента</h2>
+        <p>
+            OpenSpec Manager — центральный элемент, связывающий инструменты, скиллы,
+            изолированный MCP и файловую систему проекта.
+        </p>
+
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+                classDiagram
+                    class OpenSpecManager {
+                        +model: inherit
+                        +permissionMode: auto
+                        +Tools: Read, Write, Edit, Bash, Glob, Skill
+                        +propose() void
+                        +apply() void
+                        +sync() void
+                        +archive() void
+                    }
+
+                    class MCP {
+                        +list_changes()
+                        +list_specs()
+                        +show_change()
+                        +read_spec()
+                        +read_tasks()
+                        +validate_change()
+                        +archive_change()
+                        +Запуск: uvx openspec-mcp
+                    }
+
+                    class Skills {
+                        +openspec-propose
+                        +openspec-explore
+                        +openspec-new-change
+                        +openspec-continue-change
+                        +openspec-apply-change
+                        +openspec-ff-change
+                        +openspec-sync-specs
+                        +openspec-verify-change
+                        +openspec-archive-change
+                        +openspec-bulk-archive-change
+                        +openspec-onboard
+                    }
+
+                    class FileSystem {
+                        +String specs/
+                        +String changes/
+                        +String changes/archive/
+                        +readSpec(path)
+                        +writeChange(name, artifact)
+                        +archiveChange(name)
+                    }
+
+                    class CLI {
+                        +openspec list --json
+                        +openspec status --change name
+                    }
+
+                    OpenSpecManager --> Skills : вызывает через Skill tool
+                    OpenSpecManager --> MCP : быстрые запросы
+                    OpenSpecManager --> FileSystem : чтение/запись
+                    OpenSpecManager --> CLI : кастомные операции через Bash
+
+                    Skills --> FileSystem : создание артефактов
+                    MCP --> FileSystem : read-only доступ
+            </div>
+        </div>
+
+        <h3>Режимы работы</h3>
+        <div class="grid-2">
+            <div class="card">
+                <h4>model: inherit</h4>
+                <p style="font-size:0.92rem;">
+                    Агент использует ту же модель, что и родительский агент. Не требуется
+                    отдельного API-ключа или дополнительных затрат на подписку.
+                </p>
+            </div>
+            <div class="card">
+                <h4>permissionMode: auto</h4>
+                <p style="font-size:0.92rem;">
+                    Все разрешённые команды выполняются автоматически, без запроса
+                    подтверждения у пользователя. Ускоряет работу при частых вызовах
+                    Bash и File Operations.
+                </p>
+            </div>
+        </div>
+
+        <h3>Три способа взаимодействия с OpenSpec</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Способ</th>
+                    <th>Инструмент</th>
+                    <th>Когда использовать</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Скиллы</strong></td>
+                    <td>Skill tool</td>
+                    <td>Полный workflow: propose, apply, sync, archive. Содержит все шаги и проверки.</td>
+                </tr>
+                <tr>
+                    <td><strong>MCP-сервер</strong></td>
+                    <td>Inlined MCP (uvx)</td>
+                    <td>Быстрые read-only запросы: список изменений, чтение задач, валидация.</td>
+                </tr>
+                <tr>
+                    <td><strong>CLI напрямую</strong></td>
+                    <td>Bash</td>
+                    <td>Кастомные операции: <code>openspec list --json</code>, <code>openspec status</code>.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ===== 9. НАВИГАЦИЯ ПО СКИЛЛАМ ===== -->
+    <section>
+        <h2>9. Быстрая навигация по скиллам</h2>
+        <p>
+            Все скиллы находятся в директории <code>~/.claude/skills/openspec-*/</code>.
+            Ниже — полный список для быстрого копирования при вызове через Skill tool:
+        </p>
+        <p style="margin-top: 12px;">
+            <span class="skill-tag">openspec-propose</span>
+            <span class="skill-tag">openspec-explore</span>
+            <span class="skill-tag">openspec-new-change</span>
+            <span class="skill-tag">openspec-continue-change</span>
+            <span class="skill-tag">openspec-apply-change</span>
+            <span class="skill-tag">openspec-ff-change</span>
+            <span class="skill-tag">openspec-sync-specs</span>
+            <span class="skill-tag">openspec-verify-change</span>
+            <span class="skill-tag">openspec-archive-change</span>
+            <span class="skill-tag">openspec-bulk-archive-change</span>
+            <span class="skill-tag">openspec-onboard</span>
+        </p>
+        <p style="margin-top: 8px; font-size:0.92rem; color:#4a4a6a;">
+            Формат вызова: <code>Skill tool -> skill: "openspec-apply-change"</code>
+        </p>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        Создано writer-agent на основе конфигурации openspec-manager.
+        <br>Актуально на 2026-06-15.
+    </footer>
+
+</div>
+</body>
+</html>

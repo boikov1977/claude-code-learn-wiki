@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Management — управление сессиями в Claude Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .shortcut-table kbd {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>💾 Session Management — управление сессиями</h1>
+  <p class="subtitle">Как начинать, продолжать и возобновлять разговоры с Claude Code</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое сессия?</a></li>
+      <li><a href="#create">Создание сессии: claude</a></li>
+      <li><a href="#resume">Возврат в сессию: --resume</a></li>
+      <li><a href="#continue">Новая сессия с контекстом: --continue</a></li>
+      <li><a href="#difference">Чем --resume отличается от --continue</a></li>
+      <li><a href="#storage">Где живут сессии и сколько</a></li>
+      <li><a href="#lifecycle">Жизненный цикл сессии</a></li>
+      <li><a href="#scenarios">Практические сценарии</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ СЕССИЯ -->
+  <h2 id="what"><span class="emoji">💬</span> Что такое сессия?</h2>
+
+  <p>
+    Когда ты открываешь терминал и пишешь <code>claude</code> &mdash; ты создаёшь <strong>сессию</strong>.
+    Это как разговор: ты задаёшь вопросы, Claude отвечает, вы работаете вместе. Разговор длится,
+    пока ты не закроешь терминал (или пока сессия не истечёт).
+  </p>
+
+  <p>
+    Каждая сессия &mdash; это отдельный контекст. Все сообщения, все действия, все фоновые задачи
+    &mdash; всё это живёт внутри одной сессии. Закрыл терминал &mdash; разговор прервался.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> Сессия &mdash; это «диалоговое окно» с Claude Code.
+    Одно окно = одна сессия. Закрыл окно &mdash; сессия прервалась. Но не исчезла &mdash;
+    она где-то ещё живёт и может вернуться.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. СОЗДАНИЕ СЕССИИ -->
+  <h2 id="create"><span class="emoji">🚀</span> Создание сессии: claude</h2>
+
+  <p>Самый простой и очевидный способ:</p>
+
+  <div class="code-block">
+    <code>claude</code>
+  </div>
+
+  <p>
+    Это создаёт <strong>новую сессию</strong> &mdash; чистый лист. Claude не помнит ничего из
+    предыдущих разговоров (если ты не настроил память в <code>CLAUDE.md</code>).
+  </p>
+
+  <div class="card card-green">
+    <h3>Пример</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Утром пришёл на работу, открыл терминал</span>
+$ claude
+
+<span class="yaml-comment"># Claude приветствует тебя и готов работать</span>
+<span class="yaml-comment"># Это новая сессия &mdash; чистый старт</span></code>
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Важно:</strong> Даже если ты запускаешь <code>claude</code> в том же терминале
+    и в той же папке &mdash; это <em>новая</em> сессия. Предыдущая не пропала &mdash;
+    она просто в другом «окне».</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ВОЗВРАТ В СЕССИЮ -->
+  <h2 id="resume"><span class="emoji">🔄</span> Возврат в сессию: --resume</h2>
+
+  <p>
+    Представь: ты работал над задачей, закрыл ноутбук, поехал домой. На диване открыл терминал
+    и хочешь продолжить именно там, где остановился. Вот тут приходит на помощь <code>--resume</code>.
+  </p>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Вернуться в прерванную сессию</span>
+claude --resume
+
+<span class="yaml-comment"># Вернуться в конкретную сессию по ID</span>
+claude --resume &lt;session-id&gt;</code>
+  </div>
+
+  <p><code>--resume</code> делает вот что:</p>
+
+  <ul>
+    <li>Находит последнюю прерванную сессию</li>
+    <li>Восстанавливает <strong>всё состояние</strong> &mdash; историю сообщений, контекст, фоновые задачи</li>
+    <li>Ты продолжаешь ровно с того места, где остановился</li>
+  </ul>
+
+  <div class="card card-purple">
+    <h3>Что восстанавливается</h3>
+    <table>
+      <tr>
+        <th>Элемент</th>
+        <th>Восстанавливается?</th>
+      </tr>
+      <tr>
+        <td>История сообщений</td>
+        <td>Да, полностью</td>
+      </tr>
+      <tr>
+        <td>Контекст (что Claude «помнит»)</td>
+        <td>Да</td>
+      </tr>
+      <tr>
+        <td>Фоновые задачи</td>
+        <td>Зависит от ситуации</td>
+      </tr>
+      <tr>
+        <td>Файлы на диске</td>
+        <td>Остаются как есть</td>
+      </tr>
+      <tr>
+        <td>CLAUDE.md / память</td>
+        <td>Да, подхватывается</td>
+      </tr>
+    </table>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. НОВАЯ СЕССИЯ С КОНТЕКСТОМ -->
+  <h2 id="continue"><span class="emoji">➡️</span> Новая сессия с контекстом: --continue</h2>
+
+  <p>
+    А вот другая ситуация: контекст разросся до огромных размеров, Claude начал тупить,
+    отвечает медленно и теряет нить. Ты хочешь начать <strong>свежую сессию</strong>,
+    но при этом не потерять всё, что обсудили.
+  </p>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Начать новую сессию, подхватив контекст предыдущей</span>
+claude --continue</code>
+  </div>
+
+  <p><code>--continue</code> делает следующее:</p>
+
+  <ul>
+    <li>Берёт контекст (содержание) предыдущей сессии</li>
+    <li>Создаёт <strong>новую сессию</strong> с этим контекстом</li>
+    <li>Старая сессия <strong>остаётся жить</strong> (но уже не активна)</li>
+  </ul>
+
+  <div class="card card-orange">
+    <h3>Аналогия из жизни</h3>
+    <p>
+      Представь большую доску, на которой ты рисовал схему. Доска уже забита &mdash;
+      негде писать. Ты фотографируешь её, стираешь всё и начинаешь рисовать заново,
+      глядя на фотографию. Новая доска &mdash; чистая, но ты не потерял информацию.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ЧЕМ ОТЛИЧАЕТСЯ -->
+  <h2 id="difference"><span class="emoji">⚖️</span> Чем --resume отличается от --continue</h2>
+
+  <p>Это два самых частых путаницы. Разберём наглядно.</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    USER(("&#x1f464; Пользователь"))
+
+    USER -->|"claude --resume"| RESUME["&#x1f504; --resume"]
+    USER -->|"claude --continue"| CONTINUE["&#x1f680; --continue"]
+
+    RESUME --> SAME["&#x1f501; Та же самая сессия"]
+    SAME --> SAME_STATE["&#x1f4cb; Тот же стейт"]
+    SAME --> SAME_BG["&#x23f3; Те же фоновые задачи"]
+    SAME --> SAME_ID["&#x1f194; Тот же session ID"]
+
+    CONTINUE --> NEW["&#x2728; Новая сессия"]
+    NEW --> NEW_STATE["&#x1f4dd; Чистый контекст"]
+    NEW --> OLD_LIVES["&#x1f4c4; Старая сессия жива"]
+    NEW --> PASSED["&#x1f4e6; Контекст передан"]
+
+    style USER fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style RESUME fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style CONTINUE fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style SAME fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style SAME_STATE fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style SAME_BG fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style SAME_ID fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style NEW fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style NEW_STATE fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    style OLD_LIVES fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style PASSED fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>--resume</h3>
+      <ul>
+        <li><strong>Та же</strong> сессия</li>
+        <li>Тот же session ID</li>
+        <li>Тот же стейт и контекст</li>
+        <li>Фоновые задачи могут быть активны</li>
+        <li>Продолжаешь ровно откуда ушёл</li>
+      </ul>
+      <div class="code-block">
+        <code>claude --resume</code>
+      </div>
+    </div>
+
+    <div class="card card-orange">
+      <h3>--continue</h3>
+      <ul>
+        <li><strong>Новая</strong> сессия</li>
+        <li>Новый session ID</li>
+        <li>Контекст передан из старой</li>
+        <li>Старая сессия остаётся жить</li>
+        <li>Свежий старт с багажом знаний</li>
+      </ul>
+      <div class="code-block">
+        <code>claude --continue</code>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Правило большого пальца:</strong> Хочешь продолжить &mdash; используй <code>--resume</code>.
+    Хочешь начать заново, но не терять контекст &mdash; используй <code>--continue</code>.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. ГДЕ ЖИВУТ СЕССИИ -->
+  <h2 id="storage"><span class="emoji">📁</span> Где живут сессии и сколько</h2>
+
+  <p>Все сессии хранятся локально на твоём компьютере:</p>
+
+  <div class="code-block">
+    <code>~/.claude/sessions/</code>
+  </div>
+
+  <p>
+    Каждая сессия &mdash; это отдельная папка с идентификатором. Внутри &mdash; история сообщений,
+    контекст, метаданные. Claude Code хранит их в формате JSON.
+  </p>
+
+  <h3>TTL (time-to-live)</h3>
+  <p>
+    Сессии не живут вечно. У каждой сессии есть <strong>TTL</strong> &mdash; время жизни.
+    После истечения TTL сессия автоматически удаляется.
+  </p>
+
+  <div class="card card-red">
+    <h3>Сколько живут сессии</h3>
+    <table>
+      <tr>
+        <th>Параметр</th>
+        <th>Значение</th>
+      </tr>
+      <tr>
+        <td>Хранение на диске</td>
+        <td><strong>~/.claude/sessions/</strong></td>
+      </tr>
+      <tr>
+        <td>TTL (время жизни)</td>
+        <td>Зависит от настроек, обычно <strong>несколько дней</strong></td>
+      </tr>
+      <tr>
+        <td>После истечения TTL</td>
+        <td>Сессия удаляется, вернуться нельзя</td>
+      </tr>
+      <tr>
+        <td>Ручное удаление</td>
+        <td>Можно удалить вручную из <code>~/.claude/sessions/</code></td>
+      </tr>
+    </table>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ЖИЗНЕННЫЙ ЦИКЛ -->
+  <h2 id="lifecycle"><span class="emoji">♻️</span> Жизненный цикл сессии</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    START(("&#x1f680; Запуск<br>claude")) --> CREATE["&#x2728; Новая сессия создана"]
+    CREATE --> ACTIVE["&#x1f4ac; Активная сессия<br>Ты общаешься с Claude"]
+    ACTIVE --> CLOSE["&#x1f6aa; Закрыл терминал"]
+    CLOSE --> HANGING["&#x23f3; Сессия висит<br>в памяти"]
+
+    HANGING -->|"claude --resume"| ACTIVE
+    HANGING -->|"claude --continue"| NEW_SESSION["&#x1f504; Новая сессия<br>с контекстом старой"]
+    NEW_SESSION --> ACTIVE
+
+    HANGING -->|"TTL истёк"| DEAD["&#x1f480; Сессия удалена"]
+    HANGING -->|"claude"| DEAD2["&#x274c; Забыта<br>(но пока жива)"]
+
+    style START fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style CREATE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style ACTIVE fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style CLOSE fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style HANGING fill:#fffde6,stroke:#b08800,stroke-width:2px
+    style NEW_SESSION fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style DEAD fill:#ffeef0,stroke:#d73a49,stroke-width:2px
+    style DEAD2 fill:#ffeef0,stroke:#d73a49,stroke-width:2px
+    </div>
+  </div>
+
+  <p>Шаг за шагом:</p>
+
+  <ol>
+    <li><strong>Создание.</strong> Ты пишешь <code>claude</code> &mdash; появляется новая сессия.</li>
+    <li><strong>Активная фаза.</strong> Ты общаешься с Claude, он работает, выполняет задачи.</li>
+    <li><strong>Прерывание.</strong> Закрыл терминал. Сессия не умирает сразу &mdash; она «висит».</li>
+    <li><strong>Ожидание.</strong> Сессия ждёт:maybe ты вернёшься через <code>--resume</code>.</li>
+    <li><strong>Восстановление (опционально).</strong> Ты пишешь <code>claude --resume</code> &mdash; и ты обратно.</li>
+    <li><strong>Удаление.</strong> Прошло время (TTL истёк) &mdash; сессия удаляется навсегда.</li>
+  </ol>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. ПРАКТИЧЕСКИЕ СЦЕНАРИИ -->
+  <h2 id="scenarios"><span class="emoji">🎯</span> Практические сценарии</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>🏠 Работаешь в офисе &rarr; дома</h3>
+      <p>
+        Утром в офисе разбирал баг в <code>auth</code>-модуле. Закрыл ноутбук, поехал домой.
+        На диване открыл терминал:
+      </p>
+      <div class="code-block">
+        <code>claude --resume</code>
+      </div>
+      <p>И ты обратно в той же сессии &mdash; Claude помнит весь баг и продолжает с того места.</p>
+    </div>
+
+    <div class="card card-orange">
+      <h3>📈 Контекст разросся</h3>
+      <p>
+        Три часа кодишь большую фичу. Контекст заполнился на 200%, Claude начал отвечать медленно.
+        Начинаешь чистую сессию, но с багажем:
+      </p>
+      <div class="code-block">
+        <code>claude --continue</code>
+      </div>
+      <p>Новая сессия подхватила контекст предыдущей и работает быстрее.</p>
+    </div>
+
+    <div class="card card-purple">
+      <h3>⏳ Фоновая задача отработала</h3>
+      <p>
+        Запустил фоновую задачу <code>--bg</code>, закрыл терминал уходя на обед.
+        Вернулся &mdash; задача отработала:
+      </p>
+      <div class="code-block">
+        <code>claude --resume</code>
+      </div>
+      <p>Сессия восстановилась, результат фоновой задачи доступен в истории.</p>
+    </div>
+
+    <div class="card card-accent">
+      <h3>🌙 Вечер &rarr; утро</h3>
+      <p>
+        Вечером начал исследовать архитектуру проекта. Уснул. Утром продолжил:
+      </p>
+      <div class="code-block">
+        <code>claude --resume</code>
+      </div>
+      <p>Пока TTL не истёк &mdash; ты в той же сессии со всей вчерашней историей.</p>
+    </div>
+  </div>
+
+  <div class="card card-yellow">
+    <h3>Когда --resume не поможет</h3>
+    <ul>
+      <li><strong>TTL истёк</strong> &mdash; сессия удалена, вернуть нельзя. Придётся начинать с нуля.</li>
+      <li><strong>Ручное удаление</strong> &mdash; если ты сам удалил папку <code>~/.claude/sessions/</code>.</li>
+      <li><strong>Сессия с фоновыми задачами</strong> &mdash; фоновые задачи могут не восстановиться
+      (подробнее в статье про <a href="background-tasks.html">Background Tasks</a>).</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Сессия &mdash; это разговор с Claude Code. <code>claude</code> создаёт
+      новую сессию. <code>--resume</code> возвращает в прерванную (та же самая сессия).
+      <code>--continue</code> начинает новую сессию с контекстом старой. Сессии хранятся
+      в <code>~/.claude/sessions/</code> и умирают после TTL. Закрыл терминал &mdash;
+      не переживай, можно вернуться. 💾
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Режимы пермишенов Claude Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    .mode-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85em;
+      margin-right: 6px;
+    }
+    .mode-badge.auto { background: #f6fff8; color: var(--green); border: 1px solid #c3e6cb; }
+    .mode-badge.accept { background: #fffde6; color: #b08800; border: 1px solid #f0e68c; }
+    .mode-badge.plan { background: #fff8f0; color: var(--orange); border: 1px solid #f5c6a0; }
+    .mode-badge.bypass { background: #ffeef0; color: var(--red); border: 1px solid #f9c5ce; }
+    .mode-badge.default { background: #f1f8ff; color: var(--accent); border: 1px solid #c6ddf8; }
+
+    .mode-card {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .mode-icon {
+      font-size: 2em;
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+    }
+    .mode-icon.green { background: #f6fff8; }
+    .mode-icon.yellow { background: #fffde6; }
+    .mode-icon.orange { background: #fff8f0; }
+    .mode-icon.red { background: #ffeef0; }
+    .mode-icon.gray { background: #f1f8ff; }
+    .mode-body { flex: 1; }
+    .mode-body h4 { font-size: 1.1em; margin-bottom: 4px; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .shortcut-table kbd {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+      box-shadow: 0 1px 0 var(--border);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">← Назад к вики</a>
+
+  <h1>Режимы пермишенов Claude Code</h1>
+  <p class="subtitle">Пять уровней доверия: от «не трогай ничего» до «я сам разберусь»</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое режим работы?</a></li>
+      <li><a href="#modes">Все пять режимов</a></li>
+      <li><a href="#spectrum">Спектр безопасности</a></li>
+      <li><a href="#switch">Как переключаться</a></li>
+      <li><a href="#when">Когда какой использовать</a></li>
+      <li><a href="#ours">Что стоит у нас</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ РЕЖИМ РАБОТЫ -->
+  <h2 id="what"><span class="emoji">🔑</span> Что такое режим работы?</h2>
+
+  <p>
+    Представь: ты нанял помощника. Можно дать ему ключи от квартиры и сказать «делай что нужно».
+    А можно сидеть рядом и разрешать каждое действие: «открой ящик — OK, включи дрель — подожди».
+  </p>
+
+  <p>
+    <strong>Режим работы (permission mode)</strong> — это именно эта настройка: насколько
+    Claude Code может действовать <strong>самостоятельно</strong>, не спрашивая у тебя подтверждения.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> Режим определяет, какие действия Claude Code делает
+    молча, а какие — только после твоего «ОК». От этого зависит и скорость работы, и безопасность.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ВСЕ ПЯТЬ РЕЖИМОВ -->
+  <h2 id="modes"><span class="emoji">🎛️</span> Все пять режимов</h2>
+
+  <!-- DEFAULT -->
+  <div class="card card-accent">
+    <div class="mode-card">
+      <div class="mode-icon gray">⚪</div>
+      <div class="mode-body">
+        <h4><span class="mode-badge default">default</span> Стандартный</h4>
+        <p>
+          Базовый режим Claude Code. Спрашивает <strong>почти на каждое действие</strong> —
+          чтение файлов, запуск команд, редактирование. Максимально безопасно, но медленно.
+        </p>
+        <p><strong>Для кого:</strong> Новички, первое знакомство с Claude Code, работа с незнакомым кодом.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTO -->
+  <div class="card card-green">
+    <div class="mode-card">
+      <div class="mode-icon green">🟢</div>
+      <div class="mode-body">
+        <h4><span class="mode-badge auto">auto</span> Автоматический</h4>
+        <p>
+          Сам решает, что безопасно. Без операции (чтение, <code>grep</code>, навигация по коду)
+          делает <strong>молча</strong>. Потенциально опасные (редактирование файлов, удаление,
+          запуск команд) — <strong>спрашивает</strong>.
+        </p>
+        <p><strong>Для кого:</strong> Повседневная работа. Хороший баланс между скоростью и контролем.</p>
+        <p><strong>Мы были на нём долго</strong> — и это нормальный выбор для большинства задач.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCEPT EDITS -->
+  <div class="card card-yellow">
+    <div class="mode-card">
+      <div class="mode-icon yellow">🟡</div>
+      <div class="mode-body">
+        <h4><span class="mode-badge accept">acceptEdits</span> Авто-правки</h4>
+        <p>
+          Как <code>auto</code>, но с одним важным отличием: <strong>редактирование файлов
+          разрешено без подтверждения</strong>. Чтение и запуск команд всё ещё могут спросить.
+        </p>
+        <p><strong>Для кого:</strong> Когда правишь много файлов подряд и не хочешь на каждый
+          <em>«Edit? Yes»</em> отвечать. Экономит кучу кликов при массовых изменениях.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAN -->
+  <div class="card card-orange">
+    <div class="mode-card">
+      <div class="mode-icon orange">🟠</div>
+      <div class="mode-body">
+        <h4><span class="mode-badge plan">plan</span> Режим планирования</h4>
+        <p>
+          <strong>Только читает.</strong> Не пишет, не редактирует, не запускает команды.
+          Идеален для исследования кода и составления плана перед изменениями.
+        </p>
+        <p><strong>Для кого:</strong> Сложные задачи, где сначала нужно разобраться и спроектировать
+          решение, а потом уже делать. Защита от случайных правок.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BYPASS PERMISSIONS -->
+  <div class="card card-red">
+    <div class="mode-card">
+      <div class="mode-icon red">🔴</div>
+      <div class="mode-body">
+        <h4><span class="mode-badge bypass">bypassPermissions</span> Полный доступ</h4>
+        <p>
+          Делает <strong>всё без единого вопроса</strong>. Читает, пишет, удаляет, запускает —
+          ничего не спрашивает. Самый опасный режим, но и самый быстрый.
+        </p>
+        <p><strong>Для кого:</strong> Опытные разработчики, которые знают, что делают. Когда ты
+         уверен (уверен) в задаче и хочешь максимальной скорости.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">⚠️</span>
+    <span><strong>bypassPermissions ≠ «ничего не проверяется».</strong> Claude Code всё равно
+    следует инструкциям из CLAUDE.md и системного промпта. Это не режим «самоуничтожения» —
+    это режим «я доверяю агенту принимать решения самому».</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. СПЕКТР БЕЗОПАСНОСТИ -->
+  <h2 id="spectrum"><span class="emoji">📊</span> Спектр безопасности</h2>
+
+  <p>Все режимыкомпоновкаены (выстроены) от самого безопасного к самому свободному:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    A["⚪ default<br><b>Спрашивает всё</b><br><small>Максимальный контроль</small>"]
+    B["🟢 auto<br><b>Спрашивает опасное</b><br><small>Баланс контроля и скорости</small>"]
+    C["🟡 acceptEdits<br><b>Разрешает правки</b><br><small>Быстрее на редактировании</small>"]
+    D["🟠 plan<br><b>Только читает</b><br><small>Исследование без риска</small>"]
+    E["🔴 bypass<br><b>Делает всё сам</b><br><small>Максимальная скорость</small>"]
+
+    A -->|меньше вопросов| B
+    B -->|правки без подтв.| C
+    C -->|всё без вопросов| E
+
+    D -.-|" read-only"| A
+
+    style A fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style B fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    style C fill:#fffde6,stroke:#b08800,stroke-width:2px
+    style D fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style E fill:#ffeef0,stroke:#d73a49,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="card card-purple">
+    <strong>Важный момент:</strong> <code>plan</code> — это не «ещё опаснее чем auto».
+    Это <strong>отдельная ось</strong>: он стоит <em>по-над</em> остальными, потому что
+    <em>ничего не меняет</em>. Можно переключиться на plan в любом из остальных режимов,
+    чтобы безопасно исследовать код.
+  </div>
+
+  <table>
+    <tr>
+      <th>Режим</th>
+      <th>Чтение</th>
+      <th>Запись файлов</th>
+      <th>Бash-команды</th>
+      <th>Удаление</th>
+    </tr>
+    <tr>
+      <td><span class="mode-badge default">default</span></td>
+      <td>❓ Спрашивает</td>
+      <td>❓ Спрашивает</td>
+      <td>❓ Спрашивает</td>
+      <td>❓ Спрашивает</td>
+    </tr>
+    <tr>
+      <td><span class="mode-badge auto">auto</span></td>
+      <td>✅ Молча</td>
+      <td>❓ Спрашивает</td>
+      <td>❓ Спрашивает</td>
+      <td>❓ Спрашивает</td>
+    </tr>
+    <tr>
+      <td><span class="mode-badge accept">acceptEdits</span></td>
+      <td>✅ Молча</td>
+      <td>✅ Молча</td>
+      <td>❓ Спрашивает</td>
+      <td>❓ Спрашивает</td>
+    </tr>
+    <tr>
+      <td><span class="mode-badge plan">plan</span></td>
+      <td>✅ Молча</td>
+      <td>🚫 Запрещено</td>
+      <td>🚫 Запрещено</td>
+      <td>🚫 Запрещено</td>
+    </tr>
+    <tr>
+      <td><span class="mode-badge bypass">bypass</span></td>
+      <td>✅ Молча</td>
+      <td>✅ Молча</td>
+      <td>✅ Молча</td>
+      <td>✅ Молча</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. КАК ПЕРЕКЛЮЧАТЬСЯ -->
+  <h2 id="switch"><span class="emoji">🔄</span> Как переключаться</h2>
+
+  <p>Переключить режим можно тремя способами — от самого быстрого до самого «настоящего»:</p>
+
+  <div class="card card-green">
+    <h3>1. Shift+Tab в сессии (самый быстрый)</h3>
+    <p>Нажал <kbd>Shift</kbd> + <kbd>Tab</kbd> — режим переключился циклически.
+    Удобно прямо во время работы, не отрываясь от задачи.</p>
+  </div>
+
+  <div class="card card-accent">
+    <h3>2. Команда /режим в чате</h3>
+    <p>Набери <code>/mode</code> и выбери нужный из списка. Более наглядно, чем Tab.</p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>3. Настройка по умолчанию</h3>
+    <p>Чтобы режим менялся по старту, настрой его в <code>settings.json</code>:</p>
+    <div class="code-block">
+      <code><span class="yaml-comment">// ~/.claude/settings.json</span>
+{
+  <span class="yaml-key">"defaultMode"</span>: <span class="yaml-val">"bypassPermissions"</span>
+}</code>
+    </div>
+  </div>
+
+  <div class="card card-purple">
+    <h3>4. Флаг при запуске</h3>
+    <p>Можно передать режим прямо в командной строке:</p>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Запуск с автоматическим режимом</span>
+claude --permission-mode auto
+
+<span class="yaml-comment"># Запуск с полным доступом</span>
+claude --permission-mode bypassPermissions
+
+<span class="yaml-comment"># Запуск в режиме планирования</span>
+claude --permission-mode plan</code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. КОГДА КАКОЙ -->
+  <h2 id="when"><span class="emoji">🧭</span> Когда какой использовать</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TB
+    START["🤔 Какая задача?"] --> Q1{"Знакомый проект?"}
+
+    Q1 -->|"Нет, новый код"| Q2{"Нужно исследовать<br>или уже писать?"}
+    Q2 -->|"Только изучить"| PLAN["🟠 plan<br>Исследуй код без риска"]
+    Q2 -->|"Писать код"| AUTO_START["🟢 auto<br>Начни с осторожностью"]
+
+    Q1 -->|"Да, свой проект"| Q3{"Сколько правок?"}
+
+    Q3 -->|"Много, массовые"| ACCEPT["🟡 acceptEdits<br>Правки без подтверждения"]
+    Q3 -->|"Немного, точечно"| AUTO_ROUTINE["🟢 auto<br>Стандартная рутина"]
+    Q3 -->|"Макс. скорость"| BYPASS["🔴 bypass<br>Делай всё сам"]
+
+    style START fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style PLAN fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style AUTO_START fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    style ACCEPT fill:#fffde6,stroke:#b08800,stroke-width:2px
+    style AUTO_ROUTINE fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    style BYPASS fill:#ffeef0,stroke:#d73a49,stroke-width:2px
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <th>Ситуация</th>
+      <th>Режим</th>
+      <th>Почему</th>
+    </tr>
+    <tr>
+      <td>Новый проект, незнакомый код</td>
+      <td><span class="mode-badge plan">plan</span> или <span class="mode-badge auto">auto</span></td>
+      <td>Сначала разобраться, потом действовать</td>
+    </tr>
+    <tr>
+      <td>Рутина — правки в знакомом коде</td>
+      <td><span class="mode-badge auto">auto</span> или <span class="mode-badge accept">acceptEdits</span></td>
+      <td>Привычный темп, не тратить время на подтверждения</td>
+    </tr>
+    <tr>
+      <td>Массовое рефакторинг</td>
+      <td><span class="mode-badge accept">acceptEdits</span></td>
+      <td>Десятки файлов — не будешь на каждый «да» жать</td>
+    </tr>
+    <tr>
+      <td>Точечная правка, известная задача</td>
+      <td><span class="mode-badge bypass">bypassPermissions</span></td>
+      <td>Знаешь что нужно — пусть делает, не мешая</td>
+    </tr>
+    <tr>
+      <td>Анализ, исследование, аудит</td>
+      <td><span class="mode-badge plan">plan</span></td>
+      <td>Ничего не менять — только читать и анализировать</td>
+    </tr>
+    <tr>
+      <td>Деликатные операции (prod, миграции)</td>
+      <td><span class="mode-badge default">default</span></td>
+      <td>Каждое действие под контролем</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. ЧТО СТОИТ У НАС -->
+  <h2 id="ours"><span class="emoji">🏠</span> Что стоит у нас</h2>
+
+  <div class="card card-red" style="border: 2px solid var(--red);">
+    <div class="mode-card">
+      <div class="mode-icon red" style="font-size: 2.5em;">🔴</div>
+      <div class="mode-body">
+        <h4 style="font-size: 1.3em;">Мы на <code>bypassPermissions</code></h4>
+        <p>
+          Да, полный доступ. Причина простая: <strong>я всё равно каждый раз жму «да-да-да,
+          согласен»</strong>. Claude Code спрашивает, я подтверждаю — мы теряем время впустую.
+        </p>
+        <p>
+          Это записано в нашем <code>CLAUDE.md</code> и работает на практике уже давно.
+          Если что-то пойдёт не так — всегда можно переключить через Shift+Tab.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">🛡️</span>
+    <span><strong>«А это безопасно?»</strong> — спросишь ты. Относительно. Мы компенсируем
+    это другими способами: бэкапы JSON/YAML при каждом изменении (через хук),
+    CLAUDE.md с чёткими инструкциями, и тем, что я знаю, что делаю.
+    Не каждый разработчик может так — и это нормально.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Режим пермишенов — это не «навсегда».
+      Меняй его под задачу: plan для анализа, auto для рутины, bypass для скорости.
+      Главное — знать, что ты делаешь. 🎯
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workflow Advanced — продвинутая мульти-агентная оркестрация</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .card-teal {
+      border-left: 4px solid var(--teal);
+      background: #f0ffff;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+    .yaml-str { color: #d73a49; }
+    .yaml-num { color: var(--orange); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>&#x2699;&#xfe0f; Workflow Advanced &mdash; продвинутая мульти-агентная оркестрация</h1>
+  <p class="subtitle">Детерминированные программы, которые оркестрируют десятки субагентов с возобновляемостью после падений</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое Workflow Tool (введение для продвинутых)</a></li>
+      <li><a href="#anatomy">Анатомия workflow-скрипта</a></li>
+      <li><a href="#agent">agent() &mdash; основной строительный блок</a></li>
+      <li><a href="#pipeline-vs-parallel">pipeline() против parallel()</a></li>
+      <li><a href="#quality">Паттерны верификации</a></li>
+      <li><a href="#budget">Budget management</a></li>
+      <li><a href="#overkill">Когда Workflow &mdash; overkill</a></li>
+      <li><a href="#full-example">Практический пример: полный скрипт</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ WORKFLOW TOOL -->
+  <h2 id="what"><span class="emoji">&#x1f3ed;</span> Что такое Workflow Tool</h2>
+
+  <p>
+    Если базовая статья <a href="workflow.html">Workflow</a> объясняет <em>зачем</em> оркестрировать,
+    эта &mdash; про то, <em>как</em>. Workflow-скрипт &mdash; это не просто «запусти агента и жди».
+    Это <strong>детерминированная программа</strong>, которая:
+  </p>
+
+  <ul>
+    <li>Описывает точный порядок запуска десятков субагентов</li>
+    <li>Передаёт результаты между стадиями автоматически</li>
+    <li>Поддерживает параллелизм и барьеры синхронизации</li>
+    <li><strong>Возобновляема после падения</strong> &mdash; если сессия упала, можно продолжить с того же места</li>
+  </ul>
+
+  <p>
+    Пишется на <strong>чистом JavaScript</strong> (не TypeScript!). Это не библиотека &mdash;
+    это скрипт-оркестратор. Файл живёт с расширением <code>.workflow.js</code>.
+  </p>
+
+  <div class="card card-red">
+    <p><strong>Ключевое отличие от обычного агента:</strong> Обычный вызов агента &mdash;
+    это запрос-ответ. Workflow &mdash; это программа с условиями, циклами, параллелизмом
+    и управлением бюджетом. Агент не знает, что будет дальше. Workflow знает.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. АНАТОМИЯ WORKFLOW-СКРИПТА -->
+  <h2 id="anatomy"><span class="emoji">&#x1f4d0;</span> Анатомия workflow-скрипта</h2>
+
+  <p>Каждый workflow-скрипт состоит из двух частей: <strong>метаданные</strong> и <strong>тело</strong>.</p>
+
+  <div class="card card-purple">
+    <h3>Минимальный скрипт</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment">// review.workflow.js</span>
+
+<span class="yaml-key">export const meta</span> = {
+  <span class="yaml-val">name: 'code-review',</span>
+  <span class="yaml-val">description: 'Комплексное ревью кода с верификацией',</span>
+  <span class="yaml-val">phases: [</span>
+    <span class="yaml-str">'Review'</span>,
+    <span class="yaml-str">'Verify'</span>,
+    <span class="yaml-str">'Report'</span>
+  <span class="yaml-val">]</span>
+};
+
+<span class="yaml-comment">// Тело скрипта — здесь происходит магия</span>
+<span class="yaml-key">await</span> phase(<span class="yaml-str">'Review'</span>);
+
+<span class="yaml-key">const</span> findings = <span class="yaml-key">await</span> parallel(
+  DIMENSIONS.map(dim => () =>
+    agent(<span class="yaml-str">`Проверь код по измерению «${dim}»`</span>, {
+      <span class="yaml-val">label: `Review: ${dim}`,</span>
+      <span class="yaml-val">schema: FINDING_SCHEMA</span>
+    })
+  )
+);
+
+<span class="yaml-key">await</span> phase(<span class="yaml-str">'Verify'</span>);
+
+<span class="yaml-key">const</span> verified = <span class="yaml-key">await</span> pipeline(
+  findings.filter(Boolean),
+  finding => agent(<span class="yaml-str">`Опровергни: ${finding}`</span>, {
+    <span class="yaml-val">label: `Verify: ${finding.title}`,</span>
+    <span class="yaml-val">schema: VERDICT_SCHEMA</span>
+  })
+);
+
+<span class="yaml-key">await</span> phase(<span class="yaml-str">'Report'</span>);
+
+<span class="yaml-key">return</span> agent(<span class="yaml-str">'Собери финальный отчёт'</span>, {
+  <span class="yaml-val">schema: REPORT_SCHEMA</span>
+});</code>
+    </div>
+  </div>
+
+  <h3>meta &mdash; обязательные поля</h3>
+
+  <table>
+    <tr>
+      <th>Поле</th>
+      <th>Тип</th>
+      <th>Обязательно</th>
+      <th>Описание</th>
+    </tr>
+    <tr>
+      <td><code>meta.name</code></td>
+      <td>string</td>
+      <td>Да</td>
+      <td>Уникальное имя workflow. Используется в логах и для resume.</td>
+    </tr>
+    <tr>
+      <td><code>meta.description</code></td>
+      <td>string</td>
+      <td>Да</td>
+      <td>Что делает workflow. Показывается в UI.</td>
+    </tr>
+    <tr>
+      <td><code>meta.phases</code></td>
+      <td>string[]</td>
+      <td>Да</td>
+      <td>Список фаз. Каждый <code>phase()</code> в теле ссылается на имя из этого массива.</td>
+    </tr>
+  </table>
+
+  <div class="card card-red">
+    <p><strong>meta должен быть чистым литералом!</strong> Никаких переменных, функций,
+    вычислений. Только строковые и числовые литералы, массивы литералов и объекты
+    с литеральными значениями. Движок workflow десериализует meta отдельно от тела скрипта &mdash;
+    если там будет <code>process.env.X</code>, он не сможет прочитать.</p>
+  </div>
+
+  <h3>Функции, доступные в теле скрипта</h3>
+
+  <table>
+    <tr>
+      <th>Функция</th>
+      <th>Сигнатура</th>
+      <th>Описание</th>
+    </tr>
+    <tr>
+      <td><code>phase()</code></td>
+      <td><code>phase(name)</code></td>
+      <td>Объявляет текущую фазу. Для логов, навигации и resume.</td>
+    </tr>
+    <tr>
+      <td><code>agent()</code></td>
+      <td><code>agent(prompt, opts?)</code></td>
+      <td>Запускает субагента. Возвращает текст или schema-объект.</td>
+    </tr>
+    <tr>
+      <td><code>pipeline()</code></td>
+      <td><code>pipeline(items, ...fns)</code></td>
+      <td>Конвейер без барьера. Каждый item обрабатывается независимо.</td>
+    </tr>
+    <tr>
+      <td><code>parallel()</code></td>
+      <td><code>parallel(fns)</code></td>
+      <td>Параллельный запуск с барьером. Ждёт все результаты.</td>
+    </tr>
+    <tr>
+      <td><code>budget</code></td>
+      <td><code>budget.total / .spent() / .remaining()</code></td>
+      <td>Управление лимитом токенов.</td>
+    </tr>
+    <tr>
+      <td><code>return</code></td>
+      <td>&mdash;</td>
+      <td>Возвращает финальный результат workflow.</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. AGENT() -->
+  <h2 id="agent"><span class="emoji">&#x1f916;</span> agent() &mdash; основной строительный блок</h2>
+
+  <p>
+    <code>agent(prompt, opts?)</code> &mdash; это функция, которая запускает одного субагента
+    и возвращает результат. Это атом workflow: каждый вызов &mdash; отдельный LLM-запрос
+    с собственным контекстом.
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph agent_call["agent(prompt, opts)"]
+        direction LR
+        P["Промпт"] --> AGG["Субагент LLM"]
+        AGG --> SCHEMA_CHECK{"Есть opts.schema?"}
+        SCHEMA_CHECK -->|"Да"| SO["Structured Output\n(JSON-объект)"]
+        SCHEMA_CHECK -->|"Нет"| TXT["Текст\n(string)"]
+    end
+
+    AGG -.->|"Ошибка / пропуск"| NULL["null"]
+
+    style agent_call fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style NULL fill:#fff5f5,stroke:#d73a49,stroke-width:2px,stroke-dasharray: 5 5
+    </div>
+  </div>
+
+  <h3>Параметры opts</h3>
+
+  <table>
+    <tr>
+      <th>Параметр</th>
+      <th>Тип</th>
+      <th>Описание</th>
+    </tr>
+    <tr>
+      <td><code>label</code></td>
+      <td>string</td>
+      <td>Отображаемое имя в прогресс-баре. Для читаемых логов: <code>'Review: безопасность'</code>.</td>
+    </tr>
+    <tr>
+      <td><code>schema</code></td>
+      <td>JSON Schema</td>
+      <td>Структурированный вывод! LLM обязан вернуть объект, соответствующей схеме.</td>
+    </tr>
+    <tr>
+      <td><code>model</code></td>
+      <td>string</td>
+      <td>Переопределение модели для этого вызова. Например, <code>'claude-sonnet-4-20250514'</code>.</td>
+    </tr>
+    <tr>
+      <td><code>effort</code></td>
+      <td>string</td>
+      <td>Уровень усилий: <code>'low'</code>, <code>'medium'</code>, <code>'high'</code>.</td>
+    </tr>
+    <tr>
+      <td><code>isolation</code></td>
+      <td>'worktree'</td>
+      <td>Git Worktree для изоляции мутаций файла. Каждый агент работает в своей копии.</td>
+    </tr>
+  </table>
+
+  <h3>Structured Output с schema</h3>
+
+  <p>
+    Когда передаёшь <code>schema</code>, агент обязан вернуть JSON-объект, соответствующий
+    схеме. Это <strong>главный инструмент качества</strong> &mdash; вместо парсинга текста
+    ты получаешь проверенную структуру данных.
+  </p>
+
+  <div class="card card-accent">
+    <div class="code-block">
+      <code><span class="yaml-comment">// Определяем схему</span>
+<span class="yaml-key">const</span> FINDING_SCHEMA = {
+  <span class="yaml-val">type: 'object'</span>,
+  <span class="yaml-val">properties: {</span>
+    <span class="yaml-val">title: { type: 'string', description: 'Краткое описание' },</span>
+    <span class="yaml-val">severity: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },</span>
+    <span class="yaml-val">file: { type: 'string', description: 'Путь к файлу' },</span>
+    <span class="yaml-val">line: { type: 'number', description: 'Номер строки' },</span>
+    <span class="yaml-val">evidence: { type: 'string', description: 'Цитата из кода' }</span>
+  <span class="yaml-val">},</span>
+  <span class="yaml-val">required: ['title', 'severity', 'file']</span>
+};
+
+<span class="yaml-comment">// Используем в agent()</span>
+<span class="yaml-key">const</span> finding = <span class="yaml-key">await</span> agent(
+  <span class="yaml-str">'Найди баги в файле auth.js'</span>,
+  { <span class="yaml-val">schema: FINDING_SCHEMA, label: 'Security review'</span> }
+);
+
+<span class="yaml-comment">// finding — это объект: { title: '...', severity: 'high', file: '...', ... }</span></code>
+    </div>
+  </div>
+
+  <h3>Обработка ошибок</h3>
+
+  <p>
+    Если агент упал (таймаут, ошибка API, невалидный JSON) или был пропущен &mdash;
+    <code>agent()</code> возвращает <code>null</code>, а не бросает ошибку.
+    Это сделано специально: workflow должен быть устойчив к сбоям отдельных агентов.
+  </p>
+
+  <div class="card card-orange">
+    <p><strong>Правило:</strong> всегда фильтруй результаты.</p>
+    <div class="code-block">
+      <code><span class="yaml-key">const</span> results = <span class="yaml-key">await</span> parallel(tasks);
+<span class="yaml-key">const</span> valid = results.filter(Boolean);  <span class="yaml-comment">// убираем null</span>
+
+<span class="yaml-key">if</span> (valid.length === <span class="yaml-num">0</span>) {
+  log(<span class="yaml-str">'Все агенты упали, workflow не может продолжить'</span>);
+  <span class="yaml-key">return</span> { error: <span class="yaml-str">'No valid results'</span> };
+}</code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. PIPELINE VS PARALLEL -->
+  <h2 id="pipeline-vs-parallel"><span class="emoji">&#x2694;&#xfe0f;</span> pipeline() против parallel()</h2>
+
+  <p>
+    Это <strong>ключевое архитектурное решение</strong> в каждом workflow.
+    Неправильный выбор = лишние минуты ожидания или сломанная логика.
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    subgraph PIPELINE["pipeline() — без барьера"]
+        direction TB
+        P_A1["Item A: Stage 1"] --> P_A2["Item A: Stage 2"]
+        P_B1["Item B: Stage 1"] --> P_A2
+        P_B1 --> P_B2["Item B: Stage 2"]
+        P_A2 --> P_A3["Item A: Stage 3"]
+        P_B2 --> P_B3["Item B: Stage 3"]
+    end
+
+    subgraph PARALLEL["parallel() — с барьером"]
+        direction TB
+        PB_A1["Item A: Stage 1"] --> BARRIER["=== БАРЬЕР ===\nЖдём ВСЕ"]
+        PB_B1["Item B: Stage 1"] --> BARRIER
+        BARRIER --> PB_A2["Item A: Stage 2"]
+        BARRIER --> PB_B2["Item B: Stage 2"]
+    end
+
+    style PIPELINE fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    style PARALLEL fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style BARRIER fill:#fff5f5,stroke:#d73a49,stroke-width:3px,stroke-dasharray: 5 5
+    </div>
+  </div>
+
+  <h3>pipeline() &mdash; конвейер без барьера</h3>
+
+  <div class="card card-green">
+    <p><strong>По умолчанию.</strong> Каждый item проходит все стадии независимо.</p>
+    <p>Item A может быть в Stage 2, пока Item B ещё в Stage 1. Никто никого не ждёт.</p>
+    <p><strong>Wall-clock время</strong> = время самого медленного item * количество стадий.</p>
+  </div>
+
+  <div class="code-block">
+    <code><span class="yaml-comment">// Каждый файл ревьюится, потом сразу фиксится — без ожидания других</span>
+<span class="yaml-key">const</span> results = <span class="yaml-key">await</span> pipeline(
+  files,
+  file => agent(<span class="yaml-str">`Review ${file}`</span>, {
+    <span class="yaml-val">label: `Review: ${file}`,</span>
+    <span class="yaml-val">schema: REVIEW_SCHEMA</span>
+  }),
+  review => agent(<span class="yaml-str">`Fix: ${review.evidence}`</span>, {
+    <span class="yaml-val">label: `Fix: ${review.file}`,</span>
+    <span class="yaml-val">isolation: 'worktree'</span>
+  })
+);
+
+<span class="yaml-comment">// Item A уже в Fix, пока B ещё в Review — это нормально!</span></code>
+  </div>
+
+  <h3>parallel() &mdash; барьер синхронизации</h3>
+
+  <div class="card card-orange">
+    <p><strong>Ждёт ВСЕ результаты</strong> перед переходом к следующей стадии.</p>
+    <p>Используй <strong>только</strong> когда стадия N требует все результаты стадии N-1.</p>
+  </div>
+
+  <div class="code-block">
+    <code><span class="yaml-comment">// Все ревью должны быть готовы, чтобы выбрать лучшее</span>
+<span class="yaml-key">const</span> reviews = <span class="yaml-key">await</span> parallel(
+  approaches.map(a => () =>
+    agent(a.prompt, { <span class="yaml-val">label: `Approach: ${a.name}`</span> })
+  )
+);
+
+<span class="yaml-comment">// Барьер: все reviews получены</span>
+
+<span class="yaml-key">const</span> best = <span class="yaml-key">await</span> agent(
+  <span class="yaml-str">`Выбери лучшее из ${reviews.length} подходов`</span>,
+  { <span class="yaml-val">schema: BEST_APPROACH_SCHEMA</span> }
+);</code>
+  </div>
+
+  <h3>Когда нужен барьер</h3>
+
+  <table>
+    <tr>
+      <th>Сценарий</th>
+      <th>Барьер нужен?</th>
+      <th>Почему</th>
+    </tr>
+    <tr>
+      <td>Дедупликация: собрали все findings, убираем дубли</td>
+      <td><strong>Да</strong></td>
+      <td>Нужно видеть все находки, чтобы сравнить</td>
+    </tr>
+    <tr>
+      <td>Early exit: «0 bugs found — нечего верифицировать»</td>
+      <td><strong>Да</strong></td>
+      <td>Нужно знать общее количество до принятия решения</td>
+    </tr>
+    <tr>
+      <td>Сравнение: «найди лучшее из всех решений»</td>
+      <td><strong>Да</strong></td>
+      <td>Агент-судья должен видеть все варианты</td>
+    </tr>
+    <tr>
+      <td>Просто собрать результаты</td>
+      <td><strong>Нет</strong></td>
+      <td><code>pipeline(items, ..., r => r.flat())</code> внутри стадии</td>
+    </tr>
+    <tr>
+      <td>Стадии концептуально разные</td>
+      <td><strong>Нет</strong></td>
+      <td>Для этого pipeline() и существует</td>
+    </tr>
+  </table>
+
+  <div class="card card-red">
+    <h3>&#x274c; Ошибка новичков: барьер без необходимости</h3>
+    <p>«Надо просто собрать результаты в массив» &mdash; это <strong>не</strong> причина для <code>parallel()</code>.</p>
+    <div class="code-block">
+      <code><span class="yaml-comment">// ЛИШНИЙ БАРЬЕР — все файлы ждут самый медленный</span>
+<span class="yaml-key">const</span> results = <span class="yaml-key">await</span> parallel(
+  files.map(f => () => agent(<span class="yaml-str">`Process ${f}`</span>))
+);
+<span class="yaml-comment">// Файл A обработался за 5с, файл B за 5 минут.</span>
+<span class="yaml-comment">// Все ждут 5 минут.</span>
+
+<span class="yaml-comment">// ПРАВИЛЬНО — pipeline, каждый работает в своём темпе</span>
+<span class="yaml-key">const</span> results = <span class="yaml-key">await</span> pipeline(
+  files,
+  f => agent(<span class="yaml-str">`Process ${f}`</span>)
+);</code>
+    </div>
+    <p>Барьерное ожидание = лишние минуты. Каждый барьер замедляет workflow на время самого медленного агента.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ПАТТЕРНЫ ВЕРИФИКАЦИИ -->
+  <h2 id="quality"><span class="emoji">&#x1f50d;</span> Паттерны верификации</h2>
+
+  <p>
+    LLM могут галлюцинировать, выдумывать баги и ошибочно определять проблемы.
+    Workflow Tool позволяет строить <strong>системы верификации</strong>, которые ловят
+    эти ошибки. Вот три проверенных паттерна.
+  </p>
+
+  <h3>1. Adversarial Verification &mdash; аверсариал</h3>
+
+  <p>
+    Запускаешь N скептиков, каждый пытается <strong>опровергнуть</strong> finding.
+    По умолчанию &laquo;refuted=true&raquo;: скептик должен найти конкретную причину,
+    почему находка <em>невалидна</em>.
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    FINDING["Находка:\n\"SQL injection в auth.js:42\""]
+    FINDING --> S1["Скептик 1"]
+    FINDING --> S2["Скептик 2"]
+    FINDING --> S3["Скептик 3"]
+
+    S1 --> V1["refuted: false\n(подтверждает)"]
+    S2 --> V2["refuted: true\n(параметризованный запрос)"]
+    S3 --> V3["refuted: false\n(уязвимость реальна)"]
+
+    V1 --> VOTE["Голосование: 2/3\nне опровергли"]
+    V2 --> VOTE
+    V3 --> VOTE
+
+    VOTE -->|"2+ не опровергли"| PASS["Находка подтверждена"]
+    VOTE -->|"2+ опровергли"| KILL["Находка отброшена"]
+
+    style FINDING fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style PASS fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    style KILL fill:#fff5f5,stroke:#d73a49,stroke-width:2px
+    style VOTE fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="code-block">
+    <code><span class="yaml-key">const</span> VERDICT_SCHEMA = {
+  <span class="yaml-val">type: 'object'</span>,
+  <span class="yaml-val">properties: {</span>
+    <span class="yaml-val">refuted: { type: 'boolean' },</span>
+    <span class="yaml-val">reason: { type: 'string' }</span>
+  <span class="yaml-val">},</span>
+  <span class="yaml-val">required: ['refuted', 'reason']</span>
+};
+
+<span class="yaml-key">async function</span> adversarialVerify(claim, n = <span class="yaml-num">3</span>) {
+  <span class="yaml-key">const</span> votes = <span class="yaml-key">await</span> parallel(
+    Array.from({ length: n }, () => () =>
+      agent(
+        <span class="yaml-str">`Опровергни: ${claim}. По умолчанию refuted=true, если не уверен.`</span>,
+        { <span class="yaml-val">schema: VERDICT_SCHEMA, label: 'Skeptic'</span> }
+      )
+    )
+  );
+
+  <span class="yaml-key">const</span> valid = votes.filter(Boolean);
+  <span class="yaml-key">const</span> survives = valid.filter(v => !v.refuted).length >= Math.ceil(n / <span class="yaml-num">2</span>);
+  <span class="yaml-key">return</span> { survives, votes: valid };
+}</code>
+  </div>
+
+  <div class="card card-teal">
+    <p><strong>Почему «по умолчанию refuted=true»?</strong> LLM по умолчанию склонен соглашаться.
+    Если просто спросить «это баг?» &mdash; большинство скажет «да».
+    Фраза «по умолчанию refuted=true» переворачивает модель: теперь скептик должен
+    <em>доказать</em> валидность, а не просто подтвердить. Это снижает false positive на 40-60%.</p>
+  </div>
+
+  <h3>2. Judge Panel &mdash; панель судей</h3>
+
+  <p>
+    N независимых подходов к одной задаче, потом один агент синтезирует лучшее.
+    Используй когда нужно выбрать из нескольких вариантов, а не просто отфильтровать.
+  </p>
+
+  <div class="code-block">
+    <code><span class="yaml-key">const</span> APPROACHES = [
+  { <span class="yaml-val">name: 'aggressive'</span>,  <span class="yaml-val">prompt: 'Предложи максимально агрессивное решение'</span> },
+  { <span class="yaml-val">name: 'conservative'</span>, <span class="yaml-val">prompt: 'Предложи максимально безопасное решение'</span> },
+  { <span class="yaml-val">name: 'balanced'</span>,   <span class="yaml-val">prompt: 'Предложи сбалансированное решение'</span> },
+];
+
+<span class="yaml-key">const</span> approaches = <span class="yaml-key">await</span> parallel(
+  APPROACHES.map(a => () => agent(a.prompt, { <span class="yaml-val">label: `Judge: ${a.name}`</span> }))
+);
+
+<span class="yaml-key">const</span> synthesis = <span class="yaml-key">await</span> agent(
+  <span class="yaml-str">`Синтезируй из ${approaches.length} подходов лучшее решение. `</span> +
+  <span class="yaml-str">`Возьми сильные стороны каждого.`</span>,
+  { <span class="yaml-val">schema: SYNTHESIS_SCHEMA, label: 'Synthesis'</span> }
+);</code>
+  </div>
+
+  <h3>3. Loop-until-dry &mdash; цикл до иссякания</h3>
+
+  <p>
+    Повторяешь проверку, пока новые находки не иссякнут.
+    Паттерн «dry count»: считаешь количество пустых итераций подряд.
+  </p>
+
+  <div class="code-block">
+    <code><span class="yaml-key">let</span> dry = <span class="yaml-num">0</span>;
+<span class="yaml-key">const</span> allFindings = [];
+
+<span class="yaml-key">while</span> (dry < <span class="yaml-num">2</span>) {
+  <span class="yaml-key">const</span> found = <span class="yaml-key">await</span> agent(
+    <span class="yaml-str">'Найди баги в коде. Если ничего не найдено — верни пустой массив.'</span>,
+    { <span class="yaml-val">schema: BUGS_SCHEMA, label: `Scan #${allFindings.length}`</span> }
+  );
+
+  <span class="yaml-key">if</span> (!found.bugs || found.bugs.length === <span class="yaml-num">0</span>) {
+    dry++;
+    log(<span class="yaml-str">`Пустой проход ${dry}/2`</span>);
+    <span class="yaml-key">continue</span>;
+  }
+
+  dry = <span class="yaml-num">0</span>;  <span class="yaml-comment">// сброс счётчика — нашлись новые баги</span>
+  allFindings.push(...found.bugs);
+  log(<span class="yaml-str">`Найдено ${found.bugs.length} багов (всего: ${allFindings.length})`</span>);
+}
+
+<span class="yaml-comment">// Два пустых прохода подряд —останавливаемся</span></code>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Зачем 2, а не 1?</strong> Один пустой проход может быть случайностью
+    (LLM не заметил что-то). Два пустых прохода подряд — статистически надёжный сигнал,
+    что находки иссякли.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. BUDGET MANAGEMENT -->
+  <h2 id="budget"><span class="emoji">&#x1f4b0;</span> Budget management</h2>
+
+  <p>
+    Workflow Tool имеет встроенный механизм управления лимитом токенов.
+    Это критично для длительных workflow с десятками агентов.
+  </p>
+
+  <h3>API</h3>
+
+  <table>
+    <tr>
+      <th>Свойство</th>
+      <th>Возвращает</th>
+      <th>Описание</th>
+    </tr>
+    <tr>
+      <td><code>budget.total</code></td>
+      <td>number | null</td>
+      <td>Лимит на весь workflow. <code>null</code> = без лимита.</td>
+    </tr>
+    <tr>
+      <td><code>budget.spent()</code></td>
+      <td>number</td>
+      <td>Сколько токенов уже израсходовано.</td>
+    </tr>
+    <tr>
+      <td><code>budget.remaining()</code></td>
+      <td>number</td>
+      <td>Сколько осталось. <code>Infinity</code> если нет лимита.</td>
+    </tr>
+  </table>
+
+  <div class="card card-accent">
+    <h3>Пример: цикл с бюджетом</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment">// Ограничиваем верификацию 50K токенов</span>
+<span class="yaml-key">const</span> findings = [<span class="yaml-comment">/* ... */</span>];
+<span class="yaml-key">const</span> verified = [];
+
+<span class="yaml-key">for</span> (<span class="yaml-key">const</span> f <span class="yaml-key">of</span> findings) {
+  <span class="yaml-key">if</span> (budget.total && budget.remaining() < <span class="yaml-num">50_000</span>) {
+    log(<span class="yaml-str">`Бюджет на исходе: ${budget.remaining()} токенов. Стоп.`</span>);
+    <span class="yaml-key">break</span>;
+  }
+
+  <span class="yaml-key">const</span> verdict = <span class="yaml-key">await</span> adversarialVerify(f);
+  <span class="yaml-key">if</span> (verdict.survives) verified.push(f);
+}
+
+log(<span class="yaml-str">`Потрачено: ${budget.spent()}, осталось: ${budget.remaining()}`</span>);</code>
+    </div>
+  </div>
+
+  <div class="card card-red">
+    <p><strong>Лимит жёсткий.</strong> При превышении <code>budget.total</code> вызов
+    <code>agent()</code> выбрасывает ошибку. Workflow может обработать это через try/catch,
+    но остановка неизбежна. Планируй бюджет заранее!</p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Эвристика:</strong> Один вызов <code>agent()</code> средней сложности
+    сжигает ~5-15K токенов. Workflow с 3 фазами по 5 агентов = ~150K токенов.
+    Ставь лимит с запасом 30%.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. КОГДА WORKFLOW — OVERKILL -->
+  <h2 id="overkill"><span class="emoji">&#x26a0;&#xfe0f;</span> Когда Workflow &mdash; overkill</h2>
+
+  <p>Workflow Tool мощный, но не всегда нужен. Вот когда <strong>не стоит</strong> его использовать.</p>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>&#x2705; Достаточно простого агента</h3>
+      <ul>
+        <li>Простой поиск/ответ &mdash; один <code>agent()</code></li>
+        <li>Разовый вопрос &mdash; обычный разговор с Claude</li>
+        <li>«Проверь CI» &mdash; <code>/loop</code></li>
+        <li>Ревью одного файла &mdash; Agent tool</li>
+      </ul>
+    </div>
+
+    <div class="card card-orange">
+      <h3>&#x1f680; Workflow нужен</h3>
+      <ul>
+        <li>5+ агентов с разными ролями</li>
+        <li>Сложный контроль потока (условия, циклы)</li>
+        <li>Детерминированность и воспроизводимость</li>
+        <li>Возобновляемость после падения сессии</li>
+        <li>Управление бюджетом токенов</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card card-yellow">
+    <h3>Правило большого пальца</h3>
+    <p>
+      Если задача укладывается в один контекст одного агента &mdash; workflow не нужен.
+      Если задача требует <strong>3+ агентов</strong>, <strong>разных компетенций</strong>
+      или <strong>итеративной верификации</strong> &mdash; workflow экономит время
+      и делает результат качественнее.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. ПОЛНЫЙ ПРИМЕР -->
+  <h2 id="full-example"><span class="emoji">&#x1f680;</span> Практический пример: полный скрипт</h2>
+
+  <p>Рабочий workflow для поиска багов с верификацией. 3 фазы, schema-валидация, adversarial verify.</p>
+
+  <div class="card card-purple">
+    <div class="code-block">
+      <code><span class="yaml-comment">// bug-hunt.workflow.js</span>
+<span class="yaml-comment">// Полный workflow: поиск багов → верификация → отчёт</span>
+
+<span class="yaml-key">export const meta</span> = {
+  <span class="yaml-val">name: 'bug-hunt',</span>
+  <span class="yaml-val">description: 'Мульти-измерительный поиск багов с adversarial верификацией',</span>
+  <span class="yaml-val">phases: [</span>
+    <span class="yaml-str">'Scan'</span>,
+    <span class="yaml-str">'Verify'</span>,
+    <span class="yaml-str">'Report'</span>
+  <span class="yaml-val">]</span>
+};
+
+<span class="yaml-comment">// ── Схемы ──</span>
+
+<span class="yaml-key">const</span> BUG_SCHEMA = {
+  <span class="yaml-val">type: 'object'</span>,
+  <span class="yaml-val">properties: {</span>
+    <span class="yaml-val">title: { type: 'string' },</span>
+    <span class="yaml-val">severity: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },</span>
+    <span class="yaml-val">file: { type: 'string' },</span>
+    <span class="yaml-val">line: { type: 'number' },</span>
+    <span class="yaml-val">evidence: { type: 'string' },</span>
+    <span class="yaml-val">suggestion: { type: 'string' }</span>
+  <span class="yaml-val">},</span>
+  <span class="yaml-val">required: ['title', 'severity', 'file']</span>
+};
+
+<span class="yaml-key">const</span> BUGS_SCHEMA = {
+  <span class="yaml-val">type: 'object'</span>,
+  <span class="yaml-val">properties: {</span>
+    <span class="yaml-val">bugs: { type: 'array', items: BUG_SCHEMA }</span>
+  <span class="yaml-val">},</span>
+  <span class="yaml-val">required: ['bugs']</span>
+};
+
+<span class="yaml-key">const</span> VERDICT_SCHEMA = {
+  <span class="yaml-val">type: 'object'</span>,
+  <span class="yaml-val">properties: {</span>
+    <span class="yaml-val">refuted: { type: 'boolean' },</span>
+    <span class="yaml-val">reason: { type: 'string' }</span>
+  <span class="yaml-val">},</span>
+  <span class="yaml-val">required: ['refuted', 'reason']</span>
+};
+
+<span class="yaml-key">const</span> REPORT_SCHEMA = {
+  <span class="yaml-val">type: 'object'</span>,
+  <span class="yaml-val">properties: {</span>
+    <span class="yaml-val">summary: { type: 'string' },</span>
+    <span class="yaml-val">bugs: { type: 'array', items: BUG_SCHEMA },</span>
+    <span class="yaml-val">total_found: { type: 'number' },</span>
+    <span class="yaml-val">total_survived: { type: 'number' }</span>
+  <span class="yaml-val">},</span>
+  <span class="yaml-val">required: ['summary', 'bugs', 'total_found', 'total_survived']</span>
+};
+
+<span class="yaml-comment">// ── Измерения сканирования ──</span>
+
+<span class="yaml-key">const</span> DIMENSIONS = [
+  { <span class="yaml-val">name: 'security'</span>,   <span class="yaml-val">prompt: 'Ищи SQL injection, XSS, path traversal, hardcoded secrets' </span>},
+  { <span class="yaml-val">name: 'logic'</span>,      <span class="yaml-val">prompt: 'Ищи off-by-one, race conditions, unhandled edge cases' </span>},
+  { <span class="yaml-val">name: 'reliability'</span>, <span class="yaml-val">prompt: 'Ищи uncaught exceptions, missing null checks, resource leaks' </span>}
+];
+
+<span class="yaml-comment">// ── Тело workflow ──</span>
+
+<span class="yaml-comment">// ФАЗА 1: Параллельное сканирование по 3 измерениям</span>
+<span class="yaml-key">await</span> phase(<span class="yaml-str">'Scan'</span>);
+
+<span class="yaml-key">const</span> scanResults = <span class="yaml-key">await</span> parallel(
+  DIMENSIONS.map(dim => () =>
+    agent(
+      <span class="yaml-str">`Ты — ${dim.name} эксперт. ${dim.prompt}\n\n`</span> +
+      <span class="yaml-str">'Проанализируй весь код в проекте и найди проблемы.'</span>,
+      {
+        <span class="yaml-val">label: `Scan: ${dim.name}`,</span>
+        <span class="yaml-val">schema: BUGS_SCHEMA,</span>
+        <span class="yaml-val">effort: 'high'</span>
+      }
+    )
+  )
+);
+
+<span class="yaml-comment">// Собираем все баги, дедуплицируем по file+line</span>
+<span class="yaml-key">const</span> allBugs = scanResults
+  .filter(Boolean)
+  .flatMap(r => r.bugs)
+  .filter((bug, i, arr) =>
+    arr.findIndex(b => b.file === bug.file && b.line === bug.line) === i
+  );
+
+log(<span class="yaml-str">`Найдено ${allBugs.length} уникальных багов после дедупликации`</span>);
+
+<span class="yaml-key">if</span> (allBugs.length === <span class="yaml-num">0</span>) {
+  <span class="yaml-key">return</span> { <span class="yaml-val">summary: 'Багов не найдено!',</span> <span class="yaml-val">bugs: [],</span> <span class="yaml-val">total_found: 0,</span> <span class="yaml-val">total_survived: 0</span> };
+}
+
+<span class="yaml-comment">// ФАЗА 2: Adversarial верификация каждого бага</span>
+<span class="yaml-key">await</span> phase(<span class="yaml-str">'Verify'</span>);
+
+<span class="yaml-key">const</span> verified = <span class="yaml-key">await</span> pipeline(
+  allBugs,
+  bug => parallel(
+    Array.from({ length: <span class="yaml-num">3</span> }, () => () =>
+      agent(
+        <span class="yaml-str">`Опровергни этот баг. По умолчанию refuted=true.\n`</span> +
+        <span class="yaml-str">`Баг: ${bug.title}\nФайл: ${bug.file}:${bug.line}\n`</span> +
+        <span class="yaml-str">`Доказательство: ${bug.evidence}\n`</span> +
+        <span class="yaml-str">`Если НЕ можешь найти конкретную причину опровержения — `</span> +
+        <span class="yaml-str">`ставь refuted=false.`</span>,
+        {
+          <span class="yaml-val">schema: VERDICT_SCHEMA,</span>
+          <span class="yaml-val">label: `Verify: ${bug.title}`</span>
+        }
+      )
+    ),
+    votes => {
+      <span class="yaml-key">const</span> valid = votes.filter(Boolean);
+      <span class="yaml-key">const</span> survives = valid.filter(v => !v.refuted).length >= <span class="yaml-num">2</span>;
+      <span class="yaml-key">return</span> survives ? bug : <span class="yaml-key">null</span>;
+    }
+  )
+);
+
+<span class="yaml-key">const</span> survivors = verified.filter(Boolean);
+log(<span class="yaml-str">`Верификация: ${survivors.length}/${allBugs.length} багов выжили`</span>);
+
+<span class="yaml-comment">// ФАЗА 3: Синтез отчёта</span>
+<span class="yaml-key">await</span> phase(<span class="yaml-str">'Report'</span>);
+
+<span class="yaml-key">return</span> agent(
+  <span class="yaml-str">`Составь отчёт о найденных багах.\n`</span> +
+  <span class="yaml-str">`Всего найдено: ${allBugs.length}\n`</span> +
+  <span class="yaml-str">`Подтверждено: ${survivors.length}\n\n`</span> +
+  <span class="yaml-str">`Данные:\n${JSON.stringify(survivors, null, 2)}`</span>,
+  {
+    <span class="yaml-val">schema: REPORT_SCHEMA,</span>
+    <span class="yaml-val">label: 'Final Report'</span>
+  }
+);</code>
+    </div>
+  </div>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    START(["bug-hunt.workflow.js"])
+
+    subgraph PHASE1["ФАЗА 1: Scan"]
+        direction LR
+        SEC["Security\nэксперт"]
+        LOGIC["Logic\nэксперт"]
+        REL["Reliability\nэксперт"]
+    end
+
+    DEDUP["Дедупликация\n(file + line)"]
+
+    subgraph PHASE2["ФАЗА 2: Verify"]
+        direction TB
+        B1["Bug #1"] --> S1A["Скептик 1"]
+        B1 --> S1B["Скептик 2"]
+        B1 --> S1C["Скептик 3"]
+        S1A --> VOTE1["2/3 голосов"]
+        S1B --> VOTE1
+        S1C --> VOTE1
+    end
+
+    subgraph PHASE3["ФАЗА 3: Report"]
+        SYNTH["Синтез\nотчёта"]
+    end
+
+    FINAL(["Финальный\nрезультат"])
+
+    START --> PHASE1
+    PHASE1 --> DEDUP
+    DEDUP -->|"Нет багов"| FINAL
+    DEDUP -->|"Есть баги"| PHASE2
+    PHASE2 --> PHASE3
+    PHASE3 --> FINAL
+
+    style PHASE1 fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style PHASE2 fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style PHASE3 fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    style FINAL fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Заметь:</strong> Верификация использует <code>pipeline()</code>, а не <code>parallel()</code>.
+    Каждый баг верифицируется независимо &mdash; зачем ждать, пока скептики проверят Bug #1,
+    чтобы начать проверку Bug #5? Барьер нужен только перед фазой Report.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ИТОГО -->
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Workflow Tool &mdash; это детерминированная программа для
+      оркестрации десятков субагентов. Ключевые инструменты: <code>agent()</code> со schema,
+      <code>pipeline()</code> vs <code>parallel()</code> (выбирай осознанно!),
+      adversarial verification для качества, budget management для контроля затрат.
+      Пиши на JavaScript, фильтруй null, считай dry count. &#x2699;&#xfe0f;
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

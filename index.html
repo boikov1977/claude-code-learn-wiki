@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code на понятном — Живая вики</title>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --accent: #6c5ce7;
+      --accent-light: #a29bfe;
+      --text: #2d3436;
+      --text-muted: #636e72;
+      --border: #e0e0e0;
+      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+      --shadow-hover: 0 6px 24px rgba(108,92,231,0.12);
+      --radius: 12px;
+      --concept-color: #00b894;
+      --agent-color: #6c5ce7;
+      --arch-color: #e17055;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+      color: #fff;
+      text-align: center;
+      padding: 56px 24px 48px;
+    }
+    .header h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .header p {
+      font-size: 1.15rem;
+      opacity: 0.88;
+      font-weight: 400;
+    }
+
+    /* ── Main ── */
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px 48px;
+    }
+
+    /* ── Section ── */
+    .section {
+      margin-top: 48px;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .section-subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+    .section-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #fff;
+    }
+    .badge-concept { background: var(--concept-color); }
+    .badge-agent { background: var(--agent-color); }
+    .badge-arch { background: var(--arch-color); }
+
+    /* ── Cards Grid ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 860px) {
+      .cards { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 540px) {
+      .cards { grid-template-columns: 1fr; }
+      .header h1 { font-size: 1.8rem; }
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 22px 20px;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.2s, transform 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-3px);
+    }
+    .card-emoji {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    .card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .card p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      flex: 1;
+    }
+    .card-arrow {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .card:hover .card-arrow { text-decoration: underline; }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding: 36px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.8;
+    }
+    .footer strong { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <!-- Шапка -->
+  <header class="header">
+    <h1>🧠 Claude Code на понятном</h1>
+    <p>Живая вики, собранная из практики</p>
+    <p style="margin-top:16px;font-size:0.95rem;opacity:0.75;">
+      Вики пополняется по мере изучения Claude Code &mdash; каждая статья родилась из реальной задачи
+    </p>
+  </header>
+
+  <main class="container">
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- Раздел 1: Понятия (Concepts)           -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-badge badge-concept">Concepts</span>
+        Понятия
+      </h2>
+      <p class="section-subtitle">Фундаментальные идеи, которые стоит знать перед тем, как углубляться</p>
+
+      <div class="cards">
+
+        <a href="wiki/concepts/effort-levels-about.html" class="card">
+          <div class="card-emoji">🎚️</div>
+          <h3>Effort Levels</h3>
+          <p>Уровни усилий Claude Code — от быстрого черновика до тщательной проработки. Когда и зачем менять.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/worktree-about.html" class="card">
+          <div class="card-emoji">🌳</div>
+          <h3>Worktree</h3>
+          <p>Как Git Worktree позволяет изолировать эксперименты, не ломая основную ветку.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/frontmatter-about.html" class="card">
+          <div class="card-emoji">⚙️</div>
+          <h3>Frontmatter</h3>
+          <p>YAML-конфиги в шапке файлов агентов и скиллов — модель, температура, описание.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/context-window.html" class="card">
+          <div class="card-emoji">🧩</div>
+          <h3>Context Window</h3>
+          <p>Рабочая память Claude. Как заполняется, когда жать /compact, как не потерять важное при сжатии.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/hooks.html" class="card">
+          <div class="card-emoji">🪝</div>
+          <h3>Хуки</h3>
+          <p>PreToolUse, PostToolUse — автоматические действия до и после событий. Бэкапы, форматирование, логи.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/mcp.html" class="card">
+          <div class="card-emoji">🔌</div>
+          <h3>MCP</h3>
+          <p>Model Context Protocol — как Claude подключает внешние сервисы. Глобальный vs изолированный, наши серверы.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/poisk-mcp.html" class="card">
+          <div class="card-emoji">🔍</div>
+          <h3>poisk-mcp</h3>
+          <p>Наш кастомный MCP-сервер поиска с нейро-ранжированием, DuckDuckGo и SearXNG.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/claude-opencode.html" class="card">
+          <div class="card-emoji">🤖</div>
+          <h3>claude-opencode</h3>
+          <p>Как запускать Claude Code через китайские модели (DeepSeek, Qwen, MiniMax) с помощью прокси и OpenCode Go.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/bundled-skills.html" class="card">
+          <div class="card-emoji">📦</div>
+          <h3>Базовые скиллы</h3>
+          <p>16 встроенных скиллов Claude Code: код-ревью, дебаг, запуск, исследования — шпаргалка с примерами.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/loop.html" class="card">
+          <div class="card-emoji">🔄</div>
+          <h3>/loop и расписание</h3>
+          <p>Повторяющиеся задачи и напоминания. Форматы, интервалы, loop.md. (Не работает через OpenCode)</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/background-tasks.html" class="card">
+          <div class="card-emoji">⏳</div>
+          <h3>Background Tasks</h3>
+          <p>Фоновый запуск задач: --bg, Ctrl+B, /tasks. Параллельная работа не отвлекая от главного.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/workflow.html" class="card">
+          <div class="card-emoji">🔀</div>
+          <h3>Workflow</h3>
+          <p>Мульти-агентная оркестрация: pipeline, fan-out, дебаты. Скрипты, которые управляют роем агентов.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/workflow-advanced.html" class="card">
+          <div class="card-emoji">⚙️</div>
+          <h3>Workflow: Advanced</h3>
+          <p>Продвинутая мульти-агентная оркестрация: pipeline vs parallel, adversarial verify, budget management.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/memory-system.html" class="card">
+          <div class="card-emoji">🧠</div>
+          <h3>Память</h3>
+          <p>Глобальный ~/CLAUDE.md, проектная память, auto-memory — что куда писать и как не запутаться.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/session-management.html" class="card">
+          <div class="card-emoji">💾</div>
+          <h3>Session Management</h3>
+          <p>Управление сессиями: --resume, --continue, жизненный цикл, TTL, когда что использовать.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/permissions.html" class="card">
+          <div class="card-emoji">🛡️</div>
+          <h3>Permissions</h3>
+          <p>Система правил доступа: allow, deny, ask. Синтаксис правил, приоритеты, процесс проверки.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/permission-modes.html" class="card">
+          <div class="card-emoji">🔐</div>
+          <h3>Режимы работы</h3>
+          <p>Auto, bypassPermissions, acceptEdits — режимы доступа, как переключаться, что когда использовать.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/plan-mode.html" class="card">
+          <div class="card-emoji">📐</div>
+          <h3>Plan Mode</h3>
+          <p>Режим проектирования: только читаю, не пишу. Исследовать код и составить план до начала работ.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/task-about.html" class="card">
+          <div class="card-emoji">✅</div>
+          <h3>Task Tool</h3>
+          <p>Todo-лист внутри Claude Code: создание, обновление, отслеживание прогресса задач.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/skill-vs-slash.html" class="card">
+          <div class="card-emoji">⚡</div>
+          <h3>Skill vs Slash Command</h3>
+          <p>Два встроенных механизма: многошаговые скиллы и одноразовые слэш-команды.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/mcp-advanced.html" class="card">
+          <div class="card-emoji">🔌</div>
+          <h3>MCP Advanced</h3>
+          <p>Транспорты (stdio/HTTP/SSE), scope (Local/User/Project), управление и пермишены.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/subagent-vs-forked.html" class="card">
+          <div class="card-emoji">🎭</div>
+          <h3>Subagent vs Forked</h3>
+          <p>Когда запускать субагента с чистого листа, а когда с копией контекста.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/permissions.html" class="card">
+          <div class="card-emoji">🔐</div>
+          <h3>Permissions</h3>
+          <p>allow/deny/ask, wildcard-паттерны, приоритет deny > ask > allow.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/tool-use.html" class="card">
+          <div class="card-emoji">🧰</div>
+          <h3>Tool Use</h3>
+          <p>Как Claude выбирает и вызывает инструменты: цепочки вызовов, рейт-лимиты, ограничения.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/concepts/dev-agents-about.html" class="card">
+          <div class="card-emoji">🤖</div>
+          <h3>Dev Agents</h3>
+          <p>Типы, паттерны и best practices мульти-агентных систем для разработки. Пять паттернов Anthropic, уровни сложности Azure, разбор индустрии.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- Раздел 2: Агенты (Agents)              -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-badge badge-agent">Agents</span>
+        Агенты
+      </h2>
+      <p class="section-subtitle">Субагенты — специалисты по узким задачам, которых вызывает основной Claude</p>
+
+      <div class="cards">
+
+        <a href="wiki/agents/writer-agent-about.html" class="card">
+          <div class="card-emoji">✍️</div>
+          <h3>writer-agent</h3>
+          <p>Документирующий агент: README, CHANGELOG, docstrings. Разбирается в своём деле.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/agents/all-agents.html" class="card">
+          <div class="card-emoji">🎭</div>
+          <h3>Все агенты</h3>
+          <p>Обзор 8 субагентов: инноватор, прагматик, консерватор, писатель, openspec-manager и другие.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/agents/openspec-manager-about.html" class="card">
+          <div class="card-emoji">📋</div>
+          <h3>openspec-manager</h3>
+          <p>Spec-driven разработка: от описания задачи до реализации через спеки.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- Раздел 3: Архитектура (Architecture)   -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-badge badge-arch">Architecture</span>
+        Архитектура
+      </h2>
+      <p class="section-subtitle">Архитектурные дебаты — зачем, почему и к какому вердикту пришли</p>
+
+      <div class="cards">
+
+        <a href="wiki/architecture/grill-me-verdict.html" class="card">
+          <div class="card-emoji">🔥</div>
+          <h3>Нужен ли Grill-me?</h3>
+          <p>Дебаты про скилл « Grill-me» — критический разбор кода перед коммитом. Итог и аргументы.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/architecture/arch-dept-verdict.html" class="card">
+          <div class="card-emoji">🏛️</div>
+          <h3>Нужен ли архитектурный отдел?</h3>
+          <p>Стоит ли выделять отдельных агентов для архитектурных решений, или это over-engineering?</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/architecture/arch-vs-grill-verdict.html" class="card">
+          <div class="card-emoji">⚔️</div>
+          <h3>ARCH-cluster vs Grill-me</h3>
+          <p>Сравнение подходов: кластер архитектурных агентов против Grill-me скилла.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- Раздел 4: Практика (Practice)          -->
+    <!-- ═══════════════════════════════════════ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="section-badge badge-concept">Practice</span>
+        Практика
+      </h2>
+      <p class="section-subtitle">Рецепты и workflow для реальных задач</p>
+
+      <div class="cards">
+
+        <a href="wiki/practice/sdd-workflow.html" class="card">
+          <div class="card-emoji">📋</div>
+          <h3>Spec-Driven Development (SDD)</h3>
+          <p>OpenSpec: propose → apply → sync → archive. Полный цикл spec-driven разработки.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/practice/code-review-workflow.html" class="card">
+          <div class="card-emoji">🔍</div>
+          <h3>Многоагентный Code Review</h3>
+          <p>Три агента, три взгляда: как организовать code review, который ловит больше багов.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+        <a href="wiki/practice/research-workflow.html" class="card">
+          <div class="card-emoji">🔬</div>
+          <h3>Deep Research Workflow</h3>
+          <p>Автоматизированное исследование через MCP: поиск → верификация → синтез отчёта.</p>
+          <span class="card-arrow">Читать →</span>
+        </a>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Футер -->
+  <footer class="footer">
+    <strong>34 статьи</strong> · Проект начат <strong>июнь 2026</strong><br>
+    Собрано с помощью Claude Code 🧠
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Многоагентный Code Review — самодельный workflow</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e0e0e0;
+      --text: #2d3436;
+      --text-muted: #636e72;
+      --accent: #6c5ce7;
+      --accent-light: #f3f0ff;
+      --code-bg: #f6f8fa;
+      --green: #00b894;
+      --orange: #e17055;
+      --red: #d63031;
+      --purple: #6c5ce7;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f0fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f3f0ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .card-warning {
+      border: 2px solid var(--red);
+      background: #fff5f5;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>Многоагентный Code Review</h1>
+  <p class="subtitle">Самодельный рецепт &mdash; Workflow tool + Agent tool + методики review. Не встроенная фича Claude Code.</p>
+
+  <!-- ДИСКЛЕЙМЕР -->
+  <div class="card card-accent" style="margin-bottom: 32px;">
+    <p style="margin: 0;">
+      Это <strong>не встроенная фича Claude Code</strong>. Это самодельный рецепт &mdash; комбинация
+      Workflow tool, Agent tool и методик code review. Термин &laquo;fan-out&raquo; пришёл из
+      параллельного программирования: задача раздаётся N независимым workers, результаты собираются.
+      В Claude Code такую оркестрацию пишут скриптом через <code>parallel()</code> в Workflow tool.
+      Встроенный скилл code-review (вызывается через <code>/code-review</code>) работает иначе
+      &mdash; он одноагентный и не поддерживает параллельную проверку с разными фокусами.
+    </p>
+  </div>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#why">Зачем многоагентный ревью</a></li>
+      <li><a href="#architecture">Архитектура: три фазы</a></li>
+      <li><a href="#diagrams">Диаграммы</a></li>
+      <li><a href="#example">Пример: типичные уязвимости в Python-проекте</a></li>
+      <li><a href="#best-practices">Best Practices</a></li>
+      <li><a href="#pitfalls">Типичные ошибки</a></li>
+      <li><a href="#comparison">Сравнение со встроенным code-review</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЗАЧЕМ -->
+  <h2 id="why"><span class="emoji">&#x1f4a1;</span> Зачем многоагентный ревью</h2>
+
+  <p>
+    Один агент смотрит код &mdash; видит то, на что настроен его промпт. Три агента с разными
+    фокусами (баги, безопасность, качество) видят больше. Это принцип <strong>four-eyes
+    principle</strong> в исполнении Claude Code.
+  </p>
+
+  <p>
+    Практика code review показывает: один reviewer находит ~60% проблем,
+    два независимых &mdash; ~75%, три &mdash; ~85%. С агентами то же самое:
+    разные фокусы = меньше слепых зон.
+  </p>
+
+  <div class="card card-accent">
+    <h3>Почему именно независимые</h3>
+    <p>
+      Не три одинаковых агента, а три <strong>разных</strong>. Если все ищут одни и те же паттерны
+      &mdash; benefit от параллелизма равен нулю. Секрет в <strong>разных фокусах</strong>:
+      один смотрит на баги, другой &mdash; на безопасность, третий &mdash; на качество кода.
+      У каждого свой промпт, своя перспектива, свой &laquo;слепой угол&raquo;,
+      который закрывают другие.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. АРХИТЕКТУРА -->
+  <h2 id="architecture"><span class="emoji">&#x1f3d7;&#xfe0f;</span> Архитектура: три фазы</h2>
+
+  <p>
+    Многоагентный code review строится из трёх последовательных фаз. Каждая фаза делает своё дело
+    и передаёт результаты следующей.
+  </p>
+
+  <h3>Фаза 1: Найти (Find) &mdash; параллельно</h3>
+  <div class="card card-green">
+    <p>
+      Три агента запускаются <strong>параллельно</strong> через <code>parallel()</code> в Workflow tool.
+      Каждый получает один и тот же diff (или файлы), но работает в своей роли:
+    </p>
+    <ul>
+      <li><strong>Bug Hunter</strong> (<code>model: inherit</code>) &mdash; ищет логические ошибки, гонки, утечки, edge cases, null-deref</li>
+      <li><strong>Security Auditor</strong> (<code>model: inherit</code>) &mdash; ищет injection, hardcoded secrets, XSS, insecure defaults</li>
+      <li><strong>Code Quality</strong> (<code>model: inherit</code>) &mdash; ищет code smells, нарушения конвенций, дублирование, сложность</li>
+    </ul>
+    <p>
+      На выходе &mdash; три списка <em>findings</em> (находок). Каждая finding имеет серьёзность,
+      описание, место в коде и обоснование.
+    </p>
+  </div>
+
+  <h3>Фаза 2: Проверить (Verify) &mdash; adversarial</h3>
+  <div class="card card-orange">
+    <p>
+      Это критичный шаг, который большинство пропускает. Каждый finding из фазы 1
+      отправляется <strong>независимому скептику</strong> &mdash; отдельный агент с
+      adversarial промптом. Скептик проверяет:
+    </p>
+    <ul>
+      <li>Правда ли это проблема, или false positive?</li>
+      <li>Какова реальная эксплуатируемость?</li>
+      <li>Насколько критична &mdash; P0 или P3?</li>
+    </ul>
+    <p>
+      Находки, которые скептик <strong>не подтверждает</strong>, отфильтровываются.
+      Это снижает шум и экономит время разработчику.
+    </p>
+  </div>
+
+  <h3>Фаза 3: Собрать (Synthesize)</h3>
+  <div class="card card-purple">
+    <p>
+      Все подтверждённые findings собираются в единый отчёт. Агент-синтезатор
+      группирует по приоритету, убирает дубли, добавляет рекомендации по исправлению.
+      На выходе &mdash; структурированный отчёт, готовый к использованию.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ДИАГРАММЫ -->
+  <h2 id="diagrams"><span class="emoji">&#x1f4ca;</span> Диаграммы</h2>
+
+  <h3>Общая архитектура</h3>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    subgraph INPUT["Вход"]
+        DIFF["git diff / PR"]
+    end
+
+    subgraph PHASE1["Фаза 1: Найти (параллельно)"]
+        direction LR
+        BH["Bug Hunter"]
+        SA["Security Auditor"]
+        CQ["Code Quality"]
+    end
+
+    subgraph PHASE2["Фаза 2: Проверить (adversarial)"]
+        direction LR
+        SK1["Скептик #1"]
+        SK2["Скептик #2"]
+        SK3["Скептик #3"]
+    end
+
+    subgraph PHASE3["Фаза 3: Собрать"]
+        SYN["Синтез отчёта"]
+    end
+
+    OUTPUT["Итоговый отчёт"]
+
+    DIFF --> BH
+    DIFF --> SA
+    DIFF --> CQ
+
+    BH --> SK1
+    SA --> SK2
+    CQ --> SK3
+
+    SK1 --> SYN
+    SK2 --> SYN
+    SK3 --> SYN
+
+    SYN --> OUTPUT
+
+    style INPUT fill:#f3f0ff,stroke:#6c5ce7,stroke-width:2px
+    style PHASE1 fill:#f0fff8,stroke:#00b894,stroke-width:2px
+    style PHASE2 fill:#fff8f0,stroke:#e17055,stroke-width:2px
+    style PHASE3 fill:#f3f0ff,stroke:#6c5ce7,stroke-width:2px
+    style OUTPUT fill:#f0fff8,stroke:#00b894,stroke-width:2px
+    </div>
+  </div>
+
+  <h3>Последовательность взаимодействия</h3>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+sequenceDiagram
+    participant U as Разработчик
+    participant O as Оркестратор (Workflow script)
+    participant BH as Bug Hunter
+    participant SA as Security Auditor
+    participant CQ as Code Quality
+    participant SK as Скептики
+    participant WR as Writer
+
+    U->>O: Запусти code review для PR #42
+
+    Note over O: Фаза 1 &mdash; Найти (параллельно через parallel())
+
+    par
+        O->>BH: Вот diff, ищи баги
+        O->>SA: Вот diff, ищи уязвимости
+        O->>CQ: Вот diff, оцени качество
+    end
+
+    BH-->>O: 3 findings
+    SA-->>O: 2 findings
+    CQ-->>O: 4 findings
+
+    Note over O: Фаза 2 &mdash; Проверить (adversarial verify)
+
+    par
+        O->>SK: Проверь finding багов
+        O->>SK: Проверь finding безопасность
+        O->>SK: Проверь finding качество
+    end
+
+    SK-->>O: 6 подтверждены, 3 отброшены
+
+    Note over O: Фаза 3 &mdash; Собрать
+
+    O->>WR: Синтезируй отчёт из 6 findings
+    WR-->>O: Структурированный отчёт
+
+    O-->>U: Итоговый отчёт с приоритетами
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span>
+      <strong>Ключевой момент:</strong> Фаза 2 (adversarial verify) &mdash; это то, что отличает
+      продуманный review от &laquo;три агента нашли 90% false positives&raquo;. Без неё вы получаете
+      больше шума, а не больше полезных находок.
+    </span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ПРИМЕР -->
+  <h2 id="example"><span class="emoji">&#x1f41b;</span> Пример: типичные уязвимости в Python-проекте</h2>
+
+  <p>
+    Допустим, у нас есть Python-проект с API и базой данных. Вот фрагмент кода,
+    который будут проверять три агента.
+  </p>
+
+  <div class="card card-red">
+    <h3>Уязвимый код</h3>
+    <div class="code-block">
+      <code># config.py
+import os
+
+API_KEY = "sk-EXAMPLE1234567890abcdef"    # ← hardcoded secret
+DEBUG = True
+
+# db.py
+import sqlite3
+
+def search_users(query: str):
+    conn = sqlite3.connect("app.db")
+    cursor = conn.cursor()
+    # SQL injection — f-string в запросе
+    cursor.execute(f"SELECT * FROM users WHERE name LIKE '%{query}%'")
+    results = cursor.fetchall()
+    return results
+
+# routes.py (FastAPI)
+from fastapi import FastAPI, Request
+from starlette.responses import JSONResponse
+import traceback
+
+router = FastAPI()
+
+@router.get("/search")
+def search(q: str = ""):
+    results = search_users(q)
+    return JSONResponse(results)
+
+@router.get("/users/{user_id}")
+def get_user(user_id: int):
+    try:
+        user = db.get_user(user_id)
+        return JSONResponse(user)
+    except Exception as e:
+        # Утечка traceback клиенту
+        return JSONResponse({"error": traceback.format_exc()}, status_code=500)</code>
+    </div>
+  </div>
+
+  <h3>Что нашёл каждый агент</h3>
+
+  <div class="comparison-grid">
+    <div class="card card-red">
+      <h3>Bug Hunter</h3>
+      <ul>
+        <li><strong>Finding #1:</strong> SQL Injection в <code>search_users</code>. Формируется raw SQL через f-string. Любой пользовательский ввод попадает напрямую в запрос &mdash; можно извлечь всё содержимое базы.</li>
+        <li><strong>Finding #2:</strong> Нет валидации параметра <code>q</code> на входе в <code>search</code>. Если пустая строка &mdash; <code>LIKE '%%'</code> вернёт все записи, потенциально thousands of rows.</li>
+      </ul>
+    </div>
+
+    <div class="card card-orange">
+      <h3>Security Auditor</h3>
+      <ul>
+        <li><strong>Finding #3:</strong> Hardcoded API key в <code>config.py</code>. Доступен в git-истории даже после удаления файла &mdash; нужна ротация ключа.</li>
+        <li><strong>Finding #4:</strong> Утечка отладочной информации в <code>get_user</code>. <code>traceback.format_exc()</code> возвращает полный стек-трейс клиенту, включая пути файлов и фрагменты кода.</li>
+      </ul>
+    </div>
+
+    <div class="card card-accent">
+      <h3>Code Quality</h3>
+      <ul>
+        <li><strong>Finding #5:</strong> Нет обработки ошибок при подключении к SQLite &mdash; если файл базы не найден, приложение упадёт с необработанным исключением.</li>
+        <li><strong>Finding #6:</strong> Соединение с базой не закрывается в <code>search_users</code> &mdash; утечка соединений при многократных вызовах.</li>
+        <li><strong>Finding #7:</strong> Нет type hints и docstrings у функций в <code>db.py</code>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Что сделал скептик</h3>
+
+  <div class="card card-yellow">
+    <table>
+      <tr>
+        <th>Finding</th>
+        <th>Вердикт скептика</th>
+        <th>Действие</th>
+      </tr>
+      <tr>
+        <td>#1 SQL Injection</td>
+        <td style="color: var(--green);"><strong>Подтверждено</strong> &mdash; критично, эксплуатируемо через параметр <code>q</code></td>
+        <td>P0 &mdash; заменить на параметризованный запрос</td>
+      </tr>
+      <tr>
+        <td>#2 Нет валидации</td>
+        <td style="color: var(--orange);"><strong>Частично</strong> &mdash; зависит от бизнес-логики, но SQL injection покрывает эту уязвимость</td>
+        <td>P2 &mdash; добавить валидацию, ограничить длину</td>
+      </tr>
+      <tr>
+        <td>#3 Hardcoded secret</td>
+        <td style="color: var(--green);"><strong>Подтверждено</strong> &mdash; staging или production?</td>
+        <td>P0 &mdash; вынести в переменные окружения, ротировать ключ</td>
+      </tr>
+      <tr>
+        <td>#4 Утечка отладки</td>
+        <td style="color: var(--green);"><strong>Подтверждено</strong> &mdash; полный стек-трейс клиенту раскрывает внутреннюю структуру приложения</td>
+        <td>P1 &mdash; логировать ошибки на сервере, клиенту отдавать общее сообщение</td>
+      </tr>
+      <tr>
+        <td>#5 Нет обработки ошибок DB</td>
+        <td style="color: var(--red);"><strong>Отклонено</strong> &mdash; SQLite.raises если файл не найден, но это ожидаемое поведение при старте</td>
+        <td>False positive</td>
+      </tr>
+      <tr>
+        <td>#6 Утечка соединений</td>
+        <td style="color: var(--green);"><strong>Подтверждено</strong> &mdash; реальная проблема при высокой нагрузке</td>
+        <td>P1 &mdash; использовать контекстный менеджер или connection pool</td>
+      </tr>
+      <tr>
+        <td>#7 Нет type hints</td>
+        <td style="color: var(--red);"><strong>Отклонено</strong> &mdash; это не баг, это стиль</td>
+        <td>False positive</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card card-green">
+    <h3>Финальный отчёт</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Итоговый отчёт &mdash; 4 из 7 findings прошли проверку</span>
+
+<span class="yaml-key">P0 (критично):</span>
+  1. SQL Injection в search_users &mdash; <span class="yaml-val">raw SQL через f-string, нужен parameterized query</span>
+  2. Hardcoded API key в config.py &mdash; <span class="yaml-val">вынести в env-переменные</span>
+
+<span class="yaml-key">P1 (важно):</span>
+  3. Утечка traceback клиенту &mdash; <span class="yaml-val">логировать на сервере, отдавать generic error</span>
+  4. Утечка соединений с SQLite &mdash; <span class="yaml-val">контекстный менеджер или pool</span>
+
+<span class="yaml-key">P2 (средний):</span>
+  5. Нет валидации параметра q &mdash; <span class="yaml-val">ограничить длину, sanitize</span>
+
+<span class="yaml-comment"># Отброшено: 2 false positives</span></code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. BEST PRACTICES -->
+  <h2 id="best-practices"><span class="emoji">&#x2b50;</span> Best Practices</h2>
+
+  <div class="card card-green">
+    <h3>1. Разные фокусы &mdash; не запускай трёх одинаковых агентов</h3>
+    <p>
+      Если все ищут одни и те же паттерны &mdash; параллелизм бесполезен. Один &mdash; баги,
+      другой &mdash; безопасность, третий &mdash; качество. У каждого свой промпт,
+      свой список паттернов, своя модель проверки.
+    </p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>2. Diff + контекст &mdash; давай не только diff</h3>
+    <p>
+      Diff показывает <em>что изменилось</em>, но не показывает <em>как это используется</em>.
+      Передавайте агентам не только diff, но и: маршруты API, модели данных, конфигурацию, middleware.
+      Это снижает false positives и повышает точность.
+    </p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>3. Verify обязателен &mdash; иначе 50% findings будут false positives</h3>
+    <p>
+      Не верьте агентам на слово. Каждая находка должна пройти проверку скептиком
+      (adversarial verify). Без этого вы тонете в false positives и разработчики
+      перестают доверять ревью.
+    </p>
+  </div>
+
+  <div class="card card-accent">
+    <h3>4. Писать schema для structured output</h3>
+    <p>
+      Если агенты отвечают свободным текстом &mdash; вы не можете автоматизировать
+      обработку. Задавайте JSON schema для каждого типа агента:
+    </p>
+    <div class="code-block">
+      <code>// Схема для Bug Hunter
+{
+  "findings": [
+    {
+      "severity": "P0|P1|P2|P3",
+      "category": "logic|security|performance|style",
+      "file": "string",
+      "line": "number",
+      "description": "string",
+      "confidence": "number (0-1)",
+      "suggestion": "string"
+    }
+  ]
+}</code>
+    </div>
+
+    <p>Пример реального вывода агента после обработки кода:</p>
+
+    <div class="code-block">
+      <code>// Пример вывода Bug Hunter
+{
+  "findings": [
+    {
+      "severity": "P0",
+      "category": "security",
+      "file": "db.py",
+      "line": 12,
+      "description": "SQL injection via f-string interpolation",
+      "confidence": 0.95,
+      "suggestion": "Replace with parameterized query"
+    }
+  ]
+}</code>
+    </div>
+  </div>
+
+  <div class="card card-yellow">
+    <h3>5. Логировать и сравнивать</h3>
+    <p>
+      Сохраняйте результаты каждого раунда. Со временем вы увидите patterns:
+      какие агенты какие баги находят лучше, какой порог оптимален,
+      какие findings всегда false positive. Это данные для тюнинга.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. ОШИБКИ -->
+  <h2 id="pitfalls"><span class="emoji">&#x26a0;&#xfe0f;</span> Типичные ошибки</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-red">
+      <h3>&#x274c; Запустить одинаковых агентов</h3>
+      <p>
+        <strong>Проблема:</strong> Запустили 3 копии одного промпта. Все нашли одни и те же
+        баги. Параллелизм дал 0 benefit по качеству &mdash; только утроили стоимость.
+      </p>
+      <p>
+        <strong>Решение:</strong> Разные фокусы. Bug Hunter, Security Auditor, Code Quality.
+        Разные промпты &mdash; минимум.
+      </p>
+    </div>
+
+    <div class="card card-red">
+      <h3>&#x274c; Пропустить verify</h3>
+      <p>
+        <strong>Проблема:</strong> Запустили 3 агента, каждый нашёл по 10 находок.
+        В итоге 30 &laquo;проблем&raquo;, из которых 25 &mdash; ложные. Разработчик видит &mdash;
+        и закрывает PR-ревью, потому что &laquo;это всё ерунда&raquo;.
+      </p>
+      <p>
+        <strong>Решение:</strong> Adversarial verify &mdash; обязателен. Не optional.
+      </p>
+    </div>
+  </div>
+
+  <div class="comparison-grid">
+    <div class="card card-red">
+      <h3>&#x274c; Не дать контекст</h3>
+      <p>
+        <strong>Проблема:</strong> Агентам дают только diff. Они не знают, что переменная
+        <code>query</code> приходит из query string и уже проходит валидацию
+        на уровне middleware &mdash; считают её &laquo;возможно опасной&raquo;.
+      </p>
+      <p>
+        <strong>Решение:</strong> Давайте diff + маршруты + middleware + модели данных.
+      </p>
+    </div>
+
+    <div class="card card-red">
+      <h3>&#x274c; Поверить каждому finding'у</h3>
+      <p>
+        <strong>Проблема:</strong> Агент сказал &laquo;SQL injection&raquo; &mdash; разработчик
+        паникует. А на деле это строковый literal, который не подставляется извне.
+        Без verify &mdash; ложная тревога.
+      </p>
+      <p>
+        <strong>Решение:</strong> Каждый finding проходит adversarial verify. Скептик проверяет
+        эксплуатируемость и контекст.
+      </p>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. СРАВНЕНИЕ -->
+  <h2 id="comparison"><span class="emoji">&#x2694;&#xfe0f;</span> Сравнение со встроенным code-review</h2>
+
+  <p>
+    В Claude Code есть <strong>встроенный скилл code-review</strong> (вызывается через
+    <code>/code-review</code> или как Skill tool). Он удобен для быстрой проверки перед коммитом,
+    но у него есть ограничения.
+  </p>
+
+  <table>
+    <tr>
+      <th>Характеристика</th>
+      <th>Встроенный /code-review</th>
+      <th>Этот workflow</th>
+    </tr>
+    <tr>
+      <td><strong>Количество агентов</strong></td>
+      <td>Один</td>
+      <td>Три параллельных</td>
+    </tr>
+    <tr>
+      <td><strong>Фокусы</strong></td>
+      <td>Generic code review</td>
+      <td>Баги / Безопасность / Качество</td>
+    </tr>
+    <tr>
+      <td><strong>Adversarial verify</strong></td>
+      <td>Нет</td>
+      <td>Есть &mdash; скептик проверяет каждый finding</td>
+    </tr>
+    <tr>
+      <td><strong>Настройка prompt'ов</strong></td>
+      <td>Нет</td>
+      <td>Можно кастомизировать каждого агента</td>
+    </tr>
+    <tr>
+      <td><strong>Параллельность</strong></td>
+      <td>Нет</td>
+      <td>Через <code>parallel()</code> в Workflow tool</td>
+    </tr>
+    <tr>
+      <td><strong>Когда использовать</strong></td>
+      <td>Быстрая проверка перед коммитом</td>
+      <td>Глубокое ревью критичных изменений</td>
+    </tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span>
+      <strong>Когда что использовать:</strong> Встроенный <code>/code-review</code> &mdash; для
+      быстрого &laquo;всё ли в порядке?&raquo; перед коммитом. Многоагентный workflow &mdash;
+      для глубокого ревью критичных изменений (новый API, security-sensitive код, рефакторинг
+      на сотни строк).
+    </span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ИТОГО -->
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Многоагентный code review &mdash; это самодельный recipe из
+      Workflow tool (parallel/pipeline) + Agent tool. Fan-out паттерн &mdash; общепринятый
+      термин из параллельного программирования, не фича Claude Code. Три агента с разными
+      фокусами находят больше, чем один. Adversarial verify фильтрует false positives.
+      Не запускайте одинаковых агентов, не пропускайте верификацию и давайте контекст,
+      а не только diff.
+    </p>
+  </div>
+
+<footer style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.85em;text-align:center;">
+    Создано <strong>writer-agent</strong> через Workflow tool.
+    <br>Актуально на 2026-06-17.
+    <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+</footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+</body>
+</html>

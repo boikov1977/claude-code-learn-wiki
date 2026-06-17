@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP (Model Context Protocol) — шпаргалка</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-teal {
+      border-left: 4px solid var(--teal);
+      background: #f0fffa;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .tag-global {
+      display: inline-block;
+      background: #e3f2fd;
+      color: #1565c0;
+      border: 1px solid #bbdefb;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-agent {
+      display: inline-block;
+      background: #f3e5f5;
+      color: #7b1fa2;
+      border: 1px solid #e1bee7;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-stdio {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-remote {
+      display: inline-block;
+      background: #fff3e0;
+      color: #e65100;
+      border: 1px solid #ffe0b2;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>&#x1f50c; MCP &mdash; Model Context Protocol</h1>
+  <p class="subtitle">Протокол, через который Claude Code общается с внешними сервисами &mdash; USB для AI-инструментов</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое MCP?</a></li>
+      <li><a href="#how">Как это работает</a></li>
+      <li><a href="#types">Типы подключения</a></li>
+      <li><a href="#scope">Глобальный vs изолированный MCP</a></li>
+      <li><a href="#our-servers">Наши MCP-серверы</a></li>
+      <li><a href="#pitfall">Ловушка: дублирование серверов</a></li>
+      <li><a href="#isolation">Изоляция контекста</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ MCP -->
+  <h2 id="what"><span class="emoji">&#x1f50c;</span> Что такое MCP?</h2>
+
+  <p>
+    Знаешь USB? Раньше у каждого устройства был свой разъём &mdash; а потом появился USB как единый стандарт.
+    Теперь любую периферию воткнул &mdash; и работает. MCP &mdash; это <strong>USB для AI-инструментов</strong>.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> MCP (Model Context Protocol) &mdash; это <strong>протокол</strong>,
+    через который Claude Code подключается к внешним сервисам и получает доступ к их инструментам.
+    Claude может поискать в интернете, прочитать документацию, проверить что-то &mdash;
+    всё это через MCP-серверы.</p>
+  </div>
+
+  <p><strong>MCP-сервер</strong> &mdash; это программа, которая предоставляет Claude Code набор инструментов (tools).
+  Claude подключается к серверу, видит какие инструменты есть, и может их вызывать.</p>
+
+  <p>Допустим, у тебя есть MCP-сервер для поиска в интернете. Claude хочет найти что-то &rarr;
+  вызывает инструмент <code>search_web</code> на этом сервере &rarr; сервер ищет и возвращает результат.
+  Claude даже не знает <em>как</em> ищет &mdash; он просто видит доступный инструмент.</p>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. КАК ЭТО РАБОТАЕТ -->
+  <h2 id="how"><span class="emoji">&#x2699;&#xfe0f;</span> Как это работает</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph USER["&#x1f464; Пользователь"]
+        U["Набирает промпт"]
+    end
+
+    subgraph CC["&#x1f916; Claude Code"]
+        CLAUDE["Claude"]
+        TOOLS["Доступные инструменты"]
+    end
+
+    subgraph SERVER["&#x1f50c; MCP-сервер"]
+        SERVER_CODE["Программа"]
+        MCP_TOOLS["Инструменты<br><small>search, read, write...</small>"]
+    end
+
+    subgraph EXT["&#x1f310; Внешние сервисы"]
+        WEB["&#x1f310; Интернет"]
+        API["&#x1f4e1; API"]
+        DB["&#x1f4be; База данных"]
+    end
+
+    U -->|"найти документацию<br>React"| CLAUDE
+    CLAUDE -->|"нужен поиск"| TOOLS
+    TOOLS -->|"вызов<br>search_web"| SERVER_CODE
+    SERVER_CODE --> MCP_TOOLS
+    MCP_TOOLS --> WEB
+    MCP_TOOLS --> API
+    MCP_TOOLS --> DB
+
+    WEB -->|"результат"| SERVER_CODE
+    SERVER_CODE -->|"данные"| CLAUDE
+    CLAUDE -->|"React docs<br>найдены!"| U
+
+    style USER fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style CC fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style SERVER fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style EXT fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    </div>
+  </div>
+
+  <p>Процесс:</p>
+  <ol>
+    <li><strong>Запуск.</strong> При старте сессии Claude Code поднимает все настроенные MCP-серверы.</li>
+    <li><strong>Регистрация.</strong> Каждый сервер сообщает: &laquo;у меня есть инструменты A, B, C&raquo;.</li>
+    <li><strong>Использование.</strong> Когда Claude решает, что ему нужен внешний инструмент &mdash; он вызывает его.</li>
+    <li><strong>Результат.</strong> Сервер выполняет операцию и возвращает данные Claude.</li>
+  </ol>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Ключевой момент:</strong> Claude не программирует MCP-серверы на лету &mdash;
+    они уже написаны и настроены заранее. Claude просто <em>использует</em> доступные инструменты.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ТИПЫ ПОДКЛЮЧЕНИЯ -->
+  <h2 id="types"><span class="emoji">&#x1f310;</span> Типы подключения MCP-серверов</h2>
+
+  <p>MCP-серверы бывают трёх видов. Разница &mdash; в том, <em>как</em> Claude Code к ним подключается:</p>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3><span class="tag-stdio">stdio</span> Локальный процесс</h3>
+      <p>Сервер запускается <strong>как процесс</strong> на твоей машине. Claude Code общается с ним через stdin/stdout &mdash; как с обычной программой.</p>
+      <div class="code-block">
+        <code><span class="yaml-comment"># Пример: наш poisk-mcp</span>
+{
+  "type": "stdio",
+  "command": "python",
+  "args": ["server.py"]
+}</code>
+      </div>
+      <p><strong>Плюс:</strong> быстрый, простой, не требует интернета.<br>
+      <strong>Минус:</strong> занимает ресурсы твоей машины.</p>
+    </div>
+
+    <div class="card card-orange">
+      <h3><span class="tag-remote">remote</span> Удалённый сервер</h3>
+      <p>Сервер живёт <strong>на удалённом URL</strong>. Claude Code подключается по HTTP, как браузер к сайту.</p>
+      <div class="code-block">
+        <code><span class="yaml-comment"># Пример: context7</span>
+{
+  "type": "remote",
+  "url": "https://mcp.context7.com/mcp",
+  "headers": {
+    "API_KEY": "..."
+  }
+}</code>
+      </div>
+      <p><strong>Плюс:</strong> не нагружает машину, всегда актуален.<br>
+      <strong>Минус:</strong> нужен интернет, нужен API-ключ.</p>
+    </div>
+  </div>
+
+  <div class="card card-purple">
+    <h3><span class="tag-agent">sse</span> Server-Sent Events</h3>
+    <p>Разновидность удалённого подключения. Сервер отправляет события через <strong>Server-Sent Events</strong> &mdash;
+    постоянный поток данных от сервера к клиенту. Используется реже, но подходит для долгоживущих соединений.</p>
+  </div>
+
+  <table>
+    <tr>
+      <th>Тип</th>
+      <th>Где живёт</th>
+      <th>Пример</th>
+      <th>Когда использовать</th>
+    </tr>
+    <tr>
+      <td><span class="tag-stdio">stdio</span></td>
+      <td>На твоей машине</td>
+      <td>poisk-mcp, openspec-mcp</td>
+      <td>Локальные инструменты, быстрый доступ</td>
+    </tr>
+    <tr>
+      <td><span class="tag-remote">remote</span></td>
+      <td>На сервере провайдера</td>
+      <td>context7</td>
+      <td>Онлайн-сервисы, обновляемые данные</td>
+    </tr>
+    <tr>
+      <td><span class="tag-agent">sse</span></td>
+      <td>На сервере провайдера</td>
+      <td>Некоторые кастомные</td>
+      <td>Долгие операции, стриминг</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ГЛОБАЛЬНЫЙ VS ИЗОЛИРОВАННЫЙ -->
+  <h2 id="scope"><span class="emoji">&#x1f3e0;</span> Глобальный vs изолированный MCP</h2>
+
+  <p>Это <strong>ключевое различие</strong>. MCP-серверы можно подключить на двух уровнях &mdash;
+  и от этого зависит, кто их видит:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    subgraph GLOBAL["&#x1f30e; Глобальный MCP"]
+        direction TB
+        G_FILE1["~/.claude.json<br><small>новый формат (claude mcp add)</small>"]
+        G_FILE2["~/.claude/settings.json<br><small>старый формат</small>"]
+    end
+
+    subgraph MAIN["&#x1f916; Основной агент (я)"]
+        M_TOOLS["Все инструменты<br>из глобальных серверов"]
+    end
+
+    subgraph AGENTS["&#x1f464; Субагенты"]
+        direction TB
+        A1["openspec-manager"]
+        A2["writer-agent"]
+        A3["innovator"]
+    end
+
+    subgraph ISOLATED["&#x1f512; Изолированные MCP"]
+        direction TB
+        I1["openspec-mcp<br><small>только openspec-manager</small>"]
+        I2["poisk-mcp<br><small>только writer-agent</small>"]
+        I3["context7<br><small>только innovator/pragmatist</small>"]
+    end
+
+    G_FILE1 --> MAIN
+    G_FILE2 -.->|"старый формат,<br>лучше не использовать"| MAIN
+
+    MAIN -->|"видит"| M_TOOLS
+
+    I1 -->|"видит"| A1
+    I2 -->|"видит"| A2
+    I3 -->|"видит"| A3
+
+    MAIN -.->|"НЕ видит"| I1
+    MAIN -.->|"НЕ видит"| I2
+    MAIN -.->|"НЕ видит"| I3
+
+    style GLOBAL fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style MAIN fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style AGENTS fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style ISOLATED fill:#ffebee,stroke:#c62828,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="comparison-grid">
+    <div class="card card-accent">
+      <h3>&#x1f30e; Глобальный MCP</h3>
+      <p><strong>Виден:</strong> основному агенту (мне) во всех проектах.</p>
+      <p><strong>Где настраивается:</strong></p>
+      <ul>
+        <li><code>~/.claude.json</code> &mdash; <strong>новый формат</strong> (через <code>claude mcp add</code>)</li>
+        <li><code>~/.claude/settings.json</code> &mdash; <strong>старый формат</strong> (но тоже работает)</li>
+      </ul>
+      <p><strong>Пример:</strong> наш <code>poisk-mcp</code> &mdash; глобальный, потому что мне нужен поиск всегда.</p>
+    </div>
+
+    <div class="card card-purple">
+      <h3>&#x1f512; Изолированный MCP</h3>
+      <p><strong>Виден:</strong> только конкретному агенту. Я про него <strong>не знаю</strong>, пока не вызову агента.</p>
+      <p><strong>Где настраивается:</strong> в frontmatter агента, поле <code>mcpServers</code>.</p>
+      <p><strong>Пример:</strong> <code>openspec-mcp</code> &mdash; только у <code>openspec-manager</code>.
+      Поднимается только когда агент активен.</p>
+    </div>
+  </div>
+
+  <div class="card card-green">
+    <h3>Пример изолированного MCP во frontmatter</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment">---
+# ~/.claude/agents/openspec-manager.md
+---</span>
+---
+name: openspec-manager
+<span class="yaml-comment"># ...остальные поля...</span>
+mcpServers:
+  openspec-mcp:
+    type: stdio
+    command: uvx
+    args:
+      - "openspec-mcp"
+<span class="yaml-comment">---</span>
+
+# Описание агента...</code>
+    </div>
+    <p>Этот MCP-сервер <strong>только</strong> у openspec-manager. Никто другой его не видит.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. НАШИ MCP-СЕРВЕРЫ -->
+  <h2 id="our-servers"><span class="emoji">&#x1f6e0;&#xfe0f;</span> Наши MCP-серверы</h2>
+
+  <p>У нас три MCP-сервера. Каждый подключён к определённым агентам:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph SERVERS["&#x1f50c; MCP-Серверы"]
+        POISK["&#x1f30d; poisk-mcp<br><small>Поиск в интернете<br><small>нейро-ранжирование</small></small>"]
+        CTX7["&#x1f4da; context7<br><small>Документация<br>библиотек</small>"]
+        SPEC["&#x1f4cb; openspec-mcp<br><small>Управление<br>OpenSpec ченжами</small>"]
+    end
+
+    subgraph GLOBAL["&#x1f30e; Глобальный"]
+        CLAUDE["&#x1f916; Основной агент<br><small>(я)</small>"]
+    end
+
+    subgraph AGENTS["&#x1f464; Субагенты"]
+        OSPEC["openspec-manager"]
+        WRITER["writer-agent"]
+        INNOV["innovator"]
+        PRAGM["pragmatist"]
+        CONSV["conservative"]
+    end
+
+    POISK -->|"&#x1f30e; глобальный"| CLAUDE
+    POISK -->|"&#x1f512; дубль"| WRITER
+    CTX7 -->|"&#x1f512; изолированный"| INNOV
+    CTX7 -->|"&#x1f512; изолированный"| PRAGM
+    CTX7 -->|"&#x1f512; изолированный"| CONSV
+    SPEC -->|"&#x1f512; изолированный"| OSPEC
+
+    style SERVERS fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style GLOBAL fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style AGENTS fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <th>Сервер</th>
+      <th>Тип</th>
+      <th>Что делает</th>
+      <th>У кого</th>
+    </tr>
+    <tr>
+      <td><strong>poisk-mcp</strong></td>
+      <td><span class="tag-stdio">stdio</span></td>
+      <td>Поиск в интернете с нейро-ранжированием</td>
+      <td><span class="tag-global">глобальный</span> + <span class="tag-agent">writer-agent</span> (дубль)</td>
+    </tr>
+    <tr>
+      <td><strong>context7</strong></td>
+      <td><span class="tag-remote">remote</span></td>
+      <td>Актуальная документация библиотек</td>
+      <td><span class="tag-agent">innovator</span>, <span class="tag-agent">pragmatist</span>, <span class="tag-agent">conservative</span></td>
+    </tr>
+    <tr>
+      <td><strong>openspec-mcp</strong></td>
+      <td><span class="tag-stdio">stdio</span></td>
+      <td>Управление OpenSpec ченжами</td>
+      <td><span class="tag-agent">openspec-manager</span></td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. ЛОВУШКА: ДУБЛИРОВАНИЕ -->
+  <h2 id="pitfall"><span class="emoji">&#x26a0;&#xfe0f;</span> Ловушка: дублирование серверов</h2>
+
+  <div class="card card-red">
+    <h3>&#x1f6a8; Наш реальный кейс с poisk-mcp</h3>
+    <p>Была ситуация: <code>poisk-mcp</code> был прописан <strong>дважды</strong>:</p>
+    <ul>
+      <li>В <code>~/.claude/settings.json</code> &mdash; глобально</li>
+      <li>В <code>~/.claude.json</code> &mdash; тоже глобально</li>
+    </ul>
+    <p>В результате &mdash; <strong>сервер отваливался</strong>. Два экземпляра одного и того же сервера конфликтовали.</p>
+    <p><strong>Решение:</strong> удалили из <code>settings.json</code>. Оставил только <code>~/.claude.json</code>.</p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Правило:</strong> Один сервер &mdash; одна запись. Если подключаешь глобально через
+    <code>claude mcp add</code> &mdash; он попадёт в <code>~/.claude.json</code>. Не дублируй в
+    <code>settings.json</code>.</span>
+  </div>
+
+  <p>Где что живёт:</p>
+
+  <table>
+    <tr>
+      <th>Файл</th>
+      <th>Формат</th>
+      <th>Когда использовать</th>
+    </tr>
+    <tr>
+      <td><code>~/.claude.json</code></td>
+      <td>Новый (<code>claude mcp add</code>)</td>
+      <td><strong>Рекомендуется.</strong> Основной способ добавления MCP</td>
+    </tr>
+    <tr>
+      <td><code>~/.claude/settings.json</code></td>
+      <td>Старый</td>
+      <td>Можно, но <strong>лучше не смешивать</strong> с новым форматом</td>
+    </tr>
+    <tr>
+      <td>Frontmatter агента</td>
+      <td><code>mcpServers</code></td>
+      <td>Для изолированных серверов (только у этого агента)</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ИЗОЛЯЦИЯ КОНТЕКСТА -->
+  <h2 id="isolation"><span class="emoji">&#x1f512;</span> Изоляция контекста: зачем это важно</h2>
+
+  <p>Это <strong>самая мощная фича</strong> изолированных MCP-серверов.</p>
+
+  <div class="card card-purple">
+    <p><strong>Проблема:</strong> Если у тебя 10 MCP-серверов &mdash; основной агент видит все 100+ инструментов.
+    Это засоряет контекст. Модель тратит токены на то, чтобы &laquo;знать&raquo; про инструменты,
+    которыми она никогда не пользуется.</p>
+  </div>
+
+  <div class="card card-green">
+    <p><strong>Решение:</strong> Изолированные MCP подключаются <strong>только к нужному агенту</strong>.
+    Основной агент (я) их вообще не видит. Контекст чистый.</p>
+  </div>
+
+  <p>Пример:</p>
+
+  <div class="comparison-grid">
+    <div class="card card-accent">
+      <h3>Без изоляции (плохо)</h3>
+      <p>У основного агента 15 инструментов от 5 MCP-серверов. Каждый вызов LLM тратит токены
+      на описание всех 15 инструментов, даже если 12 из них не нужны.</p>
+    </div>
+
+    <div class="card card-green">
+      <h3>С изоляцией (хорошо)</h3>
+      <p>Основной агент видит только <code>search_web</code> от poisk-mcp.
+      Остальные инструменты (context7, openspec-mcp) &mdash; знают только их агенты.
+      Контекст минимален, токены экономятся.</p>
+    </div>
+  </div>
+
+  <div class="card card-accent">
+    <h3>Как это работает</h3>
+    <p>Когда я (основной агент) запускаю субагента &mdash; тот поднимает <strong>свои</strong> MCP-серверы.
+    Все инструменты субагента видны <strong>только ему</strong>. Я вижу только результат работы субагента,
+    а не его внутренние инструменты.</p>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Я — основной агент</span>
+Мои инструменты: Read, Write, Edit, Bash, search_web (poisk-mcp)
+
+<span class="yaml-comment"># Вызываю innovator</span>
+→ innovator поднимает context7
+→ innovator видит: search_library_docs, get_library_version
+→ Я вижу только: "Вот ответ от innovator: ..."
+
+<span class="yaml-comment"># Вызываю openspec-manager</span>
+→ openspec-manager поднимает openspec-mcp
+→ openspec-manager видит: create_change, apply_change, ...
+→ Я вижу только: "Вот ответ от openspec-manager: ..."</code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ИТОГО -->
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> MCP &mdash; это протокол подключения внешних инструментов к Claude Code.
+      Серверы бывают <span class="tag-stdio">stdio</span> (локальные) и <span class="tag-remote">remote</span> (онлайн).
+      Глобальные видны основному агенту, изолированные &mdash; только конкретному субагенту.
+      Не дублируй серверы в разных файлах. Изоляция экономит контекст и делает систему чище. &#x1f50c;
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+</body>
+</html>

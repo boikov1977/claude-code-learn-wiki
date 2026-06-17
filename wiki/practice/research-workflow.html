@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deep Research Workflow — самодельный рецепт автоматизированного исследования</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e0e0e0;
+      --text: #2d3436;
+      --text-muted: #636e72;
+      --accent: #6c5ce7;
+      --accent-light: #f1f0ff;
+      --code-bg: #f6f8fa;
+      --green: #00b894;
+      --orange: #e17055;
+      --red: #d63031;
+      --purple: #6c5ce7;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .card-teal {
+      border-left: 4px solid var(--teal);
+      background: #f0ffff;
+    }
+
+    .card-warn {
+      border-left: 4px solid var(--orange);
+      background: #fff5f0;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+    .yaml-str { color: var(--red); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    kbd {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .phase-step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin: 16px 0;
+    }
+
+    .phase-num {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.95em;
+      margin-top: 2px;
+    }
+
+    .phase-body {
+      flex: 1;
+    }
+
+    .phase-body h4 {
+      margin-bottom: 4px;
+      font-size: 1.05em;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>Deep Research Workflow</h1>
+  <p class="subtitle">Самодельный рецепт автоматизированного исследования &mdash; поиск, верификация и синтез отчёта через MCP-инструменты</p>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ВНИМАНИЕ: ЭТО НЕ ВСТРОЕННАЯ ФИЧА                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <div class="card card-warn" style="border: 2px solid var(--orange); background: #fff8f0;">
+    <p style="margin:0; font-size: 1.05em;">
+      <strong>Это не встроенная фича Claude Code.</strong>
+      Deep Research Workflow &mdash; это самодельный рецепт (workflow),
+      собранный из доступных инструментов: MCP-серверов, Workflow tool и
+      методик оркестрации. В Claude Code есть встроенный скилл
+      <code>deep-research</code>, но он работает иначе &mdash;
+      см. <a href="#comparison">сравнение в конце статьи</a>.
+    </p>
+  </div>
+
+  <p>
+    Этот workflow не поставляется &laquo;из коробки&raquo;. Его собирают вручную:
+    подключают MCP-серверы с инструментами для веб-поиска и чтения страниц,
+    настраивают Workflow tool для оркестрации, и прописывают промпты для
+    каждой фазы. Преимущество &mdash; полный контроль над каждым шагом
+    и возможность подставить любые источники.
+  </p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#why">Зачем это нужно</a></li>
+      <li><a href="#tools">Инструменты</a></li>
+      <li><a href="#phases">Четыре фазы workflow</a></li>
+      <li><a href="#flowchart">Полный цикл: от запроса до отчёта</a></li>
+      <li><a href="#example">Пример: популярные MCP-серверы в Claude Code</a></li>
+      <li><a href="#best-practices">Best practices</a></li>
+      <li><a href="#mistakes">Типичные ошибки</a></li>
+      <li><a href="#comparison">Сравнение со встроенным deep-research</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЗАЧЕМ -->
+  <h2 id="why"><span class="emoji">&#x1f50d;</span> Зачем это нужно</h2>
+
+  <p>
+    Допустим, тебе нужно понять, какие MCP-серверы сейчас популярны, или собрать обзор
+    инструментов для конкретной задачи. Вручную &mdash; это десятки вкладок, копирование,
+    сравнение, сомнения в актуальности. Claude Code умеет делать это <strong>автоматически</strong>:
+    разбить вопрос на подуглы, параллельно пробежаться по источникам, проверить факты
+    перекрёстно и выдать готовый отчёт со ссылками.
+  </p>
+
+  <div class="card card-accent">
+    <p style="margin:0;"><strong>Суть:</strong> Deep Research Workflow &mdash; это не &laquo;погуглить&raquo;. Это
+    <strong>систематическое исследование</strong>: многократный поиск, чтение нескольких
+    источников, проверка противоречий и синтез в структурированный отчёт. Результат &mdash;
+    не &laquo;гугл-выдача&raquo;, а документ, на который можно опереться. Но это
+    <em>твой</em> рецепт &mdash; не готовая функция платформы.</p>
+  </div>
+
+  <p>
+    Сравни два подхода:
+  </p>
+
+  <div class="comparison-grid">
+    <div class="card card-red">
+      <h3>&#x274c; Ручной поиск</h3>
+      <ul>
+        <li>Открыл Google, ввёл запрос</li>
+        <li>Пролистал 10 ссылок, открыл 3 в новых вкладках</li>
+        <li>Прочитал, забыл, что было в первой</li>
+        <li>Не уверен, актуальны ли данные</li>
+        <li>Нет ссылок в итоговом тексте</li>
+        <li>30&ndash;60 минут рутины</li>
+      </ul>
+    </div>
+
+    <div class="card card-green">
+      <h3>&#x2705; Deep Research Workflow</h3>
+      <ul>
+        <li>Claude разбивает запрос на 5 углов</li>
+        <li>Параллельно ищет по каждому</li>
+        <li>Читает топ-15 источников</li>
+        <li>Перекрёстно проверяет факты</li>
+        <li>Генерирует отчёт со ссылками и confidence</li>
+        <li>5&ndash;10 минут без твоего участия</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ИНСТРУМЕНТЫ -->
+  <h2 id="tools"><span class="emoji">&#x1f6e0;&#xfe0f;</span> Инструменты</h2>
+
+  <p>
+    Всё строится на MCP-серверах &mdash; внешних процессах, которые Claude подключает
+    через stdio и вызывает как обычные инструменты. Для этого workflow ключевой &mdash;
+    <code>poisk-mcp</code>, но подойдёт любой MCP-сервер с инструментами поиска и чтения.
+  </p>
+
+  <h3>poisk-mcp: инструменты для исследования</h3>
+
+  <table>
+    <tr>
+      <th>Инструмент</th>
+      <th>Назначение</th>
+      <th>Когда использовать</th>
+    </tr>
+    <tr>
+      <td><code>search_web</code></td>
+      <td>Поиск по запросу. Возвращает список ссылок с описаниями и оценками релевантности.</td>
+      <td>Первый шаг: собрать потенциальные источники. Запускай с разных формулировок.</td>
+    </tr>
+    <tr>
+      <td><code>read_webpage</code></td>
+      <td>Чтение содержимого страницы. Конвертирует HTML в чистый текст.</td>
+      <td>Когда нашёл перспективную ссылку &mdash; прочитай её полностью.</td>
+    </tr>
+    <tr>
+      <td><code>browse_summarize</code></td>
+      <td>Чтение + автоматическое извлечение ключевых тезисов.</td>
+      <td>Для быстрого сканирования: &laquo;этот источник релевантен или нет?&raquo;</td>
+    </tr>
+    <tr>
+      <td><code>web_research</code></td>
+      <td>Глубокое исследование: поиск + чтение топ-страниц + анализ + отчёт. Всё в одном вызове.</td>
+      <td>Когда нужен готовый отчёт, а не сырые ссылки. depth=1&ndash;5.</td>
+    </tr>
+  </table>
+
+  <div class="card card-green">
+    <h3>Примеры вызовов</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Широкий поиск &mdash; собрать источники</span>
+<span class="yaml-key">search_web</span>(<span class="yaml-str">"MCP servers popular 2026 Claude Code"</span>, max_results=<span class="yaml-val">10</span>)
+
+<span class="yaml-comment"># Конкретный вопрос</span>
+<span class="yaml-key">search_web</span>(<span class="yaml-str">"best MCP servers for code review"</span>, max_results=<span class="yaml-val">8</span>)
+
+<span class="yaml-comment"># Прочитать конкретную статью</span>
+<span class="yaml-key">read_webpage</span>(<span class="yaml-str">"https://example.com/mcp-overview"</span>)
+
+<span class="yaml-comment"># Быстрое резюме длинной статьи</span>
+<span class="yaml-key">browse_summarize</span>(<span class="yaml-str">"https://example.com/mcp-guide"</span>, <span class="yaml-str">"Какие MCP-серверы описаны?"</span>)
+
+<span class="yaml-comment"># Глубокое исследование за один вызов</span>
+<span class="yaml-key">web_research</span>(<span class="yaml-str">"MCP экосистема 2026: популярные серверы и тренды"</span>, depth=<span class="yaml-val">4</span>)</code>
+    </div>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Workflow tool &mdash; оркестрация</h3>
+    <p>
+      Сам workflow orchestrates через Workflow tool: веерный (fan-out) поиск,
+      параллельное чтение, последовательная верификация и синтез. Это не
+      один вызов инструмента &mdash; это цепочка шагов, каждый из которых
+      управляет предыдущими.
+    </p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Альтернативы: другие MCP-серверы</h3>
+    <p style="margin:0;">
+      Если <code>poisk-mcp</code> недоступен, подойдут другие MCP-серверы с инструментами
+      для работы с вебом: Context7, Tavily, Firecrawl и т.д. Ключевое требование &mdash;
+      наличие хотя бы двух инструментов:
+      <strong>поиск</strong> (найти ссылки) и <strong>чтение</strong> (получить содержимое страницы).
+      Встроенный <code>WebSearch</code> Claude Code через OpenCode-прокси не работает
+      (ошибка схемы DeepSeek), поэтому MCP обязателен.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ФАЗЫ -->
+  <h2 id="phases"><span class="emoji">&#x1f4c8;</span> Четыре фазы workflow</h2>
+
+  <p>
+    Deep Research Workflow &mdash; это не хаотичный набор запросов. Это <strong>структурированный
+    процесс</strong> из четырёх фаз, каждая со своей целью. Вот общая картина:
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    Q["&#x1f4dd; Запрос<br>Пользователь<br>задаёт вопрос"] --> S["&#x1f50d; Поиск<br>5 углов,<br>параллельные<br>запросы"]
+    S --> R["&#x1f4d6; Чтение<br>Топ-15 источников<br>параллельно"]
+    R --> V["&#x2705; Верификация<br>Перекрёстная<br>проверка фактов"]
+    V --> O["&#x1f4cb; Отчёт<br>Синтез, ссылки,<br>confidence"]
+
+    style Q fill:#f8f4ff,stroke:#6c5ce7,stroke-width:2px
+    style S fill:#f1f0ff,stroke:#6c5ce7,stroke-width:2px
+    style R fill:#fff8f0,stroke:#e17055,stroke-width:2px
+    style V fill:#f6fff8,stroke:#00b894,stroke-width:2px
+    style O fill:#f1f0ff,stroke:#6c5ce7,stroke-width:2px
+    </div>
+  </div>
+
+  <!-- Фаза 1 -->
+  <div class="phase-step">
+    <div class="phase-num">1</div>
+    <div class="phase-body">
+      <h4>Scout &mdash; веерный поиск по теме</h4>
+      <p>
+        Один запрос в Google даёт одну перспективу. Хорошее исследование &mdash; это
+        <strong>5 параллельных поисков</strong> с разных ракурсов. Claude сам разбивает
+        исходный вопрос на подуглы и запускает <code>search_web</code> по каждому.
+      </p>
+
+      <div class="card card-accent">
+        <p style="margin:0;"><strong>Пример:</strong> Вопрос &laquo;Какие MCP-серверы популярны?&raquo; разбивается на:</p>
+        <ol>
+          <li><code>"MCP servers popular 2026 GitHub stars"</code> &mdash; количественные метрики</li>
+          <li><code>"best MCP servers Claude Code production"</code> &mdash; продакшн-опыт</li>
+          <li><code>"MCP ecosystem overview Anthropic"</code> &mdash; официальная позиция</li>
+          <li><code>"MCP servers comparison review"</code> &mdash; сравнительные обзоры</li>
+          <li><code>"MCP new servers trending"</code> &mdash; свежие новинки</li>
+        </ol>
+      </div>
+
+      <p>
+        Каждый поиск возвращает 8&ndash;10 результатов. После дедупликации по URL получается
+        ~30&ndash;40 уникальных ссылок.
+      </p>
+    </div>
+  </div>
+
+  <!-- Фаза 2 -->
+  <div class="phase-step">
+    <div class="phase-num">2</div>
+    <div class="phase-body">
+      <h4>Deep-read &mdash; параллельное чтение лучших источников</h4>
+      <p>
+        Из ~35 ссылок отбираются <strong>15 самых перспективных</strong> (по релевантности
+        и разнообразию доменов). Каждая читается через <code>read_webpage</code> или
+        <code>browse_summarize</code>. Параллельно &mdash; не нужно ждать, пока прочитаешь
+        первую, чтобы начать вторую.
+      </p>
+
+      <div class="card card-orange">
+        <h3 style="margin-top:0;">Что искать в каждом источнике</h3>
+        <ul>
+          <li><strong>Конкретные имена и цифры</strong> &mdash; названия серверов, звёзды, даты</li>
+          <li><strong>Цитаты и примеры</strong> &mdash; прямые выдержки, которые можно проверить</li>
+          <li><strong>Дата публикации</strong> &mdash; устаревшая информация = низкий приоритет</li>
+          <li><strong>Автор и площадка</strong> &mdash; Anthropic blog vs личный пост в dev.to</li>
+        </ul>
+      </div>
+
+      <p>
+        Из каждой страницы извлекаются <strong>фальсифицируемые утверждения</strong> &mdash;
+        конкретные факты, которые можно подтвердить или опровергнуть другим источником.
+        Например: &laquo;Context7 &mdash; самый популярный MCP-сервер с 15K+ звёзд&raquo; &mdash;
+        это фальсифицируемое утверждение.
+      </p>
+    </div>
+  </div>
+
+  <!-- Фаза 3 -->
+  <div class="phase-step">
+    <div class="phase-num">3</div>
+    <div class="phase-body">
+      <h4>Verify &mdash; проверка фактов через несколько независимых источников</h4>
+      <p>
+        Это самая важная фаза. Каждый факт, собранный из источников, проверяется
+        <strong>минимум двумя независимыми источниками</strong>. Если факт подтверждается
+        только одним &mdash; он помечается как <code>low confidence</code>.
+      </p>
+
+      <div class="card card-teal">
+        <h3 style="margin-top:0;">Алгоритм верификации</h3>
+        <div class="diagram-wrapper">
+          <div class="mermaid">
+flowchart TD
+    CLAIM["Факт: \"Context7 — популярный MCP<br>с 15K+ звёзд на GitHub\""]
+    CLAIM --> SRC1["Источник 1<br>Официальный сайт<br>context7.com"]
+    CLAIM --> SRC2["Источник 2<br>Habr-статья<br>от марта 2026"]
+    CLAIM --> SRC3["Источник 3<br>GitHub страница<br>репозитория"]
+
+    SRC1 --> CHECK{"Есть ли<br>противоречия?"}
+    SRC2 --> CHECK
+    SRC3 --> CHECK
+
+    CHECK -->|"Все говорят<br>одно и то же"| HIGH["&#x1f4aa; HIGH confidence<br>Факт подтверждён 3 источниками"]
+    CHECK -->|"Есть расхождения<br>в цифрах"| MED["&#x1f4aa; MEDIUM confidence<br>Факт вероятен, цифры уточнить"]
+    CHECK -->|"Только один<br>источник"| LOW["&#x26a0;&#xfe0f; LOW confidence<br>Не включать в отчёт"]
+
+    style CLAIM fill:#fff8f0,stroke:#e17055,stroke-width:2px
+    style HIGH fill:#f6fff8,stroke:#00b894,stroke-width:2px
+    style MED fill:#fffff0,stroke:#b08800,stroke-width:2px
+    style LOW fill:#fff5f5,stroke:#d63031,stroke-width:2px
+    style SRC1 fill:#f1f0ff,stroke:#6c5ce7,stroke-width:1px
+    style SRC2 fill:#f1f0ff,stroke:#6c5ce7,stroke-width:1px
+    style SRC3 fill:#f1f0ff,stroke:#6c5ce7,stroke-width:1px
+          </div>
+        </div>
+      </div>
+
+      <p>
+        Верификация проверяет не только факты, но и <strong>противоречия</strong>:
+        если один источник говорит &laquo;MCP-сервер X deprecated&raquo;, а другой &laquo;активно
+        развивается&raquo; &mdash; это нужно зафиксировать и указать в отчёте.
+      </p>
+    </div>
+  </div>
+
+  <!-- Фаза 4 -->
+  <div class="phase-step">
+    <div class="phase-num">4</div>
+    <div class="phase-body">
+      <h4>Synthesize &mdash; отчёт с confidence-оценками</h4>
+      <p>
+        Последний шаг: все проверенные факты, противоречия и источники объединяются
+        в структурированный отчёт. Не &laquo;список ссылок&raquo;, а
+        <strong>аргументированный текст</strong> с ответом на исходный вопрос.
+      </p>
+
+      <div class="card card-green">
+        <h3 style="margin-top:0;">Структура отчёта</h3>
+        <ul>
+          <li><strong>Executive summary</strong> &mdash; ответ на вопрос в 2&ndash;3 предложениях</li>
+          <li><strong>Детали</strong> &mdash; развёрнутый ответ с аргументами</li>
+          <li><strong>Источники</strong> &mdash; список ссылок, по которым собрана информация</li>
+          <li><strong>Confidence</strong> &mdash; насколько можно доверять каждому тезису</li>
+          <li><strong>Оговорки</strong> &mdash; что не удалось проверить или где есть противоречия</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ДИАГРАММА -->
+  <h2 id="flowchart"><span class="emoji">&#x1f310;</span> Полный цикл: от запроса до отчёта</h2>
+
+  <p>Вот как выглядит весь workflow целиком &mdash; от вопроса пользователя до готового отчёта. Обрати внимание: на каждом этапе указаны конкретные MCP-инструменты.</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    START(["&#x1f4dd; Пользователь: «Какие MCP-серверы<br>сейчас популярны в Claude Code?»"])
+
+    DECOMPOSE["Разбиение на 5 углов<br>(параллельно)"]
+    START --> DECOMPOSE
+
+    subgraph SEARCH["ФАЗА 1: Scout — search_web x5"]
+        direction LR
+        A1["&#x1f50d; GitHub звёзды"]
+        A2["&#x1f50d; Продакшн-опыт"]
+        A3["&#x1f50d; Официальная позиция"]
+        A4["&#x1f50d; Обзоры"]
+        A5["&#x1f50d; Новинки"]
+    end
+
+    DECOMPOSE --> SEARCH
+
+    DEDUP["Дедупликация по URL<br>~35 уникальных ссылок"]
+    SEARCH --> DEDUP
+
+    SELECT["Отбор топ-15<br>по релевантности"]
+    DEDUP --> SELECT
+
+    subgraph READ["ФАЗА 2: Deep-read — read_webpage / browse_summarize"]
+        direction LR
+        R1["read_webpage<br>Источник 1"]
+        R2["read_webpage<br>Источник 2"]
+        R3["browse_summarize<br>Источник 3"]
+        R4["read_webpage<br>Источник N..."]
+        RN["..."]
+    end
+
+    SELECT --> READ
+
+    EXTRACT["Извлечение фальсифицируемых<br>утверждений"]
+    READ --> EXTRACT
+
+    subgraph VERIFY["ФАЗА 3: Verify — перекрёстная проверка"]
+        direction LR
+        V1["Факт A<br>2 источника &rarr; HIGH"]
+        V2["Факт B<br>1 источник &rarr; LOW"]
+        V3["Факт C<br>3 источника &rarr; HIGH"]
+        V4["Противоречие<br>между источниками"]
+    end
+
+    EXTRACT --> VERIFY
+
+    FILTER["Фильтрация:<br>LOW confidence &rarr; пометка<br>Противоречия &rarr; в оговорки"]
+    VERIFY --> FILTER
+
+    SYNTH["ФАЗА 4: Synthesize"]
+    FILTER --> SYNTH
+
+    REPORT(["&#x1f4cb; Готовый отчёт:<br>summary + details + sources<br>+ confidence + caveats"])
+    SYNTH --> REPORT
+
+    style START fill:#f8f4ff,stroke:#6c5ce7,stroke-width:2px
+    style DECOMPOSE fill:#f1f0ff,stroke:#6c5ce7,stroke-width:2px
+    style SEARCH fill:#f1f0ff,stroke:#6c5ce7,stroke-width:2px
+    style DEDUP fill:#fffde6,stroke:#b08800,stroke-width:2px
+    style SELECT fill:#fffde6,stroke:#b08800,stroke-width:2px
+    style READ fill:#fff8f0,stroke:#e17055,stroke-width:2px
+    style EXTRACT fill:#f8f4ff,stroke:#6c5ce7,stroke-width:2px
+    style VERIFY fill:#f6fff8,stroke:#00b894,stroke-width:2px
+    style FILTER fill:#fff5f0,stroke:#e17055,stroke-width:2px
+    style SYNTH fill:#f1f0ff,stroke:#6c5ce7,stroke-width:2px
+    style REPORT fill:#f8f4ff,stroke:#6c5ce7,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Ключевой момент:</strong> Фазы 1 и 2 работают параллельно &mdash; пока
+    ищешь по одному углу, другой уже читает результаты предыдущего поиска. Фаза 3 &mdash;
+    тоже параллельная: каждый факт проверяется независимо от других. Только фаза 4
+    &mdash; последовательная, потому что синтез требует всех данных.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ПРИМЕР -->
+  <h2 id="example"><span class="emoji">&#x1f4cb;</span> Пример: популярные MCP-серверы в Claude Code</h2>
+
+  <p>
+    Давай пройдём конкретный пример &mdash; как этот workflow ответит на вопрос:
+    <strong>&laquo;Какие MCP-серверы сейчас популярны в Claude Code?&raquo;</strong>
+  </p>
+
+  <h3>Фаза 1: Scout</h3>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Claude запускает 5 параллельных поисков:</span>
+
+<span class="yaml-key">search_web</span>(<span class="yaml-str">"most popular MCP servers GitHub stars 2026"</span>, max_results=<span class="yaml-val">10</span>)
+<span class="yaml-key">search_web</span>(<span class="yaml-str">"best MCP servers Claude Code production setup"</span>, max_results=<span class="yaml-val">10</span>)
+<span class="yaml-key">search_web</span>(<span class="yaml-str">"MCP ecosystem Anthropic official servers"</span>, max_results=<span class="yaml-val">8</span>)
+<span class="yaml-key">search_web</span>(<span class="yaml-str">"MCP servers comparison review 2026"</span>, max_results=<span class="yaml-val">8</span>)
+<span class="yaml-key">search_web</span>(<span class="yaml-str">"new MCP servers trending Claude"</span>, max_results=<span class="yaml-val">8</span>)
+
+<span class="yaml-comment"># Результат: ~38 ссылок, после дедупликации — 29 уникальных</span></code>
+  </div>
+
+  <h3>Фаза 2: Deep-read</h3>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Claude выбирает 12 самых перспективных и читает:</span>
+
+<span class="yaml-key">read_webpage</span>(<span class="yaml-str">"https://github.com/topics/model-context-protocol"</span>)
+  <span class="yaml-comment"># → список самых популярных репозиториев по звёздам</span>
+
+<span class="yaml-key">browse_summarize</span>(<span class="yaml-str">"https://docs.anthropic.com/en/docs/claude-code/mcp"</span>,
+  <span class="yaml-str">"Какие MCP-серверы упоминает Anthropic?"</span>)
+  <span class="yaml-comment"># → Context7, Brave Search, filesystem, memory, postgres</span>
+
+<span class="yaml-key">read_webpage</span>(<span class="yaml-str">"https://habr.com/ru/articles/mcp-servers-overview"</span>)
+  <span class="yaml-comment"># → сравнительная таблица серверов</span>
+
+<span class="yaml-key">read_webpage</span>(<span class="yaml-str">"https://github.com/modelcontextprotocol/servers"</span>)
+  <span class="yaml-comment"># → официальный репозиторий MCP servers</span>
+
+<span class="yaml-comment"># ... и ещё 8 страниц</span></code>
+  </div>
+
+  <h3>Фаза 3: Verify</h3>
+
+  <div class="card card-teal">
+    <p><strong>Пример проверки:</strong></p>
+    <p>
+      Утверждение: <em>&laquo;Context7 &mdash; самый популярный MCP-сервер&raquo;</em>
+    </p>
+    <ul>
+      <li><strong>GitHub Topics</strong> &mdash; Context7 на первом месте по звёздам &rarr; подтверждает</li>
+      <li><strong>Anthropic docs</strong> &mdash; Context7 упоминается первым в рекомендациях &rarr; подтверждает</li>
+      <li><strong>Habr-статья</strong> &mdash; в таблице Context7领先 &rarr; подтверждает</li>
+      <li><strong>Confidence: HIGH</strong> &mdash; 3 независимых источника говорят одно и то же</li>
+    </ul>
+  </div>
+
+  <div class="card card-yellow">
+    <p><strong>Пример противоречия:</strong></p>
+    <p>
+      Утверждение: <em>&laquo;Brave Search MCP deprecated&raquo;</em>
+    </p>
+    <ul>
+      <li><strong>Reddit-пост</strong> &mdash; говорит, что deprecated &rarr; подтверждает</li>
+      <li><strong>GitHub repo</strong> &mdash; последний коммит 2 недели назад, активные issues &rarr; опровергает</li>
+      <li><strong>Anthropic docs</strong> &mdash; Brave Search всё ещё в списке рекомендованных &rarr; опровергает</li>
+      <li><strong>Confidence: LOW</strong> &mdash; 2 из 3 источников опровергают, но факт включается в оговорки</li>
+    </ul>
+  </div>
+
+  <h3>Фаза 4: Отчёт</h3>
+
+  <div class="card card-green">
+    <h3 style="margin-top:0;">Executive Summary</h3>
+    <p>
+      Самые популярные MCP-серверы в Claude Code (по состоянию на июнь 2026):
+      Context7 (документация), Brave Search (поиск), filesystem (работа с файлами),
+      memory (память между сессиями), postgres (базы данных), GitHub (интеграция).
+    </p>
+
+    <h3>Детали</h3>
+    <p>
+      Context7 &mdash; лидер по звёздам и активности. Brave Search остаётся рекомендованным
+      Anthropic, несмотря на слухи о deprecated. Файловый и memory-серверы входят в
+      &laquo;must have&raquo; для продакшн-сценариев.
+    </p>
+
+    <h3>Источники</h3>
+    <ul>
+      <li>github.com/topics/model-context-protocol</li>
+      <li>docs.anthropic.com/en/docs/claude-code/mcp</li>
+      <li>github.com/modelcontextprotocol/servers</li>
+      <li><em>...ещё 9 источников</em></li>
+    </ul>
+
+    <h3>Confidence</h3>
+    <ul>
+      <li><strong>HIGH:</strong> Context7 &mdash; самый популярный</li>
+      <li><strong>HIGH:</strong> filesystem и memory &mdash; must have</li>
+      <li><strong>MEDIUM:</strong> Brave Search &mdash; deprecated статус не подтверждён</li>
+      <li><strong>LOW:</strong> &laquo;Postgres превзошёл MySQL по популярности&raquo; &mdash; только 1 источник</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. BEST PRACTICES -->
+  <h2 id="best-practices"><span class="emoji">&#x2b50;</span> Best practices</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3 style="margin-top:0;">Не полагайся на один источник</h3>
+      <p>
+        Минимум 3 независимых источника на каждый ключевой тезис. Один источник &mdash;
+        это не исследование, а пересказ. Чередуй: официальная документация, GitHub,
+        Habr/dev.to, Reddit, личные блоги.
+      </p>
+    </div>
+
+    <div class="card card-green">
+      <h3 style="margin-top:0;">Ищи противоречия</h3>
+      <p>
+        Если все источники говорят одно и то же &mdash; это <strong>подозрительно</strong>.
+        Возможно, все они скопировали информацию из одного места. Специально ищи
+        альтернативные точки зрения и включай их в отчёт.
+      </p>
+    </div>
+  </div>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3 style="margin-top:0;">Указывай confidence</h3>
+      <p>
+        Каждый тезис в отчёте должен иметь уровень уверенности: HIGH / MEDIUM / LOW.
+        Это помогает читателю понять, на что можно полагаться, а что требует
+        дополнительной проверки.
+      </p>
+    </div>
+
+    <div class="card card-green">
+      <h3 style="margin-top:0;">Повторяй verify при low-confidence</h3>
+      <p>
+        Если много тезисов с LOW confidence &mdash; запусти ещё раунд верификации
+        с другими поисковыми запросами. Часто проблема не в источниках, а в
+        формулировке поискового запроса.
+      </p>
+    </div>
+  </div>
+
+  <div class="card card-purple">
+    <h3 style="margin-top:0;">Формула хорошего отчёта</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Хороший отчёт = формула</span>
+
+Ответ на вопрос       <span class="yaml-comment">(2-3 предложения)</span>
++ Контекст            <span class="yaml-comment">(почему это важно, что изменилось)</span>
++ Аргументы           <span class="yaml-comment">(факты с источниками)</span>
++ Противоречия        <span class="yaml-comment">(если есть — честно указать)</span>
++ Confidence          <span class="yaml-comment">(уровень уверенности по каждому тезису)</span>
++ Источники           <span class="yaml-comment">(список ссылок с датами)</span>
++ Оговорки            <span class="yaml-comment">(что не удалось проверить)</span></code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ОШИБКИ -->
+  <h2 id="mistakes"><span class="emoji">&#x26a0;&#xfe0f;</span> Типичные ошибки</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-red">
+      <h3 style="margin-top:0;">Принимать первый результат за истину</h3>
+      <p>
+        <strong>Ошибка:</strong> Прочитал одну статью и выдал её как отчёт.
+      </p>
+      <p>
+        <strong>Почему плохо:</strong> Статья может быть устаревшей, неточной, рекламной
+        или просто ошибочной. Один источник &mdash; это не исследование, а пересказ.
+      </p>
+      <p>
+        <strong>Решение:</strong> Минимум 3 независимых источника на каждый ключевой тезис.
+      </p>
+    </div>
+
+    <div class="card card-red">
+      <h3 style="margin-top:0;">Не проверять авторитетность источника</h3>
+      <p>
+        <strong>Ошибка:</strong> Личный твит и официальная документация взвешиваются одинаково.
+      </p>
+      <p>
+        <strong>Почему плохо:</strong> Anthropic blog &gt; сравнительный обзор на Habr &gt;
+        мнение в комментариях. Источники имеют разный вес.
+      </p>
+      <p>
+        <strong>Решение:</strong> При верификации учитывай <em>кто</em> пишет и <em>где</em>.
+      </p>
+    </div>
+  </div>
+
+  <div class="comparison-grid">
+    <div class="card card-red">
+      <h3 style="margin-top:0;">Игнорирование дат</h3>
+      <p>
+        <strong>Ошибка:</strong> Ссылаешься на статью 2024 года как на актуальный источник.
+      </p>
+      <p>
+        <strong>Почему плохо:</strong> MCP-экосистема развивается быстро. Инструмент,
+        который был popular в 2024, мог стать deprecated к 2026. Устаревшая информация
+        хуже, чем отсутствие информации.
+      </p>
+      <p>
+        <strong>Решение:</strong> Всегда проверяй дату публикации. Приоритизируй источники
+        не старше 6 месяцев.
+      </p>
+    </div>
+
+    <div class="card card-red">
+      <h3 style="margin-top:0;">Все ссылки с одного домена</h3>
+      <p>
+        <strong>Ошибка:</strong> 5 из 5 источников &mdash; habr.com (или dev.to, или medium).
+      </p>
+      <p>
+        <strong>Почему плохо:</strong> Одна площадка = один угол зрения. Habr склонен
+        к техническим подробностям, Medium &mdash; к обзорам, Reddit &mdash; к мнениям.
+        Без разнообразия ты видишь только одну грань.
+      </p>
+      <p>
+        <strong>Решение:</strong> MMR-разнообразие (встроено в poisk-mcp) помогает, но
+        и сам Claude должен следить за балансом доменов.
+      </p>
+    </div>
+  </div>
+
+  <div class="card card-yellow">
+    <h3 style="margin-top:0;">Чек-лист перед выдачей отчёта</h3>
+    <ul>
+      <li>&#x2611; Минимум 3 источника на каждый ключевой тезис</li>
+      <li>&#x2611; Все факты имеют дату публикации источника</li>
+      <li>&#x2611; Факты отделены от мнений</li>
+      <li>&#x2611; Противоречия честно описаны</li>
+      <li>&#x2611; Confidence указан для каждого тезиса</li>
+      <li>&#x2611; Источники с разных доменов</li>
+      <li>&#x2611; Оговорки про непроверенные данные</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. СРАВНЕНИЕ СО ВСТРОЕННЫМ DEEP-RESEARCH -->
+  <h2 id="comparison"><span class="emoji">&#x1f50d;</span> Сравнение со встроенным deep-research</h2>
+
+  <div class="card card-warn" style="border: 2px solid var(--orange); background: #fff8f0;">
+    <p style="margin:0;">
+      В Claude Code есть встроенный скилл <code>deep-research</code> (вызывается через
+      Skill tool или <kbd>/deep-research</kbd>). Он тоже ищет в вебе, но работает
+      <strong>иначе</strong> &mdash; и это принципиальное отличие.
+    </p>
+  </div>
+
+  <table>
+    <tr>
+      <th>Характеристика</th>
+      <th>Встроенный deep-research</th>
+      <th>Этот workflow</th>
+    </tr>
+    <tr>
+      <td><strong>Оркестрация</strong></td>
+      <td>Встроенная, не настраивается</td>
+      <td>Кастомная через Workflow tool</td>
+    </tr>
+    <tr>
+      <td><strong>Инструменты</strong></td>
+      <td>Внутренние (WebSearch, WebFetch)</td>
+      <td>Любые MCP-серверы (poisk-mcp, Context7 и др.)</td>
+    </tr>
+    <tr>
+      <td><strong>Parallel / pipeline</strong></td>
+      <td>Не применяется</td>
+      <td>Веерный поиск, параллельное чтение</td>
+    </tr>
+    <tr>
+      <td><strong>Верификация фактов</strong></td>
+      <td>Нет</td>
+      <td>Adversarial verify с confidence-оценками</td>
+    </tr>
+    <tr>
+      <td><strong>Контроль</strong></td>
+      <td>Чёрный ящик</td>
+      <td>Полный контроль над каждым шагом</td>
+    </tr>
+    <tr>
+      <td><strong>Замена источников</strong></td>
+      <td>Нет &mdash; только встроенные инструменты</td>
+      <td>Любые MCP-серверы</td>
+    </tr>
+    <tr>
+      <td><strong>Когда использовать</strong></td>
+      <td>Быстрый ответ на простой вопрос</td>
+      <td>Кастомизация процесса, специфические источники</td>
+    </tr>
+  </table>
+
+  <div class="card card-accent" style="border: 2px solid var(--accent); background: var(--accent-light);">
+    <p style="margin:0; font-size: 1.05em;">
+      <strong>Вывод:</strong> встроенный deep-research хорош для быстрых ответов &mdash;
+      задал вопрос, получил резюме, готово. Этот workflow нужен, когда нужен
+      <strong>прозрачный, контролируемый процесс</strong> под специфические источники,
+      с верификацией фактов и возможностью настроить каждый шаг.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ИТОГО -->
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Deep Research Workflow &mdash; это самодельный рецепт,
+      а не встроенная фича Claude Code. Он собирается из MCP-серверов (poisk-mcp,
+      Context7, Tavily и др.) и Workflow tool. Четыре фазы: веерный поиск по 5 углам,
+      параллельное чтение топ-15 источников, перекрёстная верификация фактов,
+      синтез структурированного отчёта со ссылками и confidence. Встроенный
+      <code>deep-research</code> проще, но менее контролируемый &mdash; выбирай под задачу.
+    </p>
+  </div>
+
+</div>
+
+<footer style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.85em;text-align:center;">
+    Создано <strong>writer-agent</strong> через Workflow tool.
+    <br>Актуально на 2026-06-17.
+    <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+</body>
+</html>

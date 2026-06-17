@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>poisk-mcp — кастомный MCP-сервер поиска</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    kbd {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>🔍 poisk-mcp — кастомный MCP-сервер поиска</h1>
+  <p class="subtitle">Свой поисковик для Claude Code: нейро-ранжирование, DuckDuckGo, SearXNG &mdash; без внешних API-ключей</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое poisk-mcp?</a></li>
+      <li><a href="#architecture">Архитектура</a></li>
+      <li><a href="#tools">Инструменты</a></li>
+      <li><a href="#how-it-works">Как это работает</a></li>
+      <li><a href="#backends">Бэкенды</a></li>
+      <li><a href="#neural-rerank">Нейро-ранжирование</a></li>
+      <li><a href="#security">Защита и безопасность</a></li>
+      <li><a href="#setup">Как подключить</a></li>
+      <li><a href="#where-code">Где код</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ -->
+  <h2 id="what"><span class="emoji">🔍</span> Что такое poisk-mcp?</h2>
+
+  <p>
+    Claude Code умеет читать файлы, запускать команды и общаться с MCP-серверами. Но вот беда &mdash;
+    встроенный инструмент <strong>WebSearch не работает</strong> через OpenCode-прокси (DeepSeek выдаёт ошибку схемы).
+    А часто нужно погуглить что-то прямо из сессии: документацию, ошибку, свежую новость.
+  </p>
+
+  <p>
+    <strong>poisk-mcp</strong> &mdash; это наш собственный MCP-сервер для поиска в интернете.
+    Мы написали его с нуля на Python и подключили к Claude Code через stdio. Он ищет сразу
+    в двух поисковых системах (DuckDuckGo и SearXNG), отсеивает дубли, ранжирует результаты
+    нейросетью по смысловой релевантности и разнообразит выдачу.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> poisk-mcp &mdash; это как подключить к Claude свой
+    персональный Google, только бесплатный, с умной сортировкой и без API-ключей.
+    Запрос уходит &mdash; ответ приходит. Как обычный поиск, только внутри Claude Code.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. АРХИТЕКТУРА -->
+  <h2 id="architecture"><span class="emoji">🏗️</span> Архитектура</h2>
+
+  <p>Вся система построена на модульности: каждый компонент отвечает за свою задачу, а сервер
+  &mdash; это оркестратор, который связывает всё воедино.</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    CC["🧠 Claude Code"] -->|"stdio JSON-RPC"| MCP["🔧 server.py<br>MCP-сервер"]
+
+    MCP --> ENGINE["⚙️ SearchEngine<br>Агрегация + дедупликация"]
+    MCP --> TOOLS["🛠️ tools.py<br>Парсинг HTML / Jina API"]
+
+    ENGINE --> DDGS["🦆 DuckDuckGo<br>Основной бэкенд"]
+    ENGINE --> SEARX["🌐 SearXNG<br>Docker / публичные инстансы"]
+    ENGINE --> RERANK["🤖 Neural Reranker<br>all-MiniLM-L6-v2"]
+    ENGINE --> DIVERSITY["🎯 DiversityEngine<br>MMR-разнообразие"]
+
+    MCP --> CACHE["💾 TTL-кэш<br>1 час / 1000 записей"]
+    MCP --> RATELIMIT["⏱️ Rate Limiter<br>30 запросов/мин"]
+    MCP --> NETWORK["🔒 Network Layer<br>SSRF-защита + DNS-кэш"]
+
+    style CC fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style MCP fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style ENGINE fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style TOOLS fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style DDGS fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style SEARX fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    style RERANK fill:#fce4ec,stroke:#c62828,stroke-width:2px
+    style DIVERSITY fill:#fff8e1,stroke:#ff8f00,stroke-width:2px
+    style CACHE fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style RATELIMIT fill:#fbe9e7,stroke:#bf360c,stroke-width:2px
+    style NETWORK fill:#e8eaf6,stroke:#283593,stroke-width:2px
+    </div>
+  </div>
+
+  <p>Пять ключевых модулей:</p>
+  <ul>
+    <li><strong>server.py</strong> &mdash; точка входа, объявляет MCP-инструменты, связывает модули</li>
+    <li><strong>engine.py</strong> &mdash; ядро: агрегирует результаты из бэкендов, дедуплицирует, ранжирует, разнообразит</li>
+    <li><strong>backends.py</strong> &mdash; поисковые бэкенды (DuckDuckGo, SearXNG)</li>
+    <li><strong>network.py</strong> &mdash; безопасные HTTP-запросы с SSRF-защитой</li>
+    <li><strong>cache.py</strong> &mdash; кэш результатов и rate limiter</li>
+  </ul>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ИНСТРУМЕНТЫ -->
+  <h2 id="tools"><span class="emoji">🧰</span> Инструменты</h2>
+
+  <p>poisk-mcp предоставляет Claude четыре инструмента. Вот что умеет каждый:</p>
+
+  <table>
+    <tr>
+      <th>Инструмент</th>
+      <th>Назначение</th>
+      <th>Параметры</th>
+    </tr>
+    <tr>
+      <td><code>search_web</code></td>
+      <td>Поиск в интернете с нейро-ранжированием. Основной инструмент.</td>
+      <td><code>query</code> (строка), <code>max_results</code> (8 по умолчанию, до 20), <code>backend</code> ("auto"), <code>rerank</code> (true), <code>diversity</code> (true)</td>
+    </tr>
+    <tr>
+      <td><code>read_webpage</code></td>
+      <td>Чтение содержимого веб-страницы. Конвертирует HTML в чистый текст.</td>
+      <td><code>url</code> (строка), <code>markdown</code> (true &mdash; через Jina API, false &mdash; через BeautifulSoup)</td>
+    </tr>
+    <tr>
+      <td><code>browse_summarize</code></td>
+      <td>Чтение страницы + извлечение самых важных абзацев. Готовое резюме за один вызов.</td>
+      <td><code>url</code> (строка), <code>instr</code> (инструкция, по умолчанию "Извлеките основные пункты")</td>
+    </tr>
+    <tr>
+      <td><code>web_research</code></td>
+      <td>Глубокое исследование темы. Ищет, открывает топ-страницы, анализирует и генерирует отчёт.</td>
+      <td><code>query</code> (строка), <code>depth</code> (1&ndash;5, по умолчанию 3)</td>
+    </tr>
+  </table>
+
+  <div class="card card-green">
+    <h3>Примеры использования</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Обычный поиск</span>
+search_web("Claude Code MCP сервер примеры")
+
+<span class="yaml-comment"># Прочитать страницу</span>
+read_webpage("https://docs.anthropic.com/claude-code")
+
+<span class="yaml-comment"># Быстрое резюме статьи</span>
+browse_summarize("https://habr.com/ru/article/mcp", "Опиши главные идеи")
+
+<span class="yaml-comment"># Глубокое исследование (глубина 5)</span>
+web_research("MCP сервер лучшие практики 2026", depth=5)</code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. КАК ЭТО РАБОТАЕТ -->
+  <h2 id="how-it-works"><span class="emoji">⚡</span> Как это работает</h2>
+
+  <p>Давай пройдём весь путь поискового запроса &mdash; от клика до результата:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    A["1️⃣ Запрос<br>Claude отправляет<br>search_web()"] --> B["2️⃣ Кэш<br>Есть в кэше? &rarr; отдаём"]
+    B --> C["3️⃣ Rate Limiter<br>Проверяем лимит<br>(30rpm)"]
+    C --> D["4️⃣ Бэкенды<br>DuckDuckGo + SearXNG<br>параллельно"]
+    D --> E["5️⃣ Дедупликация<br>Убираем дубли<br>по URL"]
+    E --> F["6️⃣ Ранжирование<br>Нейросеть считает<br>смысловую близость"]
+    F --> G["7️⃣ Разнообразие<br>MMR-алгоритм<br>чередует домены"]
+    G --> H["8️⃣ Результат<br>Claude получает<br>отсортированный список"]
+
+    style A fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style B fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style C fill:#fbe9e7,stroke:#bf360c,stroke-width:2px
+    style D fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style E fill:#fff8e1,stroke:#ff8f00,stroke-width:2px
+    style F fill:#fce4ec,stroke:#c62828,stroke-width:2px
+    style G fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    style H fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    </div>
+  </div>
+
+  <p>Проходит по шагам:</p>
+  <ol>
+    <li><strong>Claude вызывает</strong> инструмент через stdio (JSON-RPC)</li>
+    <li><strong>Кэш проверяется</strong> &mdash; если тот же запрос был менее часа назад, результат отдаётся мгновенно</li>
+    <li><strong>Rate limiter</strong> проверяет, не превышен ли лимит в 30 запросов в минуту</li>
+    <li><strong>Бэкенды</strong> выполняют поиск: DuckDuckGo (с разными регионами) и SearXNG (через Docker)</li>
+    <li><strong>Дедупликация</strong> &mdash; если ссылка встречалась в обоих бэкендах, она попадёт в список один раз</li>
+    <li><strong>Нейро-ранжирование</strong> &mdash; модель all-MiniLM-L6-v2 сравнивает запрос и каждый результат по смыслу, пересчитывая оценки</li>
+    <li><strong>MMR-разнообразие</strong> &mdash; чтобы в выдаче не было 5 ссылок на один домен, алгоритм чередует результаты</li>
+    <li><strong>Результат</strong> возвращается Claude в виде структурированного текста с URL, описаниями и оценками релевантности</li>
+  </ol>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. БЭКЕНДЫ -->
+  <h2 id="backends"><span class="emoji">🌐</span> Бэкенды</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>🦆 DuckDuckGo</h3>
+      <p><strong>Основной бэкенд.</strong> Не требует API-ключей, работает из коробки.</p>
+      <ul>
+        <li>Использует библиотеку <code>ddgs</code> (или <code>duckduckgo_search</code>)</li>
+        <li>4 стратегии поиска: <code>wt-wt</code> (мировой), <code>ru-ru</code>, <code>us-en</code>, <code>news</code></li>
+        <li>Если одна стратегия не дала результатов &mdash; автоматически пробует следующую</li>
+        <li>Также умеет искать <strong>новости</strong> и <strong>изображения</strong></li>
+      </ul>
+    </div>
+
+    <div class="card card-orange">
+      <h3>🌐 SearXNG</h3>
+      <p><strong>Мета-поисковик</strong> с агрегацией из 70+ поисковых систем.</p>
+      <ul>
+        <li>Локальный Docker-инстанс на <code>localhost:8081</code></li>
+        <li>Публичные инстансы как fallback: searx.be, search.disroot.org и другие</li>
+        <li>Авто-переключение: если один инстанс упал &mdash; пробует следующий</li>
+        <li>Работает через REST API с JSON-ответами</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card card-accent">
+    <p><strong>Порядок работы:</strong> В режиме <code>auto</code> (по умолчанию) бэкенды опрашиваются
+    последовательно. Сначала DuckDuckGo &mdash; если результаты есть, используем их.
+    Если пусто &mdash; добавляем результаты из SearXNG. В итоге оба набора результатов объединяются
+    и дедуплицируются.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. НЕЙРО-РАНЖИРОВАНИЕ -->
+  <h2 id="neural-rerank"><span class="emoji">🤖</span> Нейро-ранжирование</h2>
+
+  <p>Обычные поисковики сортируют по ключевым словам и ссылочному весу. А мы делаем кое-что
+  поинтереснее &mdash; прогоняем результаты через <strong>нейросеть</strong>, которая понимает
+  <em>смысл</em>.</p>
+
+  <div class="card card-purple">
+    <h3>Как устроено</h3>
+    <p>Используется модель <strong>all-MiniLM-L6-v2</strong> из библиотеки sentence-transformers.
+    Это лёгкая модель (90MB), которая превращает текст в векторы &mdash; числовые
+    представления смысла.</p>
+    <ol>
+      <li>Модель вычисляет <strong>эмбеддинг запроса</strong> (вектор смысла запроса)</li>
+      <li>Вычисляет <strong>эмбеддинги</strong> для заголовка и описания каждого результата</li>
+      <li>Считает <strong>косинусное сходство</strong> между запросом и каждым результатом</li>
+      <li>Комбинирует нейросетевую оценку (60%) с исходной (40%): <code>score = original * 0.4 + neural * 0.6</code></li>
+    </ol>
+  </div>
+
+  <div class="card card-yellow">
+    <h3>Fallback: работает и без нейросети</h3>
+    <p>Если по какой-то причине модель не загружена (нет <code>sentence-transformers</code>,
+    модель не скачана, нет места на диске) &mdash; poisk-mcp <strong>не падает</strong>.
+    Он просто работает без нейро-ранжирования, используя только исходные оценки от поисковых бэкендов.
+    В логах будет <code>Neural reranking: Disabled</code>, но поиск продолжит работать.</p>
+  </div>
+
+  <div class="card card-green">
+    <h3>Разнообразие результатов (MMR)</h3>
+    <p>Даже после ранжирования может получиться так, что первые 5 результатов &mdash; с одного
+    сайта. Алгоритм <strong>MMR (Maximal Marginal Relevance)</strong> решает эту проблему:</p>
+    <ul>
+      <li>Берёт наиболее релевантный результат</li>
+      <li>Для следующего выбирает тот, который <strong>релевантен</strong>, но при этом <strong>не похож</strong> на уже выбранные</li>
+      <li>Параметр <code>lambda=0.7</code> &mdash; баланс между релевантностью (70%) и разнообразием (30%)</li>
+      <li>Если нейросеть недоступна &mdash; используется упрощённая стратегия: сначала результаты с разных доменов</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ЗАЩИТА И БЕЗОПАСНОСТЬ -->
+  <h2 id="security"><span class="emoji">🛡️</span> Защита и безопасность</h2>
+
+  <p>MCP-сервер работает с сетью &mdash; значит, нужно думать о безопасности. Вот что
+  реализовано в poisk-mcp:</p>
+
+  <table>
+    <tr>
+      <th>Мера</th>
+      <th>Что защищает</th>
+      <th>Как реализовано</th>
+    </tr>
+    <tr>
+      <td><strong>SSRF-защита</strong></td>
+      <td>От запросов к внутренним серверам (127.0.0.1, 10.x.x.x, 192.168.x.x и т.д.)</td>
+      <td>Функция <code>safe_ip()</code> проверяет каждый IP перед запросом. Блокирует private, loopback, reserved, multicast, link-local адреса и метаданные облачных провайдеров (169.254.169.254)</td>
+    </tr>
+    <tr>
+      <td><strong>Rate Limiter</strong></td>
+      <td>От спам-запросов и блокировок поисковиков</td>
+      <td>Token bucket на 30 RPM (30 запросов в минуту). Если лимит исчерпан &mdash; запрос ждёт или отклоняется</td>
+    </tr>
+    <tr>
+      <td><strong>TTL-кэш</strong></td>
+      <td>От повторных запросов к поисковикам</td>
+      <td>LRU-кэш на 1000 записей с TTL 1 час. Один и тот же запрос не будет выполняться повторно в течение часа</td>
+    </tr>
+    <tr>
+      <td><strong>DNS-кэш</strong></td>
+      <td>От DNS-спуфинга и частых резолвов</td>
+      <td>Результат DNS-резолва кэшируется на 5 минут. Каждый резолв проверяется на SSRF</td>
+    </tr>
+    <tr>
+      <td><strong>Ограничение редиректов</strong></td>
+      <td>От открытых петель редиректов и SSRF через редиректы</td>
+      <td>Максимум 5 редиректов. Каждый промежуточный URL проверяется через SSRF-фильтр. Петли отслеживаются</td>
+    </tr>
+    <tr>
+      <td><strong>Ограничение размера</strong></td>
+      <td>От переполнения памяти при чтении страниц</td>
+      <td>Максимум 3MB на скачивание, 15000 символов на вывод. Страницы читаются чанками</td>
+    </tr>
+  </table>
+
+  <div class="card card-red">
+    <h3>Зачем это нужно?</h3>
+    <p>Представь: Claude запрашивает <code>read_webpage("http://169.254.169.254/latest/meta-data/")</code> &mdash;
+    это попытка прочитать метаданные облачного сервера (AWS, GCP). Без SSRF-защиты это сработало бы
+    и утечёк бы секреты. С защитой &mdash; запрос блокируется на этапе DNS-резолва. Аналогично
+    с запросами к <code>localhost:xxxx</code> &mdash; poisk-mcp не даст прочитать то, что слушает
+    на внутреннем порту.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. КАК ПОДКЛЮЧИТЬ -->
+  <h2 id="setup"><span class="emoji">🔌</span> Как подключить</h2>
+
+  <p>Три способа &mdash; от самого простого до самого гибкого:</p>
+
+  <h3>1. Через CLI (рекомендуется)</h3>
+  <div class="code-block">
+    <code><span class="yaml-comment"># Добавить poisk-mcp глобально</span>
+claude mcp add poisk-mcp --stdio \
+  /home/andrei/mcp/poisk-mcp/venv/bin/python \
+  /home/andrei/mcp/poisk-mcp/server.py
+
+<span class="yaml-comment"># Проверить, что сервер подключился</span>
+claude mcp list</code>
+  </div>
+
+  <h3>2. Через ~/.claude.json</h3>
+  <p>Добавь запись в секцию <code>mcpServers</code>:</p>
+  <div class="code-block">
+    <code>{
+  <span class="yaml-key">"mcpServers"</span>: {
+    <span class="yaml-key">"poisk-mcp"</span>: {
+      <span class="yaml-key">"command"</span>: <span class="yaml-val">"/home/andrei/mcp/poisk-mcp/venv/bin/python"</span>,
+      <span class="yaml-key">"args"</span>: [<span class="yaml-val">"/home/andrei/mcp/poisk-mcp/server.py"</span>],
+      <span class="yaml-key">"env"</span>: {}
+    }
+  }
+}</code>
+  </div>
+
+  <h3>3. Как изолированный MCP у субагента</h3>
+  <p>Если нужно, чтобы только конкретный субагент имел доступ к поиску (а основной Claude &mdash; нет),
+  используй изолированный MCP во frontmatter:</p>
+  <div class="code-block">
+    <code>---
+name: my-researcher
+model: inherit
+mcpServers:
+  poisk-mcp:
+    command: /home/andrei/mcp/poisk-mcp/venv/bin/python
+    args:
+      - /home/andrei/mcp/poisk-mcp/server.py
+---
+
+Ты &mdash; исследователь. Используй search_web для поиска информации.</code>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Совет:</strong> Для работы poisk-mcp нужен Python 3.9+ и виртуальное окружение
+    с установленными зависимостями. Скрипт <code>deploy.sh</code> из репозитория создаёт venv,
+    ставит все пакеты и скачивает модель &mdash; одной командой.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 9. ГДЕ КОД -->
+  <h2 id="where-code"><span class="emoji">📂</span> Где код</h2>
+
+  <p>Репозиторий: <a href="https://github.com/boikov1977/poisk-mcp">boikov1977/poisk-mcp</a> (приватный)</p>
+
+  <table>
+    <tr>
+      <th>Путь</th>
+      <th>Что делает</th>
+    </tr>
+    <tr>
+      <td><code>server.py</code></td>
+      <td>MCP-сервер: инструменты, логирование, точка входа</td>
+    </tr>
+    <tr>
+      <td><code>engine.py</code></td>
+      <td>Ядро: агрегация, дедупликация, ранжирование, разнообразие</td>
+    </tr>
+    <tr>
+      <td><code>backends.py</code></td>
+      <td>Поисковые бэкенды: DuckDuckGo и SearXNG</td>
+    </tr>
+    <tr>
+      <td><code>reranker.py</code></td>
+      <td>Нейро-ранжирование: синглтон NeuralReranker</td>
+    </tr>
+    <tr>
+      <td><code>network.py</code></td>
+      <td>HTTP-клиент: SSRF-защита, DNS-кэш, безопасные запросы</td>
+    </tr>
+    <tr>
+      <td><code>cache.py</code></td>
+      <td>TTL-кэш и rate limiter</td>
+    </tr>
+    <tr>
+      <td><code>config.py</code></td>
+      <td>Конфигурация: лимиты, модель, зеркала HuggingFace</td>
+    </tr>
+    <tr>
+      <td><code>tools.py</code></td>
+      <td>Утилиты: парсинг HTML (BeautifulSoup), Jina Reader API</td>
+    </tr>
+    <tr>
+      <td><code>models.py</code></td>
+      <td>Data-классы: SearchResult, ProcessedQuery</td>
+    </tr>
+    <tr>
+      <td><code>deploy.sh</code></td>
+      <td>Развёртывание: создаёт venv, ставит зависимости, скачивает модель</td>
+    </tr>
+    <tr>
+      <td><code>scripts/download_model.sh</code></td>
+      <td>Отдельный скрипт для скачивания модели all-MiniLM-L6-v2</td>
+    </tr>
+    <tr>
+      <td><code>docker-compose.yml</code></td>
+      <td>Docker Compose для запуска SearXNG локально</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> poisk-mcp &mdash; это наш кастомный MCP-сервер, который даёт Claude Code
+      доступ к поиску в интернете. Два бэкенда (DuckDuckGo + SearXNG), нейро-ранжирование
+      (all-MiniLM-L6-v2), SSRF-защита, кэширование. Одна команда для подключения,
+      четыре инструмента для работы. Без внешних API-ключей. 🔍
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

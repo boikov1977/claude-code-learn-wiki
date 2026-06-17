@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Effort Levels в Claude Code — полный гайд</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: { useMaxWidth: false },
+            sequence: { useMaxWidth: false }
+        });
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            line-height: 1.7;
+            color: #1a1a2e;
+            background: #f7f8fc;
+            padding: 40px 24px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        header h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #16213e;
+            letter-spacing: -0.03em;
+            margin-bottom: 8px;
+        }
+
+        header .subtitle {
+            font-size: 1.15rem;
+            color: #4a4a6a;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .badge.primary   { background: #16213e; color: #f7f8fc; }
+        .badge.accent    { background: #0f3460; color: #f7f8fc; }
+        .badge.green     { background: #1a6b4c; color: #f7f8fc; }
+        .badge.orange    { background: #c45d0a; color: #f7f8fc; }
+        .badge.purple    { background: #5b2d8e; color: #f7f8fc; }
+        .badge.red       { background: #c62828; color: #f7f8fc; }
+
+        /* ===== SECTIONS ===== */
+        section {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 36px 40px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #16213e;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8ecf4;
+        }
+
+        section h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #0f3460;
+            margin-top: 22px;
+            margin-bottom: 10px;
+        }
+
+        section p { margin-bottom: 14px; }
+
+        ul, ol { margin: 8px 0 16px 24px; }
+        li { margin-bottom: 7px; }
+
+        code {
+            background: #eef0f6;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #c7254e;
+        }
+
+        pre {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            padding: 18px 22px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            margin: 14px 0;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+            font-size: inherit;
+        }
+
+        .diagram-wrapper {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 16px 0;
+            margin: 18px -16px 10px;
+        }
+
+        .diagram-wrapper svg {
+            max-width: none !important;
+            height: auto !important;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 11px 14px;
+            border-bottom: 1px solid #e8ecf4;
+        }
+
+        th {
+            background: #f0f2f8;
+            font-weight: 600;
+            color: #16213e;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: #f7f8fc;
+            border-radius: 10px;
+            padding: 20px 22px;
+            border: 1px solid #e8ecf4;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            border-color: #0f3460;
+            box-shadow: 0 2px 12px rgba(15,52,96,0.08);
+        }
+
+        .card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #16213e;
+            margin-bottom: 10px;
+        }
+
+        .card p { font-size: 0.92rem; margin-bottom: 6px; }
+        .card ul { margin: 4px 0 0 18px; }
+        .card li { margin-bottom: 4px; font-size: 0.92rem; }
+
+        /* ===== Спектр-бар ===== */
+        .spectrum-bar {
+            display: flex;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 22px 0;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        .spectrum-bar .level {
+            flex: 1;
+            padding: 16px 8px;
+            color: #fff;
+            transition: flex 0.3s;
+        }
+
+        .spectrum-bar .level:hover { flex: 1.6; }
+
+        .spectrum-bar .level small {
+            display: block;
+            font-weight: 400;
+            font-size: 0.75rem;
+            margin-top: 4px;
+            opacity: 0.9;
+        }
+
+        .level-low     { background: #43a047; }
+        .level-medium  { background: #fdd835; color: #333 !important; }
+        .level-high    { background: #f57c00; }
+        .level-xhigh   { background: #e53935; }
+        .level-max     { background: #6a1b9a; }
+
+        /* ===== Аналогия ===== */
+        .analogy {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin: 22px 0;
+        }
+
+        .analogy-item {
+            text-align: center;
+            background: #f7f8fc;
+            border-radius: 10px;
+            padding: 18px 10px;
+            border: 2px solid #e8ecf4;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .analogy-item:hover {
+            transform: translateY(-3px);
+            border-color: #0f3460;
+        }
+
+        .analogy-item .emoji {
+            font-size: 2.2rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .analogy-item .label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #16213e;
+        }
+
+        .analogy-item .desc {
+            font-size: 0.78rem;
+            color: #4a4a6a;
+            margin-top: 4px;
+        }
+
+        /* ===== Советы / предупреждения ===== */
+        .tip-box {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+            border-left: 4px solid #43a047;
+            border-radius: 0 10px 10px 0;
+            padding: 16px 22px;
+            margin: 18px 0;
+        }
+
+        .tip-box.warn {
+            background: linear-gradient(135deg, #fff3e0 0%, #fff8e1 100%);
+            border-left-color: #f57c00;
+        }
+
+        .tip-box.danger {
+            background: linear-gradient(135deg, #fce4ec 0%, #fff3e0 100%);
+            border-left-color: #c62828;
+        }
+
+        .tip-box.info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%);
+            border-left-color: #1565c0;
+        }
+
+        .tip-box strong { color: #16213e; }
+
+        /* ===== Сравнение «до/после» ===== */
+        .vs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e8ecf4;
+        }
+
+        .vs-side {
+            padding: 20px 24px;
+        }
+
+        .vs-side.wrong {
+            background: #fff3e0;
+        }
+
+        .vs-side.right {
+            background: #e8f5e9;
+        }
+
+        .vs-side h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .vs-side.wrong h4 { color: #c62828; }
+        .vs-side.right h4 { color: #1a6b4c; }
+
+        .vs-side ul { margin-left: 18px; }
+        .vs-side li { font-size: 0.9rem; margin-bottom: 4px; }
+
+        /* ===== Чеклист ===== */
+        .checklist-item {
+            display: flex;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f2f8;
+            align-items: flex-start;
+        }
+
+        .checklist-item:last-child { border-bottom: none; }
+
+        .checklist-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            width: 40px;
+            text-align: center;
+        }
+
+        .checklist-content h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #16213e;
+            margin-bottom: 4px;
+        }
+
+        .checklist-content p {
+            font-size: 0.9rem;
+            color: #4a4a6a;
+            margin-bottom: 0;
+        }
+
+        .checklist-content code {
+            font-size: 0.85em;
+        }
+
+        /* ===== Наши настройки ===== */
+        .config-highlight {
+            background: linear-gradient(135deg, #ede7f6 0%, #e8eaf6 100%);
+            border: 2px solid #5b2d8e;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin: 20px 0;
+        }
+
+        .config-highlight h3 {
+            color: #5b2d8e;
+            margin-top: 0;
+        }
+
+        /* ===== Путь решения ===== */
+        .path-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .path-card {
+            border-radius: 10px;
+            padding: 20px 22px;
+            border: 2px solid #e8ecf4;
+        }
+
+        .path-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .path-card .steps {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .path-card .steps li {
+            padding: 8px 0;
+            padding-left: 28px;
+            position: relative;
+            font-size: 0.9rem;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+
+        .path-card .steps li:last-child { border-bottom: none; }
+
+        .path-card .steps li::before {
+            content: attr(data-step);
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+            color: #0f3460;
+        }
+
+        footer {
+            text-align: center;
+            color: #7a7a9a;
+            font-size: 0.85rem;
+            padding: 28px 0;
+        }
+
+        /* ===== Адаптивность ===== */
+        @media (max-width: 700px) {
+            body { padding: 20px 12px; }
+            section { padding: 22px 18px; }
+            header h1 { font-size: 1.7rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .analogy { grid-template-columns: repeat(3, 1fr); }
+            .vs-grid { grid-template-columns: 1fr; }
+            .path-comparison { grid-template-columns: 1fr; }
+            .spectrum-bar { flex-direction: column; }
+            .spectrum-bar .level { padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ════════════════════════════════════════════════ HEADER ════════════════════════════════════════════════ -->
+    <header>
+        <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>Effort Levels в Claude Code</h1>
+        <p class="subtitle">
+            Полный гайд: как управлять глубиной мышления модели —
+            от быстрой правки до архитектурного аудита
+        </p>
+        <div class="badge-row">
+            <span class="badge primary">5 уровней усилий</span>
+            <span class="badge accent">настройка в settings.json</span>
+            <span class="badge orange">влияет на цену</span>
+            <span class="badge purple">влияет на качество</span>
+            <span class="badge red">выбор под задачу</span>
+        </div>
+    </header>
+
+    <!-- ═══════════════════ 1. ЧТО ЭТО ═══════════════════ -->
+    <section>
+        <h2>1. Что такое Effort Level — простыми словами</h2>
+
+        <p>
+            <strong>Effort Level</strong> (уровень усилий) — это настройка, которая определяет,
+            <em>насколько глубоко модель думает</em> над твоим вопросом или задачей.
+        </p>
+
+        <p>
+            Когда ты отправляешь запрос, модель не «вспоминает» ответ из памяти.
+            Она <strong>генерирует</strong> его токен за токеном, и чем выше effort — тем больше
+            «внутренних размышлений» происходит перед тем, как ты увидишь результат.
+        </p>
+
+        <!-- Аналогия: шеф-повар -->
+        <h3>🍳 Аналогия с шеф-поваром</h3>
+        <p>
+            Представь шеф-повара. Если ты попросил яичницу — он её сделает за 3 минуты,
+            даже не задумываясь. А если заказал банкет на 50 человек — он будет
+            репетировать соусы, подбирать гармонию вкусов, пробовать и корректировать.
+            <strong>Effort Level — это как сказать повару, насколько серьёзно подходить.</strong>
+        </p>
+
+        <div class="analogy">
+            <div class="analogy-item">
+                <span class="emoji">🍳</span>
+                <span class="label">Low</span>
+                <span class="desc">Яичница на завтрак — быстро, без раздумий</span>
+            </div>
+            <div class="analogy-item">
+                <span class="emoji">🍕</span>
+                <span class="label">Medium</span>
+                <span class="desc">Ужин в кафе — аккуратно, но без заморочек</span>
+            </div>
+            <div class="analogy-item">
+                <span class="emoji">🥩</span>
+                <span class="label">High</span>
+                <span class="desc">Ресторанная подача — с вниманием к деталям</span>
+            </div>
+            <div class="analogy-item">
+                <span class="emoji">🦞</span>
+                <span class="label">XHigh</span>
+                <span class="desc">Банкет с дегустацией — каждый шаг выверен</span>
+            </div>
+            <div class="analogy-item">
+                <span class="emoji">👨‍🍳✨</span>
+                <span class="label">Max</span>
+                <span class="desc">Мишленовская звезда — идеально во всём</span>
+            </div>
+        </div>
+
+        <!-- Аналогия: водитель -->
+        <h3>🚗 Вторая аналогия — водитель</h3>
+        <p>
+            Или вот ещё: представь, что ты едешь на машине. <strong>Low</strong> — это
+            когда ты едешь по знакомой дороге на автопилоте. <strong>Medium</strong> —
+            обратил внимание на знаки. <strong>High</strong> — ты аккуратно обгоняешь
+            грузовик на трассе. <strong>XHigh</strong> — паркуешься в узком месте
+            в дождь. <strong>Max</strong> — проезжаешь горный серпантин ночью.
+            Чем сложнее ситуация — тем больше внимания ты вкладываешь в каждое действие.
+        </p>
+
+        <!-- Спектр-бар -->
+        <div class="spectrum-bar">
+            <div class="level level-low">Low<small>быстро</small></div>
+            <div class="level level-medium">Medium<small>сбалансированно</small></div>
+            <div class="level level-high">High<small>тщательно</small></div>
+            <div class="level level-xhigh">XHigh<small>максимум</small></div>
+            <div class="level level-max">Max<small>абсолют</small></div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ 2. КАК ВЛИЯЕТ НА МЫШЛЕНИЕ ═══════════════════ -->
+    <section>
+        <h2>2. Как effort влияет на мышление модели — глубже</h2>
+
+        <p>
+            Это ключевое понимание: effort — это <strong>не просто «отвечать подробнее»</strong>.
+            Это <strong>больше внутренних размышлений</strong> перед ответом. Модель как бы
+            «останавливается» и думает: «Подожди, а я точно всё учёл? А может есть нюанс?»
+        </p>
+
+        <h3>🧠 Что происходит «под капотом»</h3>
+
+        <p>
+            Современные языковые модели используют механизм, который можно описать так:
+        </p>
+
+        <ul>
+            <li><strong>Low</strong> — модель берёт первое подходящее решение. Как программист,
+            который пишет код «с ходу», не глядя в документацию.</li>
+            <li><strong>Medium</strong> — модель проверяет основные варианты. Как программист,
+            который бегло глянул в документу и написал нормально.</li>
+            <li><strong>High</strong> — модель рассматривает несколько подходов, выбирает лучший,
+            проверяет на ошибки. Как джуниор-разработчик, который пишет тесты.</li>
+            <li><strong>XHigh</strong> — модель изучает контекст со всех сторон, учитывает
+            побочные эффекты, проверяет edge cases. Как тимлид перед релизом.</li>
+            <li><strong>Max</strong> — модель exhausted все возможные варианты.
+            Как архитектор на code freeze перед продом.</li>
+        </ul>
+
+        <!-- Диаграмма: что делает модель на каждом уровне -->
+        <div class="diagram-wrapper">
+            <pre class="mermaid">
+flowchart TD
+    Q["📩 Получен запрос"] --> L{"Уровень effort"}
+
+    L -->|Low| LOW_PATH["⚡ Модель:\n→ Берёт первое решение\n→ Не проверяет альтернативы\n→ Отвечает сразу"]
+
+    L -->|Medium| MED_PATH["🤔 Модель:\n→ Рассматривает 2-3 варианта\n→ Выбирает оптимальный\n→ Проверяет очевидные ошибки"]
+
+    L -->|High| HIGH_PATH["🔍 Модель:\n→ Анализирует контекст глубоко\n→ Ищет неочевидные связи\n→ Предлагает несколько подходов\n→ Проверяет себя"]
+
+    L -->|XHigh| XHIGH_PATH["🔬 Модель:\n→ Изучает ВЕСЬ контекст\n→ Учитывает побочные эффекты\n→ Проверяет edge cases\n→ Прогоняет несколько сценариев\n→ Уверенна в ответе"]
+
+    L -->|Max| MAX_PATH["🧬 Модель:\n→ Исчерпывающий анализ\n→ Все возможные варианты\n→ Полная проверка\n→ Максимальная точность"]
+
+    LOW_PATH --> R["✅ Ответ"]
+    MED_PATH --> R
+    HIGH_PATH --> R
+    XHIGH_PATH --> R
+    MAX_PATH --> R
+
+    style Q fill:#16213e,color:#fff
+    style L fill:#0f3460,color:#fff
+    style LOW_PATH fill:#43a047,color:#fff
+    style MED_PATH fill:#fdd835,color:#333
+    style HIGH_PATH fill:#f57c00,color:#fff
+    style XHIGH_PATH fill:#e53935,color:#fff
+    style MAX_PATH fill:#6a1b9a,color:#fff
+    style R fill:#1a6b4c,color:#fff
+            </pre>
+        </div>
+
+        <div class="tip-box info">
+            <strong>💡 Ключевая мысль:</strong> модель на XHigh не просто «пишет больше текста».
+            Она <strong>думает глубже</strong> — и только потом генерирует ответ. Внутренний
+            процесс размышления занимает больше времени, но результат точнее.
+        </div>
+    </section>
+
+    <!-- ═══════════════════ 3. ВСЕ ПЯТЬ УРОВНЕЙ ═══════════════════ -->
+    <section>
+        <h2>3. Все пять уровней — подробный разбор</h2>
+
+        <!-- Диаграмма: спектр уровней -->
+        <div class="diagram-wrapper">
+            <pre class="mermaid">
+flowchart LR
+    subgraph LOW["🟢 LOW — Минимум"]
+        A1[⚡ Быстро]
+        A2[💰 Дёшево]
+        A3[📝 Простые задачи]
+    end
+
+    subgraph MED["🟡 MEDIUM — Стандарт"]
+        B1[⚖️ Сбалансированно]
+        B2[📊 Умеренная глубина]
+        B3[🔧 Повседневная работа]
+    end
+
+    subgraph HIGH["🟠 HIGH — Тщательно"]
+        C1[🔍 Глубокий анализ]
+        C2[🧪 Самопроверка]
+        C3[🏗️ Сложные задачи]
+    end
+
+    subgraph XHIGH["🔴 XHIGH — Максимум"]
+        D1[🔬 Полная картина]
+        D2[🛡️ Учёт нюансов]
+        D3[🎯 Критичные задачи]
+    end
+
+    subgraph MAX["🟣 MAX — Абсолют"]
+        E1[🧬 Исчерпывающий анализ]
+        E2[👑 Только Opus 4.7+"]
+        E3[📈 Малый прирост]
+    end
+
+    LOW -->|"+50%"| MED
+    MED -->|"x1.3"| HIGH
+    HIGH -->|"x1.5"| XHIGH
+    XHIGH -->|"малый\nприрост"| MAX
+
+    style LOW fill:#43a047,color:#fff
+    style MED fill:#fdd835,color:#333
+    style HIGH fill:#f57c00,color:#fff
+    style XHIGH fill:#e53935,color:#fff
+    style MAX fill:#6a1b9a,color:#fff
+            </pre>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Уровень</th>
+                    <th>Что делает модель</th>
+                    <th>Стоимость</th>
+                    <th>Время ответа</th>
+                    <th>Когда подходит</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>🟢 Low</strong></td>
+                    <td>Минимум думания. Ответ «по первому впечатлению» — без проверок и альтернатив</td>
+                    <td>~1x (базовая)</td>
+                    <td>1–3 сек</td>
+                    <td>Опечатки, простые вопросы, форматирование</td>
+                </tr>
+                <tr>
+                    <td><strong>🟡 Medium</strong></td>
+                    <td>Стандартный режим. Умеренные рассуждения, проверка очевидных ошибок</td>
+                    <td>~1.5x</td>
+                    <td>3–8 сек</td>
+                    <td>Большинство повседневных задач</td>
+                </tr>
+                <tr>
+                    <td><strong>🟠 High</strong></td>
+                    <td>Глубокий анализ. Рассматривает несколько подходов, проверяет себя</td>
+                    <td>~2x</td>
+                    <td>8–15 сек</td>
+                    <td>Рефакторинг, тесты, документация</td>
+                </tr>
+                <tr>
+                    <td><strong>🔴 XHigh</strong></td>
+                    <td>Максимальная глубина. Учтены все нюансы, edge cases, побочные эффекты</td>
+                    <td>~3x</td>
+                    <td>15–30 сек</td>
+                    <td>Архитектура, security-аудит, сложные баги</td>
+                </tr>
+                <tr>
+                    <td><strong>🟣 Max</strong></td>
+                    <td>Абсолютный максимум. Исчерпывающий анализ (только Opus 4.7+)</td>
+                    <td>~3.5x</td>
+                    <td>30–60 сек</td>
+                    <td>Когда XHigh не справился</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- ═══════════════════ 4. КАК ЭТО РАБОТАЕТ НА ПРАКТИКЕ ═══════════════════ -->
+    <section>
+        <h2>4. Как это работает на практике</h2>
+
+        <h3>🔧 Три способа настроить</h3>
+
+        <p><strong>Способ 1 — В файле <code>settings.json</code></strong> (глобально, для всех проектов):</p>
+        <pre><code>// ~/.claude/settings.json
+{
+  "effortLevel": "xhigh"
+}</code></pre>
+
+        <p><strong>Способ 2 — Через CLI</strong> (при запуске):</p>
+        <pre><code>claude --effort high</code></pre>
+
+        <p><strong>Способ 3 — Через чат</strong> (прямо во время диалога):</p>
+        <pre><code>/effort high</code></pre>
+
+        <div class="tip-box">
+            <strong>💡 Подсказка:</strong> изменение через <code>/effort</code> в чате
+            работает <strong>только на текущий диалог</strong>. Для постоянного изменения — правь
+            <code>settings.json</code>.
+        </div>
+
+        <!-- Диаграмма: путь от запроса до ответа -->
+        <div class="diagram-wrapper">
+            <pre class="mermaid">
+flowchart TD
+    TASK["📋 Твоя задача"] --> DETECT{"Определяем\nсложность"}
+
+    DETECT -->|"Простая\n(опечатка)"| LOW["🟢 LOW\n~100 токенов\n$0.001"]
+    DETECT -->|"Обычная\n(написать функцию)"| MED["🟡 MEDIUM\n~500 токенов\n$0.005"]
+    DETECT -->|"Серьёзная\n(рефакторинг)"| HIGH["🟠 HIGH\n~1500 токенов\n$0.015"]
+    DETECT -->|"Сложная\n(архитектура)"| XHIGH["🔴 XHIGH\n~4000 токенов\n$0.040"]
+    DETECT -->|"Экстремальная\n(аудит)"| MAX["🟣 MAX\n~6000 токенов\n$0.060"]
+
+    LOW --> ANSWER["✅ Ответ готов"]
+    MED --> ANSWER
+    HIGH --> ANSWER
+    XHIGH --> ANSWER
+    MAX --> ANSWER
+
+    style TASK fill:#16213e,color:#fff
+    style DETECT fill:#0f3460,color:#fff
+    style LOW fill:#43a047,color:#fff
+    style MED fill:#fdd835,color:#333
+    style HIGH fill:#f57c00,color:#fff
+    style XHIGH fill:#e53935,color:#fff
+    style MAX fill:#6a1b9a,color:#fff
+    style ANSWER fill:#1a6b4c,color:#fff
+            </pre>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ 5. ПУТЬ РЕШЕНИЯ ЗАДАЧИ ═══════════════════ -->
+    <section>
+        <h2>5. Путь решения задачи на разных уровнях — наглядно</h2>
+
+        <p>
+            Вот как выглядит решение <strong>одной и той же задачи</strong> на разных уровнях.
+            Представь, что тебе надо исправить баг: «приложение падает при загрузке больших файлов».
+        </p>
+
+        <div class="path-comparison">
+            <div class="path-card" style="border-color: #43a047; background: #f1f8e9;">
+                <h4 style="color: #43a047;">🟢 Low — «Просто починю»</h4>
+                <ol class="steps">
+                    <li data-step="1.">Смотрит на стек-трейс</li>
+                    <li data-step="2.">Находит очевидную ошибку в строке 42</li>
+                    <li data-step="3.">Добавляет <code>if (size > MAX) return error</code></li>
+                    <li data-step="4.">Готово! Файл ограничен</li>
+                </ol>
+                <p style="font-size:0.85rem; color:#43a047; margin-top:10px;">
+                    <strong>⏱ 2 сек | 💰 $0.001</strong><br>
+                    Но: не проверил, что ошибка бывает ещё в 3 местах. Через неделю — тот же баг.
+                </p>
+            </div>
+
+            <div class="path-card" style="border-color: #e53935; background: #fce4ec;">
+                <h4 style="color: #e53935;">🔴 XHigh — «Разберусь полностью»</h4>
+                <ol class="steps">
+                    <li data-step="1.">Изучает стек-трейс и весь путь вызова</li>
+                    <li data-step="2.">Находит корень проблемы — нет валидации размера</li>
+                    <li data-step="3.">Ищет ВСЕ места, где загружаются файлы</li>
+                    <li data-step="4.">Находит 3 дополнительных уязвимых точки</li>
+                    <li data-step="5.">Проектирует единую систему валидации</li>
+                    <li data-step="6.">Пишет функцию + обновляет конфигурацию</li>
+                    <li data-step="7.">Добавляет обработку ошибок в UI</li>
+                    <li data-step="8.">Пишет комментарии и документирует решение</li>
+                </ol>
+                <p style="font-size:0.85rem; color:#e53935; margin-top:10px;">
+                    <strong>⏱ 25 сек | 💰 $0.04</strong><br>
+                    Но: баг закрыт на 100%. Возвращаться больше не надо.
+                </p>
+            </div>
+        </div>
+
+        <div class="tip-box warn">
+            <strong>⚠️ Итог:</strong> Low потратил 2 секунды, но создал технический долг.
+            XHigh потратил 25 секунд, но закрыл проблему целиком. Ирония: для этой задачи
+            XHigh на самом деле <strong>дешевле</strong>, потому что Low потребовал бы
+            3–4 итерации, чтобы дойти до того же результата.
+        </div>
+    </section>
+
+    <!-- ═══════════════════ 6. ТИПИЧНЫЕ ОШИБКИ ═══════════════════ -->
+    <section>
+        <h2>6. Типичные ошибки — как не надо делать</h2>
+
+        <h3>❌ Ошибка №1: «Всегда ставлю Max»</h3>
+        <p>
+            «Зачем думать? Поставлю максимальный effort и будет мне счастье!»
+        </p>
+        <div class="vs-grid">
+            <div class="vs-side wrong">
+                <h4>❌ Что происходит</h4>
+                <ul>
+                    <li>Опечатку в README «анализируют» 30 секунд</li>
+                    <li>Простой вопрос по syntax обходится в 3.5x</li>
+                    <li>Каждый мелкий PR — как будто проходит security-аудит</li>
+                    <li>Бюджет утекает на задачи, которые Medium решил бы идеально</li>
+                </ul>
+            </div>
+            <div class="vs-side right">
+                <h4>✅ Что надо делать</h4>
+                <ul>
+                    <li>Поставить <strong>средний уровень</strong> по умолчанию (Medium/High)</li>
+                    <li>Поднимать до XHigh/Max только для сложных задач</li>
+                    <li>Для мелочей — <code>/effort low</code> на время</li>
+                    <li>Экономия: до 60% токенов без потери качества</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>❌ Ошибка №2: «Ставлю Low на всё подряд»</h3>
+        <p>
+            «Экономлю! Пусть модель отвечает быстро!»
+        </p>
+        <div class="vs-grid">
+            <div class="vs-side wrong">
+                <h4>❌ Что происходит</h4>
+                <ul>
+                    <li>Архитектурное решение принимается за 2 секунды</li>
+                    <li>Модель не замечает конфликты между модулями</li>
+                    <li>5 итераций, пока не дойдёшь до нормального результата</li>
+                    <li>В итоге потратил большевремя иденег, чем на High с первого раза</li>
+                </ul>
+            </div>
+            <div class="vs-side right">
+                <h4>✅ Что надо делать</h4>
+                <ul>
+                    <li>Low — только для <strong>действительно мелких</strong> задач</li>
+                    <li>Если задача занимает > 10 строк кода — уже Medium</li>
+                    <li>Архитектура, дизайн, баги — High как минимум</li>
+                    <li>Качественный ответ с первого раза <strong>всегда дешевле</strong>, чем 5 плохих</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>❌ Ошибка №3: «Забываю менять effort в процессе»</h3>
+        <p>
+            Начал с архитектурного планирования (нужен XHigh), переключился на
+            правку тестов (хватит Medium), но забыл поменять уровень.
+        </p>
+        <div class="tip-box">
+            <strong>💡 Лайфхак:</strong> используй <code>/effort</code> команду прямо в чате,
+            когда переключаешься между задачами. Потратишь 2 секунды — сэкономишь кучу токенов.
+        </div>
+    </section>
+
+    <!-- ═══════════════════ 7. КОГДА ЧТО ИСПОЛЬЗОВАТЬ ═══════════════════ -->
+    <section>
+        <h2>7. Когда что использовать —дерево решений</h2>
+
+        <!-- Диаграмма: решительное дерево -->
+        <div class="diagram-wrapper">
+            <pre class="mermaid">
+flowchart TD
+    START["🤔 Какую задачу\nнадо решить?"] --> Q1{"Это правка\nодной строки\nили опечатка?"}
+
+    Q1 -->|"Да"| LOW2["🟢 Low\nОпечатки, переименование,\nформатирование"]
+    Q1 -->|"Нет"| Q2{"Обычная задача?\nФункция, компонент,\nмаленький PR"}
+
+    Q2 -->|"Да"| MED2["🟡 Medium\nНаписать код,\nобновить документацию,\nответить на вопрос"]
+    Q2 -->|"Нет"| Q3{"Нужен рефакторинг,\nтесты, code review\nили глубокий разбор?"}
+
+    Q3 -->|"Да"| HIGH2["🟠 High\nРефакторинг, написание тестов,\ncode review, документация API"]
+    Q3 -->|"Нет"| Q4{"Архитектурное\nрешение, security-\nаудит, баг на стыке\nмодулей?"}
+
+    Q4 -->|"Да"| XHIGH2["🔴 XHigh\nАрхитектурные решения,\nаудит безопасности,\nсложные multi-file баги"]
+    Q4 -->|"Нет"| MED3["🟡 Medium\nВ остальных случаях\n— стандартный режим"]
+
+    START2["🔄 Задача выполнена"] --> SWITCH{"Нужно переключиться?"}
+    SWITCH -->|"Да"| CHANGE["/effort low\n/effort medium\n/effort high"]
+    SWITCH -->|"Нет"| CONTINUE["Продолжаем"]
+
+    style START fill:#16213e,color:#fff
+    style LOW2 fill:#43a047,color:#fff
+    style MED2 fill:#fdd835,color:#333
+    style MED3 fill:#fdd835,color:#333
+    style HIGH2 fill:#f57c00,color:#fff
+    style XHIGH2 fill:#e53935,color:#fff
+    style START2 fill:#16213e,color:#fff
+    style SWITCH fill:#0f3460,color:#fff
+    style CHANGE fill:#0f3460,color:#fff
+    style CONTINUE fill:#1a6b4c,color:#fff
+            </pre>
+        </div>
+
+        <h3>Разбор по уровням с примерами</h3>
+
+        <div class="grid-2">
+            <div class="card">
+                <h4>🟢 Low — «Быстро и дёшево»</h4>
+                <p><strong>Подходит для:</strong></p>
+                <ul>
+                    <li>Исправить опечатку в коде</li>
+                    <li>Переименовать переменную</li>
+                    <li>Простой вопрос в чате («что делает <code>Promise.all</code>?»)</li>
+                    <li>Форматирование / linting</li>
+                    <li>Запросить одну строку кода</li>
+                    <li>Обновить версию в package.json</li>
+                </ul>
+                <p><em>Экономит время и деньги на мелочах.</em></p>
+            </div>
+
+            <div class="card">
+                <h4>🟡 Medium — «Золотая середина»</h4>
+                <p><strong>Подходит для:</strong></p>
+                <ul>
+                    <li>Написать новую функцию или компонент</li>
+                    <li>Небольшой рефакторинг (1–2 файла)</li>
+                    <li>Обновить README</li>
+                    <li>Ответить на вопрос по архитектуре</li>
+                    <li>Написать SQL-запрос</li>
+                    <li>Разобрать ошибку в логах</li>
+                </ul>
+                <p><em>Для большинства задач — более чем достаточно.</em></p>
+            </div>
+
+            <div class="card">
+                <h4>🟠 High — «Серьёзный подход»</h4>
+                <p><strong>Подходит для:</strong></p>
+                <ul>
+                    <li>Рефакторинг нескольких модулей</li>
+                    <li>Написание тестов с покрытием кейсов</li>
+                    <li>Code review с рекомендациями</li>
+                    <li>Документация API с примерами</li>
+                    <li>Поиск и исправление багов</li>
+                    <li>Оптимизация производительности</li>
+                </ul>
+                <p><em>Когда нужна уверенность в качестве.</em></p>
+            </div>
+
+            <div class="card">
+                <h4>🔴 XHigh — «Полный вперёд»</h4>
+                <p><strong>Подходит для:</strong></p>
+                <ul>
+                    <li>Архитектурные решения с долгосрочными последствиями</li>
+                    <li>Security-аудит кодовой базы</li>
+                    <li>Сложные баги на стыке нескольких модулей</li>
+                    <li>Многофайловые изменения</li>
+                    <li>Проектирование публичного API</li>
+                    <li>Миграция данных</li>
+                    <li>Настройка CI/CD пайплайнов</li>
+                </ul>
+                <p><em>Когда ошибки обойдутся дорого.</em></p>
+            </div>
+        </div>
+
+        <div class="tip-box danger">
+            <strong>⚠️ Важно:</strong> Max-уровень доступен <strong>только для моделей Opus 4.7 и новее</strong>.
+            Прирост относительно XHigh минимален — по данным тестов, разница менее 5%.
+            Используй Max, только если XHigh реально не справляется
+            и у тебя модель Opus.
+        </div>
+    </section>
+
+    <!-- ═══════════════════ 8. ЦЕНА ВОПРОСА ═══════════════════ -->
+    <section>
+        <h2>8. Цена вопроса — токены и деньги</h2>
+
+        <p>
+            Effort Level напрямую влияет на количество токенов, которые модель «прогоняет»
+            внутри, прежде чем дать ответ. Больше токенов = дороже.
+        </p>
+
+        <p>
+            <strong>Что такое токен?</strong> Это примерно ¾ слова на английском или 1–2 символа
+            на русском. Модель обрабатывает текст кусочками по несколько тысяч токенов за раз.
+            Чем выше effort — тем больше «внутренних токенов» модель потратит на размышления.
+        </p>
+
+        <!-- Диаграмма: стоимость -->
+        <div class="diagram-wrapper">
+            <pre class="mermaid">
+flowchart LR
+    subgraph COST["💰 Сравнение стоимости"]
+        direction TB
+        L["🟢 Low\n~1x\n(базовая)"]
+        M["🟡 Medium\n~1.5x"]
+        H["🟠 High\n~2x"]
+        X["🔴 XHigh\n~3x"]
+        MX["🟣 Max\n~3.5x"]
+    end
+
+    L -.->|"+50%"| M
+    M -.->|"x1.3"| H
+    H -.->|"x1.5"| X
+    X -.->|"небольшой\nприрост"| MX
+
+    style L fill:#43a047,color:#fff
+    style M fill:#fdd835,color:#333
+    style H fill:#f57c00,color:#fff
+    style X fill:#e53935,color:#fff
+    style MX fill:#6a1b9a,color:#fff
+            </pre>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Уровень</th>
+                    <th>Относительная стоимость</th>
+                    <th>Примерное время</th>
+                    <th>Токены (размышления)</th>
+                    <th>Качество</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>🟢 Low</td>
+                    <td>1x (базовая)</td>
+                    <td>1–3 секунды</td>
+                    <td>~100 токенов</td>
+                    <td>Зависит от модели</td>
+                </tr>
+                <tr>
+                    <td>🟡 Medium</td>
+                    <td>~1.5x</td>
+                    <td>3–8 секунд</td>
+                    <td>~500 токенов</td>
+                    <td>Стандартное</td>
+                </tr>
+                <tr>
+                    <td>🟠 High</td>
+                    <td>~2x</td>
+                    <td>8–15 секунд</td>
+                    <td>~1500 токенов</td>
+                    <td>Хорошее</td>
+                </tr>
+                <tr>
+                    <td>🔴 XHigh</td>
+                    <td>~3x</td>
+                    <td>15–30 секунд</td>
+                    <td>~4000 токенов</td>
+                    <td>Отличное</td>
+                </tr>
+                <tr>
+                    <td>🟣 Max</td>
+                    <td>~3.5x</td>
+                    <td>30–60 секунд</td>
+                    <td>~6000 токенов</td>
+                    <td>Максимальное</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tip-box">
+            <strong>💡 Золотое правило:</strong> для сложной задачи, которая потребовала бы
+            3 итерации на High, но обойдётся в 1 итерацию на XHigh — ты
+            <strong>сэкономишь время и деньги</strong>. Выбирай уровень под задачу, а не
+            «на максимум вечно».
+        </div>
+
+        <div class="tip-box info">
+            <strong>📊 Математика на пальцах:</strong>
+            Допустим, у тебя 100 задач в день. Если все ставить на XHigh (~$0.04 за задачу),
+            это $4/день. А если подбирать: 60 задач Medium ($0.005×60 = $0.30),
+            30 задач High ($0.015×30 = $0.45), 10 задач XHigh ($0.04×10 = $0.40) —
+            итого $1.15/день. <strong>Экономия: 71%.</strong>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ 9. СОЧЕТАНИЕ С МОДЕЛЯМИ ═══════════════════ -->
+    <section>
+        <h2>9. Сочетание Effort Level с моделями</h2>
+
+        <p>
+            Не все модели одинаково хорошо «понимают» разницу между уровнями effort.
+            Вот как обстоят дела с теми моделями, которые мы используем:
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Модель</th>
+                    <th>Поддержка effort</th>
+                    <th>Особенности</th>
+                    <th>Рекомендация</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Claude Opus 4.7+</strong></td>
+                    <td>Полная (Low → Max)</td>
+                    <td>Max доступен только для неё. Лучше всего «понимает» разницу.</td>
+                    <td>Используй Max для критичных задач</td>
+                </tr>
+                <tr>
+                    <td><strong>DeepSeek V4 Flash</strong></td>
+                    <td>Частичная (Low → XHigh)</td>
+                    <td>Хорошо работает на High/XHigh. Max недоступен. Быстрая модель.</td>
+                    <td>High — оптимально, XHigh — для сложного</td>
+                </tr>
+                <tr>
+                    <td><strong>MIMO v2.5</strong></td>
+                    <td>Базовая</td>
+                    <td>Используется в writer-agent. Менее чувствительна к уровню effort.</td>
+                    <td>High достаточно для задач документации</td>
+                </tr>
+                <tr>
+                    <td><strong>Qwen 3.7 Plus</strong></td>
+                    <td>Базовая</td>
+                    <td>Используется в conservative-агенте. Умеренная чувствительность.</td>
+                    <td>High для архитектурных задач</td>
+                </tr>
+                <tr>
+                    <td><strong>MiniMax M3</strong></td>
+                    <td>Базовая</td>
+                    <td>Используется в innovator-агенте. Ориентирована на креатив.</td>
+                    <td>Medium/High — зависит от задачи</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tip-box warn">
+            <strong>⚠️ Важно помнить:</strong> effort level — это <strong>рекомендация для модели</strong>,
+            а не жёсткая инструкция. Разные модели по-разному реализуют «размышления».
+            Claude от Anthropic поддерживает его лучше всего, потому что это их собственный параметр.
+            Для моделей от других провайдеров (DeepSeek, Qwen) — эффект есть, но менее выраженный.
+        </div>
+
+        <p>
+            <strong>Влияет ли effort на нашу связку?</strong> Да. Наш основной пайплайн:
+        </p>
+        <ul>
+            <li><strong>Основная модель (DeepSeek V4 Flash)</strong> — поддерживает Low → XHigh.
+                На XHigh она глубже анализирует контекст, что критично для сложных задач.</li>
+            <li><strong>Writer-agent (MIMO v2.5)</strong> — генерирует документацию.
+                Для неё High — оптимально, XHigh даёт минимальный прирост.</li>
+            <li><strong>Субагенты (innovator, pragmatist, conservative)</strong> — используют
+                разные модели, но effort наследуют от основных настроек.</li>
+        </ul>
+    </section>
+
+    <!-- ═══════════════════ 10. НАШИ НАСТРОЙКИ ═══════════════════ -->
+    <section>
+        <h2>10. Как настроено у нас — и почему именно так</h2>
+
+        <div class="config-highlight">
+            <h3>⚙️ Текущая конфигурация</h3>
+            <pre><code>// ~/.claude/settings.json
+{
+  "effortLevel": "xhigh"
+}</code></pre>
+        </div>
+
+        <h3>Почему XHigh, а не Max или High?</h3>
+
+        <div class="grid-2">
+            <div class="card">
+                <h4>✅ Почему XHigh</h4>
+                <ul>
+                    <li>Мы работаем со <strong>сложными системами</strong>: OpenSpec, субагенты, MCP, кастомные хуки</li>
+                    <li><strong>Ошибки в архитектуре обходятся дорого</strong> — переделка занимает часы</li>
+                    <li>DeepSeek V4 Flash <strong>хорошо «понимает»</strong> этот уровень</li>
+                    <li>Разница с High заметна на сложных multi-file задачах</li>
+                    <li>Мы <strong>не тратим</strong> на мелочи — для опечаток ставим <code>/effort low</code></li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h4>❌ Почему не Max</h4>
+                <ul>
+                    <li>Max <strong>недоступен</strong> для DeepSeek V4 Flash</li>
+                    <li>Даже для Opus прирост по данным тестов <strong>менее 5%</strong></li>
+                    <li>Стоимость вырастает ещё на ~17% без ощутимого выигрыша</li>
+                    <li>XHigh — <strong>оптимальная точка</strong> на графике «качество/цена»</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>Практический результат</h3>
+        <p>
+            При effort = xhigh наш основной пайплайн (DeepSeek V4 Flash) работает так:
+        </p>
+        <ul>
+            <li><strong>Архитектурные задачи</strong> — решаются за 1–2 итерации вместо 3–4</li>
+            <li><strong>Multi-file изменения</strong> — модель учитывает связи между файлами</li>
+            <li><strong>Баги</strong> — находит корень проблемы, а не симптомы</li>
+            <li><strong>Стоимость</strong> — ~3x от базовой, но экономия на повторных итерациях</li>
+        </ul>
+
+        <div class="tip-box">
+            <strong>💡 Лайфхак для нашего проекта:</strong> когда переключаешься на мелкую задачу,
+            набери <code>/effort low</code> или <code>/effort medium</code> — потом обратно
+            <code>/effort xhigh</code>. Это экономит токены без потери качества на сложных задачах.
+        </div>
+    </section>
+
+    <!-- ═══════════════════ 11. ЧЕКЛИСТ ═══════════════════ -->
+    <section>
+        <h2>11. Какой уровень выбрать прямо сейчас — чеклист</h2>
+
+        <p>
+            Посмотри на свою текущую задачу и найди наиболее подходящий вариант:
+        </p>
+
+        <div class="checklist-item">
+            <div class="checklist-icon">🟢</div>
+            <div class="checklist-content">
+                <h4>Low — если задача мелкая и очевидная</h4>
+                <p>
+                    Опечатка · Переименование · Форматирование · Простой вопрос ·
+                    <code>/effort low</code> → сделай → <code>/effort xhigh</code>
+                </p>
+            </div>
+        </div>
+
+        <div class="checklist-item">
+            <div class="checklist-icon">🟡</div>
+            <div class="checklist-content">
+                <h4>Medium — для обычной повседневной работы</h4>
+                <p>
+                    Новая функция · Обновление документации · Компонент · SQL-запрос ·
+                    Ответ на вопрос · Маленький PR (1–2 файла)
+                </p>
+            </div>
+        </div>
+
+        <div class="checklist-item">
+            <div class="checklist-icon">🟠</div>
+            <div class="checklist-content">
+                <h4>High — когда нужна уверенность в качестве</h4>
+                <p>
+                    Рефакторинг · Тесты · Code review · Документация API ·
+                    Поиск багов · Оптимизация · Средний PR (3–10 файлов)
+                </p>
+            </div>
+        </div>
+
+        <div class="checklist-item">
+            <div class="checklist-icon">🔴</div>
+            <div class="checklist-content">
+                <h4>XHigh — для критичных и сложных задач</h4>
+                <p>
+                    Архитектурные решения · Security-аудит · Многофайловые изменения ·
+                    Сложные баги · Публичное API · Миграции · Большой PR (10+ файлов)
+                </p>
+            </div>
+        </div>
+
+        <div class="checklist-item">
+            <div class="checklist-icon">🟣</div>
+            <div class="checklist-content">
+                <h4>Max — только когда XHigh не справился и у тебя Opus</h4>
+                <p>
+                    Если XHigh дал слабый результат · Критически важная задача ·
+                    Полный аудит кодовой базы · <em>Только для Opus 4.7+</em>
+                </p>
+            </div>
+        </div>
+
+        <div class="tip-box info">
+            <strong>🧠 Мнемоника:</strong> представь, что effort — это
+            <strong>крутилка громкости</strong> на музыкальном усилителе.
+            Low — тихо, Medium — нормально, High — громко, XHigh — на максимум,
+            Max — «дасосед жалуются». Крутишь под задачу, а не «на всю катушку».
+        </div>
+    </section>
+
+    <!-- ═══════════════════ 12. СВОДКА ═══════════════════ -->
+    <section>
+        <h2>12. Одной строкой</h2>
+
+        <p style="font-size: 1.15rem; text-align: center; padding: 20px 0;">
+            <strong>Effort Level</strong> — это «крутилка» глубины мышления модели.<br><br>
+            Крутишь вправо — модель думает дольше, отвечает лучше, стоит дороже.<br>
+            Крутишь влево — быстрее и дешевле, но проще.<br><br>
+            <span style="font-size: 1.3rem;">🎯 Идеальной настройки нет — выбирай под задачу.</span>
+        </p>
+
+        <div style="text-align: center; padding: 20px 0;">
+            <div class="spectrum-bar" style="max-width: 500px; margin: 0 auto;">
+                <div class="level level-low">Low<small>мелочи</small></div>
+                <div class="level level-medium">Med<small>работа</small></div>
+                <div class="level level-high">High<small>серьёзно</small></div>
+                <div class="level level-xhigh">XHigh<small>критично</small></div>
+                <div class="level level-max">Max<small>абсолют</small></div>
+            </div>
+        </div>
+
+        <p style="text-align: center; color: #4a4a6a; font-size: 0.95rem; margin-top: 16px;">
+            Наш текущий выбор: <strong style="color: #e53935;">XHigh</strong> —
+            потому что мы работаем со сложными системами, где ошибки обходятся дорого.
+        </p>
+    </section>
+
+    <footer>
+        Документация создана для проекта claude-code-learn · Effort Levels in Claude Code<br>
+        <span style="font-size: 0.78rem; opacity: 0.7;">Последнее обновление: 2025-06</span>
+    </footer>
+
+</div>
+</body>
+</html>

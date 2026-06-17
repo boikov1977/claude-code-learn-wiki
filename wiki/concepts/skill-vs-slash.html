@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill vs Slash Command в Claude Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #2d3436;
+      --text-muted: #586069;
+      --accent: #6c5ce7;
+      --accent-light: #f0eeff;
+      --code-bg: #f6f8fa;
+      --green: #00b894;
+      --green-bg: #f0fff4;
+      --orange: #e17055;
+      --orange-bg: #fff5f0;
+      --red: #d63031;
+      --red-bg: #fff5f5;
+      --purple: #6c5ce7;
+      --purple-bg: #f0eeff;
+      --teal: #008080;
+      --yellow: #fdcb6e;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), #a29bfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: var(--green-bg);
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: var(--orange-bg);
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: var(--purple-bg);
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: var(--red-bg);
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .tag-skill {
+      display: inline-block;
+      background: var(--purple-bg);
+      color: var(--purple);
+      border: 1px solid #c4b5f0;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-slash {
+      display: inline-block;
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid #b2e5c8;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-both {
+      display: inline-block;
+      background: #fff8e1;
+      color: #e17055;
+      border: 1px solid #ffe0b2;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .highlight-box {
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+      background: var(--accent-light);
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>Skill vs Slash Command в Claude Code</h1>
+  <p class="subtitle">Два встроенных механизма для расширения возможностей Claude Code &mdash; и почему важно понимать разницу</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#intro">Зачем это знать?</a></li>
+      <li><a href="#slash-command">Slash Command &mdash; короткий промпт</a></li>
+      <li><a href="#skill">Skill &mdash; многошаговая инструкция</a></li>
+      <li><a href="#flowchart">Как это работает: блок-схема</a></li>
+      <li><a href="#comparison">Таблица сравнения</a></li>
+      <li><a href="#file-structure">Структура файлов</a></li>
+      <li><a href="#practical">Практические примеры</a></li>
+      <li><a href="#best-practices">Best Practices</a></li>
+      <li><a href="#anti-patterns">Типичные ошибки</a></li>
+      <li><a href="#migration">Когда что использовать</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЗАЧЕМ ЭТО ЗНАТЬ -->
+  <h2 id="intro"><span class="emoji">?</span> Зачем это знать?</h2>
+
+  <p>
+    Claude Code имеет два встроенных механизма для автоматизации &mdash; <strong>Slash Commands</strong> и <strong>Skills</strong>.
+    Оба позволяют создавать повторно используемые инструкции, но работают принципиально по-разному.
+    Понимание разницы помогает выбрать правильный инструмент для задачи и избежать situations, когда
+    простая команда перегружена логикой, или сложный workflow пытается втиснуться в однострочный промпт.
+  </p>
+
+  <div class="highlight-box">
+    <p style="margin:0; font-size: 1.05em;">
+      <strong>Ключевая мысль:</strong> Slash Command &mdash; это <em>одноразовый промпт</em>, который Claude выполняет целиком.
+      Skill &mdash; это <em>многошаговая инструкция</em>, которая может планировать, задавать вопросы, ветвиться
+      и автоматически запускаться при определённых условиях.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. SLASH COMMAND -->
+  <h2 id="slash-command"><span class="emoji">/</span> Slash Command &mdash; короткий промпт</h2>
+
+  <p>
+    Slash Command &mdash; это markdown-файл, который превращается в команду, вызываемую через <code>/имя</code> в чате Claude Code.
+    По сути это <strong>готовый промпт</strong>: Claude читает файл и выполняет инструкцию.
+  </p>
+
+  <h3>Где лежат</h3>
+  <ul>
+    <li><code>.claude/commands/</code> &mdash; кастомные команды проекта</li>
+    <li><code>~/.claude/commands/</code> &mdash; глобальные команды пользователя</li>
+    <li>В плагинах: <code>plugins/&lt;name&gt;/commands/</code></li>
+  </ul>
+
+  <h3>Формат файла</h3>
+  <div class="code-block"><code>---
+allowed-tools: Bash(git add:*), Bash(git commit:*)
+description: Создать git-коммит
+---
+
+## Context
+
+- Current git status: !`git status`
+- Current git diff: !`git diff HEAD`
+
+## Your task
+
+Based on the above changes, create a single git commit.</code></div>
+
+  <h3>Ключевые особенности</h3>
+
+  <div class="card card-green">
+    <ul>
+      <li><strong>Single-turn:</strong> одна команда = один ответ Claude. Без ветвления, без циклов.</li>
+      <li><strong>Явный вызов:</strong> пользователь должен набрать <code>/commit</code> в чате.</li>
+      <li><strong>Frontmatter:</strong> <code>allowed-tools</code>, <code>description</code>, <code>argument-hint</code>, <code>model</code>.</li>
+      <li><strong>$ARGUMENTS:</strong> подстановка аргументов из командной строки.</li>
+      <li><strong>!`...`</strong> (backtick): динамическое подключение вывода shell-команд прямо в промпт.</li>
+      <li><strong>Размер:</strong> обычно 5-30 строк markdown.</li>
+    </ul>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span>Slash Command &mdash; это <strong>не</strong> shell-команда терминала. Это команды, которые пишутся прямо
+    в чате Claude Code. Набери <code>/</code> и увидишь автодополнение.</span>
+  </div>
+
+  <h3>Примеры</h3>
+
+  <div class="card card-accent">
+    <h3>/commit &mdash; быстрый коммит</h3>
+    <div class="code-block"><code>---
+allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
+description: Create a git commit
+---
+
+## Context
+- Current git status: !`git status`
+- Current git diff (staged and unstaged changes): !`git diff HEAD`
+
+## Your task
+Based on the above changes, create a single git commit.</code></div>
+    <p>Простой, понятный, работает в одно касание.</p>
+  </div>
+
+  <div class="card card-green">
+    <h3>/commit-push-pr &mdash; цепочка git-операций</h3>
+    <div class="code-block"><code>---
+allowed-tools: Bash(git checkout:*), Bash(git add:*), Bash(git commit:*),
+               Bash(git push:*), Bash(gh pr create:*)
+description: Commit, push, and open a PR
+---
+
+## Your task
+1. Create a new branch if on main
+2. Create a single commit
+3. Push the branch to origin
+4. Create a pull request using `gh pr create`</code></div>
+    <p>Всё ещё single-turn, но с цепочкой шагов.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. SKILL -->
+  <h2 id="skill"><span class="emoji">⚡</span> Skill &mdash; многошаговая инструкция</h2>
+
+  <p>
+    Skill &mdash; это структурированная инструкция, которая living в отдельной директории
+    (<code>skills/&lt;name&gt;/SKILL.md</code>). Она может быть <strong>многошаговой</strong>,
+    <strong>ветвящейся</strong> и <strong>автоматически запускаемой</strong>.
+  </p>
+
+  <h3>Где лежат</h3>
+  <ul>
+    <li><code>~/.claude/skills/&lt;name&gt;/SKILL.md</code> &mdash; кастомные скиллы пользователя</li>
+    <li><code>.claude/skills/&lt;name&gt;/SKILL.md</code> &mdash; скиллы проекта</li>
+    <li>В плагинах: <code>plugins/&lt;name&gt;/skills/&lt;name&gt;/SKILL.md</code></li>
+  </ul>
+
+  <h3>Структура директории</h3>
+  <div class="code-block"><code>openspec-apply-change/
+├── SKILL.md                    <span class="yaml-comment"># Обязательный файл</span>
+├── scripts/                    <span class="yaml-comment"># Исполняемые скрипты (опционально)</span>
+├── references/                 <span class="yaml-comment"># Документация для загрузки по необходимости</span>
+└── assets/                     <span class="yaml-comment"># Шаблоны, иконки, ресурсы</span></code></div>
+
+  <h3>Формат SKILL.md</h3>
+  <div class="code-block"><code>---
+name: openspec-new-change
+description: Start a new OpenSpec change. Use when the user wants to
+  create a new feature, fix, or modification with structured workflow.
+license: MIT
+compatibility: Requires openspec CLI.
+metadata:
+  author: openspec
+  version: "1.0"
+---
+
+Start a new change using the experimental artifact-driven approach.
+
+**Input**: The user's request should include a change name or description.
+
+**Steps**
+
+1. **If no clear input provided, ask what they want to build**
+   Use the **AskUserQuestion tool** to ask the user.
+
+2. **Determine the workflow schema**
+   Use the default schema unless user explicitly requests a different one.
+
+3. **Create the change directory**
+   ```bash
+   openspec new change "&lt;name&gt;"
+   ```
+
+4. **Show the artifact status**
+   ```bash
+   openspec status --change "&lt;name&gt;" --json
+   ```
+
+5. **STOP and wait for user direction**
+
+**Guardrails**
+- Do NOT create any artifacts yet
+- Do NOT advance beyond showing the first artifact template</code></div>
+
+  <h3>Ключевые особенности</h3>
+
+  <div class="card card-purple">
+    <ul>
+      <li><strong>Multi-step:</strong> может содержать десятки шагов с ветвлениями.</li>
+      <li><strong>Автотриггер:</strong> Claude автоматически выбирает скилл по <code>description</code>, если пользователь
+      не вызвал явно.</li>
+      <li><strong>Progressive Disclosure:</strong> метаданные (~100 слов) загружаются всегда, тело &mdash; при триггере,
+      ресурсы &mdash; по необходимости.</li>
+      <li><strong>Guardrails:</strong> может запрещать определённые действия (например, "никогда не пиши код").</li>
+      <li><strong>Бандлы ресурсов:</strong> скрипты, документация, шаблоны &mdash; всё в одной папке.</li>
+      <li><strong>Размер:</strong> от 20 до 500+ строк markdown.</li>
+    </ul>
+  </div>
+
+  <h3>Примеры скиллов</h3>
+
+  <div class="card card-purple">
+    <h3>openspec-explore &mdash; исследование кодовой базы</h3>
+    <p>Весьма нетривиальный скилл: проверяет контекст, определяет активные изменения, предлагает
+    задокументировать инсайты. Содержит ASCII-диаграммы, таблицы, guardrails.</p>
+    <div class="code-block"><code>---
+name: openspec-explore
+description: Enter explore mode - a thinking partner for exploring ideas,
+  investigating problems, and clarifying requirements.
+---
+
+Enter explore mode. Think deeply. Visualize freely.
+
+**IMPORTANT: Explore mode is for thinking, not implementing.**
+You may read files and investigate the codebase, but NEVER write code.
+
+**This is a stance, not a workflow.**</code></div>
+  </div>
+
+  <div class="card card-accent">
+    <h3>playground &mdash; создание интерактивных HTML-площадок</h3>
+    <p>Определяет тип playground, загружает нужный шаблон из <code>templates/</code>,
+    строит интерактивный HTML. Автотриггер: "сделай playground для X".</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. БЛОК-СХЕМА -->
+  <h2 id="flowchart"><span class="emoji">📐</span> Как это работает: блок-схема</h2>
+
+  <p>Ключевое различие &mdash; в <strong>жизненном цикле</strong>. Slash Command выполняется один раз.
+  Skill может циклить, ветвиться и автоматически активироваться.</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TB
+    subgraph slash["Slash Command"]
+        direction TB
+        S1["Пользователь пишет\n/commit"] --> S2["Claude читает\ncommit.md"]
+        S2 --> S3["Выполняет промпт\n(один turn)"]
+        S3 --> S4["Готово"]
+    end
+
+    subgraph skill["Skill"]
+        direction TB
+        K0["Пользователь пишет\n/openspec:apply\nИЛИ Claude сам\nопределяет по description"] --> K1["Загружает SKILL.md"]
+        K1 --> K2{"Есть входные\ndанные?"}
+        K2 -- Нет --> K3["Задаёт вопрос\nпользователю"]
+        K3 --> K4{"Ветвление\nпо ответу"}
+        K2 -- Да --> K4
+        K4 --> K5["Шаг 1: проверка\nстатуса"]
+        K5 --> K6["Шаг 2: чтение\nконтекста"]
+        K6 --> K7{"Всё\nготово?"}
+        K7 -- Нет --> K8["Пауза,\nзадаёт вопрос"]
+        K8 --> K4
+        K7 -- Да --> K9["Шаг N:\nвыполнение"]
+        K9 --> K10{"Ещё шаги?"}
+        K10 -- Да --> K5
+        K10 -- Нет --> K11["Guardrails:\nпроверка ограничений"]
+        K11 --> K12["Готово"]
+    end
+
+    style slash fill:#e8f5e9,stroke:#00b894,stroke-width:2px
+    style skill fill:#f0eeff,stroke:#6c5ce7,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="card card-accent">
+    <strong>Главная разница:</strong> Slash Command &mdash; это <em>функция</em> (вход &rarr; выход).
+    Skill &mdash; это <em>программа</em> (условия, циклы, вопросы, guardrails).
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ТАБЛИЦА СРАВНЕНИЯ -->
+  <h2 id="comparison"><span class="emoji">📊</span> Таблица сравнения</h2>
+
+  <div style="overflow-x: auto;">
+  <table>
+    <tr>
+      <th>Характеристика</th>
+      <th><span class="tag-slash">Slash Command</span></th>
+      <th><span class="tag-skill">Skill</span></th>
+    </tr>
+    <tr>
+      <td><strong>Файл</strong></td>
+      <td><code>.claude/commands/opsx/commit.md</code></td>
+      <td><code>.claude/skills/openspec-apply/SKILL.md</code></td>
+    </tr>
+    <tr>
+      <td><strong>Формат</strong></td>
+      <td>Один markdown-файл</td>
+      <td>Директория с SKILL.md + ресурсы</td>
+    </tr>
+    <tr>
+      <td><strong>Размер</strong></td>
+      <td>5-30 строк (обычно)</td>
+      <td>20-500+ строк</td>
+    </tr>
+    <tr>
+      <td><strong>Multi-step</strong></td>
+      <td>Нет (single-turn)</td>
+      <td>Да (многошаговый, ветвящийся)</td>
+    </tr>
+    <tr>
+      <td><strong>Автотриггер</strong></td>
+      <td>Нет (только явный <code>/</code>-вызов)</td>
+      <td>Да (по <code>description</code>)</td>
+    </tr>
+    <tr>
+      <td><strong>Цикл с вопросами</strong></td>
+      <td>Нет</td>
+      <td>Да (AskUserQuestion, паузы)</td>
+    </tr>
+    <tr>
+      <td><strong>Guardrails</strong></td>
+      <td>Через <code>allowed-tools</code></td>
+      <td>Встроенные инструкции + <code>allowed-tools</code></td>
+    </tr>
+    <tr>
+      <td><strong>Динамический контент</strong></td>
+      <td><code>!`git status`</code> (backtick)</td>
+      <td>Bash-команды в шагах</td>
+    </tr>
+    <tr>
+      <td><strong>Аргументы</strong></td>
+      <td><code>$ARGUMENTS</code></td>
+      <td>Парсинг из текста запроса</td>
+    </tr>
+    <tr>
+      <td><strong>Пример</strong></td>
+      <td><code>/commit</code> &mdash; создать коммит</td>
+      <td><code>/openspec:apply</code> &mdash; реализовать задачи из change</td>
+    </tr>
+    <tr>
+      <td><strong>Аналогия</strong></td>
+      <td>Shell alias / скрипт</td>
+      <td>Workflow engine / state machine</td>
+    </tr>
+  </table>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. СТРУКТУРА ФАЙЛОВ -->
+  <h2 id="file-structure"><span class="emoji">📁</span> Структура файлов</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph commands["Slash Commands"]
+        direction TB
+        C1[".claude/commands/\ncommit.md"]
+        C2[".claude/commands/\ncommit-push-pr.md"]
+        C3["~/.claude/commands/\nglobal-cmd.md"]
+    end
+
+    subgraph skills["Skills"]
+        direction TB
+        S1["~/.claude/skills/\nopenspec-apply/\nSKILL.md"]
+        S2["~/.claude/skills/\nopenspec-explore/\nSKILL.md"]
+        S3[".claude/skills/\nmy-skill/\nSKILL.md\nscripts/\nreferences/"]
+    end
+
+    style commands fill:#e8f5e9,stroke:#00b894,stroke-width:2px
+    style skills fill:#f0eeff,stroke:#6c5ce7,stroke-width:2px
+    </div>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Примечание о наследии (legacy)</h3>
+    <p>Раньше скиллы тоже клались в <code>commands/</code>. Сейчас предпочтительный формат &mdash; <code>skills/&lt;name&gt;/SKILL.md</code>.
+    Оба формата загружаются одинаково, но directory-based удобнее: он позволяет хранить
+    скрипты, шаблоны и справочники рядом с инструкцией.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ПРАКТИЧЕСКИЕ ПРИМЕРЫ -->
+  <h2 id="practical"><span class="emoji">🔬</span> Практические примеры</h2>
+
+  <h3>Когда выбрать Slash Command</h3>
+
+  <div class="card card-green">
+    <h3>/commit</h3>
+    <p>Простая операция: посмотреть git status, сделать add + commit. Один turn, без вопросов.</p>
+    <div class="code-block"><code><span class="yaml-comment"># .claude/commands/commit.md</span>
+---
+allowed-tools: Bash(git add:*), Bash(git commit:*)
+description: Создать git-коммит из текущих изменений
+---
+
+## Context
+- Current git status: !`git status`
+- Current git diff: !`git diff HEAD`
+
+## Your task
+Stage all changes and create a single commit with a descriptive message.</code></div>
+  </div>
+
+  <div class="card card-green">
+    <h3>/format</h3>
+    <p>Запустить форматирование кода. Одна команда, один результат.</p>
+    <div class="code-block"><code><span class="yaml-comment"># .claude/commands/format.md</span>
+---
+allowed-tools: Bash(npx prettier:*), Bash(npx eslint:*)
+description: Отформатировать код проекта
+---
+
+Отформатируй весь код в проекте с помощью prettier, затем исправь
+ошибки eslint. Покажи что изменилось.</code></div>
+  </div>
+
+  <h3>Когда выбрать Skill</h3>
+
+  <div class="card card-purple">
+    <h3>openspec-apply-change</h3>
+    <p>Многошаговый workflow: выбор change, проверка статуса, чтение контекста, реализация задач
+    по одной, обработка ошибок, паузы для уточнений. Невозможно описать в single-turn.</p>
+  </div>
+
+  <div class="card card-accent">
+    <h3>playground</h3>
+    <p>Определяет тип playground из запроса, выбирает шаблон, строит HTML, открывает в браузере.
+    Автотриггер: "сделай playground для стилей CSS" &mdash; Claude сам подхватит без <code>/</code>-вызова.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. BEST PRACTICES -->
+  <h2 id="best-practices"><span class="emoji">✅</span> Best Practices</h2>
+
+  <div class="card card-green">
+    <h3>Для Slash Commands</h3>
+    <ul>
+      <li><strong>Держи короткими:</strong> 5-30 строк. Если больше &mdash; возможно, нужен Skill.</li>
+      <li><strong>Используй <code>!`...`</code></strong> для динамического контекста (git status, diff и т.д.).</li>
+      <li><strong>Указывай <code>allowed-tools</code></strong> &mdash; это убирает лишние запросы подтверждения.</li>
+      <li><strong>Описывай <code>description</code></strong> чётко &mdash; это то, что видит пользователь в подсказках.</li>
+      <li><strong>Используй <code>$ARGUMENTS</code></strong> когда нужен ввод от пользователя.</li>
+    </ul>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Для Skills</h3>
+    <ul>
+      <li><strong>Пиши <code>description</code> "агрессивно":</strong> Claude склонен "недотриггерить" скиллы.
+      Указывай конкретные контексты и фразы, при которых скилл должен сработать.</li>
+      <li><strong>Держи SKILL.md под 500 строк:</strong> если больше &mdash; выноси справочники в <code>references/</code>.</li>
+      <li><strong>Используй Progressive Disclosure:</strong> метаданные (~100 слов) всегда в контексте,
+      тело загружается при триггере, ресурсы &mdash; по необходимости.</li>
+      <li><strong>Добавляй Guardrails:</strong> явно запрещай то, что скилл не должен делать.</li>
+      <li><strong>Объясняй "почему":</strong> LLM лучше понимает инструкции с обоснованием, чем жёсткие MUST/NEVER.</li>
+      <li><strong>Тестируй:</strong> создавай 2-3 тестовых промпта и проверяй, что скилл срабатывает корректно.</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 9. ТИПИЧНЫЕ ОШИБКИ -->
+  <h2 id="anti-patterns"><span class="emoji">⚠️</span> Типичные ошибки</h2>
+
+  <div class="card card-red">
+    <h3>1. Slash Command на 200 строк</h3>
+    <p>Команда <code>/deploy</code> превратилась в монстра с 15 шагами, ветвлениями и обработкой ошибок.
+    Claude пытается выполнить всё за один turn и теряет контекст.</p>
+    <p><strong>Решение:</strong> Разбить на Skill с шагами и паузами.</p>
+  </div>
+
+  <div class="card card-red">
+    <h3>2. Skill без guardrails</h3>
+    <p>Скилл <code>my-deployer</code> не запрещает определённые действия. Claude при удалении деплоя
+    случайно удаляет production-данные.</p>
+    <p><strong>Решение:</strong> Всегда добавляй guardrails: "Do NOT touch production data", "Do NOT skip confirmation".</p>
+  </div>
+
+  <div class="card card-red">
+    <h3>3. Пытаться сделать автотриггер для Slash Command</h3>
+    <p>Slash Command не может срабатывать автоматически &mdash; только по <code>/</code>-вызову.
+    Если нужна автоактивация &mdash; это Skill.</p>
+    <p><strong>Решение:</strong> Используй Skill с описательным <code>description</code>.</p>
+  </div>
+
+  <div class="card card-red">
+    <h3>4. Skill без структуры</h3>
+    <p>SKILL.md содержит 500 строк сплошного текста без заголовков, шагов и разделителей.
+    Claude не может эффективно "читать" такую инструкцию.</p>
+    <p><strong>Решение:</strong> Используй заголовки, нумерованные шаги, маркированные списки, примеры кода.</p>
+  </div>
+
+  <div class="card card-red">
+    <h3>5. Slash Command для задачи, требующей вопросов</h3>
+    <p><code>/create-component</code> не может спросить "как назвать компонент?" &mdash; это single-turn.
+    Пользователь вынужден каждый раз указывать имя в <code>$ARGUMENTS</code>.</p>
+    <p><strong>Решение:</strong> Skill с AskUserQuestion на шаге 1.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 10. КОГДА ЧТО -->
+  <h2 id="migration"><span class="emoji">🧭</span> Когда что использовать</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    START["Нужна\nавтоматизация?"] --> Q1{"Нужны вопросы\nк пользователю?"}
+    Q1 -- Да --> SKILL["Skill"]
+    Q1 -- Нет --> Q2{"Больше 3 шагов\nили ветвления?"}
+    Q2 -- Да --> SKILL
+    Q2 -- Нет --> Q3{"Нужен\nавтотриггер?"}
+    Q3 -- Да --> SKILL
+    Q3 -- Нет --> Q4{"Нужны guardrails\nили ресурсы?"}
+    Q4 -- Да --> SKILL
+    Q4 -- Нет --> SLASH["Slash Command"]
+
+    style SKILL fill:#f0eeff,stroke:#6c5ce7,stroke-width:2px,color:#2d3436
+    style SLASH fill:#e8f5e9,stroke:#00b894,stroke-width:2px,color:#2d3436
+    </div>
+  </div>
+
+  <div style="overflow-x: auto;">
+  <table>
+    <tr>
+      <th>Сценарий</th>
+      <th>Рекомендация</th>
+      <th>Почему</th>
+    </tr>
+    <tr>
+      <td>Создать коммит из текущих изменений</td>
+      <td><span class="tag-slash">Slash Command</span></td>
+      <td>Один turn, без вопросов, простой контекст</td>
+    </tr>
+    <tr>
+      <td>Запустить тесты и показать отчёт</td>
+      <td><span class="tag-slash">Slash Command</span></td>
+      <td>Одна команда, один результат</td>
+    </tr>
+    <tr>
+      <td>Реализовать задачи из change-листа</td>
+      <td><span class="tag-skill">Skill</span></td>
+      <td>Много шагов, нужно читать контекст, обрабатывать ошибки</td>
+    </tr>
+    <tr>
+      <td>Исследовать кодовую базу перед архитектурным решением</td>
+      <td><span class="tag-skill">Skill</span></td>
+      <td>Ветвление, вопросы, визуализация, guardrails</td>
+    </tr>
+    <tr>
+      <td>Отформатировать код</td>
+      <td><span class="tag-slash">Slash Command</span></td>
+      <td>Предсказуемая операция, не требует ветвления</td>
+    </tr>
+    <tr>
+      <td>Создать новый компонент с выбором типа</td>
+      <td><span class="tag-skill">Skill</span></td>
+      <td>Нужно спросить тип, имя, позицию в архитектуре</td>
+    </tr>
+    <tr>
+      <td>Деплой с проверками</td>
+      <td><span class="tag-both">Зависит от сложности</span></td>
+      <td>Простой деплой &mdash; Slash, с проверками и откатом &mdash; Skill</td>
+    </tr>
+  </table>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">⚡</span>
+    <span><strong>Золотое правило:</strong> Если инструкция помещается в 30 строк без потери
+    смысла &mdash; это Slash Command. Если нужна логика, вопросы, циклы или guardrails &mdash; это Skill.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Slash Command &mdash; для простых, предсказуемых операций в одно касание.
+      Skill &mdash; для сложных workflow с логикой, вопросами и автоматическим триггером.
+      Оба &mdash; встроенные механизмы Claude Code, ничего устанавливать не нужно.
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+
+<footer style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.85em;text-align:center;">
+    Создано <strong>writer-agent</strong> через Workflow tool.
+    <br>Актуально на 2026-06-17.
+    <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+</footer>
+</body>
+</html>

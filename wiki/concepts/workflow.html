@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workflow — мульти-агентная оркестрация в Claude Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>&#x1f3ed; Workflow &mdash; мульти-агентная оркестрация</h1>
+  <p class="subtitle">Когда одна задача &mdash; это слишком много для одного агента, но идеально для конвейера из нескольких</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое Workflow?</a></li>
+      <li><a href="#vs-agent">Отличие от обычного запуска агента</a></li>
+      <li><a href="#patterns">Паттерны</a></li>
+      <li><a href="#syntax">Как это выглядит в коде</a></li>
+      <li><a href="#debates">Пример: наши архитектурные дебаты</a></li>
+      <li><a href="#usecases">Когда это нужно</a></li>
+      <li><a href="#background">Связь с Background Tasks</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ WORKFLOW -->
+  <h2 id="what"><span class="emoji">&#x1f3ed;</span> Что такое Workflow?</h2>
+
+  <p>
+    Представь конвейер на заводе. Сырьё загружается с одного конца &mdash; проходит через станции,
+    на каждой делается своя операция &mdash; а с другого конца выходит готовое изделие.
+    Никто не бегает между станциями и не передаёт вручную &mdash; всё автоматизировано.
+  </p>
+
+  <p>
+    <strong>Workflow</strong> &mdash; это скрипт, который описывает: каких агентов запустить,
+    в каком порядке, что каждому дать на вход и что делать с результатами.
+    Как конвейер: на одном конце задача, на другом &mdash; результат, собранный из работы нескольких агентов.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> Workflow &mdash; это рецепт. Ты говоришь: &laquo;возьми задачу,
+    отдай агенту A, его результат &mdash; агенту B, параллельно запусти агентов C и D,
+    собери всё в финальный ответ&raquo;. И Claude Code сам это исполняет &mdash;
+    без твоего участия на каждом шагу.</p>
+  </div>
+
+  <p>
+    Workflow описывается на JavaScript (не TypeScript) и живёт в файле <code>.workflow.js</code>.
+    Это не просто &laquo;запусти агента&raquo; &mdash; это полноценный сценарий с фазами,
+    параллельными блоками и сборкой результатов.
+  </p>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ОТЛИЧИЕ ОТ ОБЫЧНОГО ЗАПУСКА -->
+  <h2 id="vs-agent"><span class="emoji">&#x1f50d;</span> Отличие от обычного запуска агента</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>Обычный запуск</h3>
+      <p>Ты вызываешь <strong>одного агента</strong>. Он получает задачу, делает её и возвращает результат.</p>
+      <div class="code-block">
+        <code>Я: &laquo;innovator, придумай архитектуру&raquo;
+innovator: &laquo;Вот моя архитектура: ...&raquo;
+<span class="yaml-comment"># Готово. Один агент, один ответ.</span></code>
+      </div>
+    </div>
+
+    <div class="card card-purple">
+      <h3>Workflow</h3>
+      <p>Ты запускаешь <strong>сценарий</strong>. Он сам решает кого когда запускать,
+      синхронизирует результаты, собирает финальный ответ.</p>
+      <div class="code-block">
+        <code>Я: &laquo;запусти workflow дебатов&raquo;
+<span class="yaml-comment"># Workflow сам:</span>
+<span class="yaml-comment">#  1. Запускает 3 агентов параллельно</span>
+<span class="yaml-comment">#  2. Ждёт все ответы</span>
+<span class="yaml-comment">#  3. Запускает их снова с чужими ответами</span>
+<span class="yaml-comment">#  4. Собирает финальный вердикт</span>
+<span class="yaml-comment"># Готово. Ноль ручных шагов.</span></code>
+      </div>
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <th>Аспект</th>
+      <th>Обычный запуск</th>
+      <th>Workflow</th>
+    </tr>
+    <tr>
+      <td>Кто оркестрирует</td>
+      <td>Ты (ручками)</td>
+      <td>Скрипт (автоматически)</td>
+    </tr>
+    <tr>
+      <td>Параллелизм</td>
+      <td>Ты сам решаешь, что параллельно</td>
+      <td>Декларативно: <code>parallel()</code></td>
+    </tr>
+    <tr>
+      <td>Передача данных</td>
+      <td>Копируешь ответ одного &mdash; в промпт другого</td>
+      <td>Автоматически: результат &rarr; вход следующего</td>
+    </tr>
+    <tr>
+      <td>Повторяемость</td>
+      <td>Каждый раз руками</td>
+      <td>Один скрипт &mdash; бесконечные запуски</td>
+    </tr>
+    <tr>
+      <td>Когда удобно</td>
+      <td>1&ndash;2 агента, простая задача</td>
+      <td>3+ агента, сложная оркестрация</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ПАТТЕРНЫ -->
+  <h2 id="patterns"><span class="emoji">&#x1f4d6;</span> Паттерны</h2>
+
+  <p>
+    Есть несколько проверенных схем организации мульти-агентных workflow.
+    Выбор паттерна зависит от задачи.
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    subgraph PIPELINE["&#x1f680; Pipeline"]
+        direction LR
+        P_START["Задача"] --> P_A["Agent A"] --> P_B["Agent B"] --> P_C["Agent C"] --> P_RESULT["Результат"]
+    end
+
+    subgraph FANOUT["&#x1f4e1; Fan-out"]
+        direction LR
+        F_START["Задача"] --> F_A["Agent A"]
+        F_START --> F_B["Agent B"]
+        F_START --> F_C["Agent C"]
+        F_A --> F_COLLECT["&#x1f504; Собрать ответы"]
+        F_B --> F_COLLECT
+        F_C --> F_COLLECT
+        F_COLLECT --> F_RESULT["Результат"]
+    end
+
+    subgraph ADVERSARIAL["&#x2694;&#xfe0f; Adversarial"]
+        direction LR
+        A_START["Задача"] --> A_PRO["Agent-Pro"]
+        A_START --> A_CON["Agent-Contra"]
+        A_PRO --> A_JUDGE["&#x2696;&#xfe0f; Судья"]
+        A_CON --> A_JUDGE
+        A_JUDGE --> A_RESULT["Вердикт"]
+    end
+
+    subgraph LOOP["&#x1f501; Loop-until-dry"]
+        direction LR
+        L_START["Задача"] --> L_WORK["Agent"]
+        L_WORK --> L_CHECK{"Есть баги?"}
+        L_CHECK -->|"Да"| L_WORK
+        L_CHECK -->|"Нет"| L_RESULT["Результат"]
+    end
+
+    style PIPELINE fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style FANOUT fill:#f6fff8,stroke:#28a745,stroke-width:2px
+    style ADVERSARIAL fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style LOOP fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    </div>
+  </div>
+
+  <h3>Pipeline &mdash; конвейер</h3>
+  <div class="card card-accent">
+    <p><strong>Суть:</strong> A &rarr; B &rarr; C. Каждый следующий агент получает результат предыдущего.</p>
+    <p><strong>Пример:</strong> Исследователь находит баг &rarr; аналитик оценивает воздействие &rarr;
+    фиксер пишет патч &rarr; ревьюер проверяет.</p>
+    <p><strong>Когда:</strong> Когда каждый шаг зависит от предыдущего. Линейная обработка.</p>
+  </div>
+
+  <h3>Fan-out &mdash; веер</h3>
+  <div class="card card-green">
+    <p><strong>Суть:</strong> Один запрос &rarr; N агентов параллельно &rarr; собираем ответы.</p>
+    <p><strong>Пример:</strong> Код-ревью по 5 измерениям: безопасность, производительность, читаемость,
+    тестопригодность, архитектура. Пять агентов работают одновременно.</p>
+    <p><strong>Когда:</strong> Когда задача раскладывается на независимые подзадачи.</p>
+  </div>
+
+  <h3>Adversarial &mdash; дебаты</h3>
+  <div class="card card-orange">
+    <p><strong>Суть:</strong> Один агент даёт ответ, второй пытается опровергнуть, третий судит.</p>
+    <p><strong>Пример:</strong> Наша схема дебатов &mdash; innovator, pragmatist, conservative спорят,
+    writer-agent собирает вердикт.</p>
+    <p><strong>Когда:</strong> Когда нужен сбалансированный взгляд. Хорошо для архитектурных решений.</p>
+  </div>
+
+  <h3>Loop-until-dry &mdash; цикл до победы</h3>
+  <div class="card card-purple">
+    <p><strong>Суть:</strong> Запускать агента, пока он находит баги или проблемы. Когда их нет &mdash; стоп.</p>
+    <p><strong>Пример:</strong> Агент-тестер находит баг &rarr; фикс &rarr; снова тестер &rarr;
+    снова баг &rarr; снова фикс... пока тестер не скажет &laquo;всё чисто&raquo;.</p>
+    <p><strong>Когда:</strong> Итеративные процессы: ревью, тестирование, оптимизация.</p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Можно комбинировать:</strong> Fan-out для ревью &rarr; Adversarial для спора по найденным
+    проблемам &rarr; Loop для итеративного исправления. Один workflow может содержать несколько паттернов.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. СИНТАКСИС -->
+  <h2 id="syntax"><span class="emoji">&#x1f4bb;</span> Как это выглядит в коде</h2>
+
+  <p>
+    Workflow пишется на чистом JavaScript. Основные конструкции &mdash; это функции,
+    которые описывают шаги сценария.
+  </p>
+
+  <div class="card card-purple">
+    <h3>Структура файла workflow</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment">// .workflow.js &mdash; основной файл workflow</span>
+
+<span class="yaml-key">export const meta</span> = {
+  <span class="yaml-val">name: 'code-review-workflow',</span>
+  <span class="yaml-val">description: 'Комплексное ревью кода по 5 измерениям',</span>
+  <span class="yaml-val">phases: ['review', 'synthesize']</span>
+};
+
+<span class="yaml-key">export default async function</span>(context) {
+  <span class="yaml-comment">// Описываем сценарий</span>
+}</code>
+    </div>
+  </div>
+
+  <h3>Основные функции</h3>
+
+  <table>
+    <tr>
+      <th>Функция</th>
+      <th>Что делает</th>
+    </tr>
+    <tr>
+      <td><code>agent(name, prompt)</code></td>
+      <td>Запускает конкретного агента с промптом. Возвращает ответ.</td>
+    </tr>
+    <tr>
+      <td><code>parallel([...tasks])</code></td>
+      <td>Запускает несколько задач параллельно. Ждёт все.</td>
+    </tr>
+    <tr>
+      <td><code>pipeline([...steps])</code></td>
+      <td>Конвейер: результат каждого шага передаётся следующему.</td>
+    </tr>
+    <tr>
+      <td><code>phase(name, fn)</code></td>
+      <td>Объявляет фазу workflow. Для логирования и навигации.</td>
+    </tr>
+    <tr>
+      <td><code>log(message)</code></td>
+      <td>Выводит сообщение в лог workflow. Для трассировки.</td>
+    </tr>
+  </table>
+
+  <div class="card card-accent">
+    <h3>Пример: Fan-out workflow</h3>
+    <div class="code-block">
+      <code><span class="yaml-key">export default async function</span>(context) {
+  <span class="yaml-key">await</span> phase(<span class="yaml-val">'review'</span>, <span class="yaml-key">async</span> () => {
+    <span class="yaml-key">const</span> reviews = <span class="yaml-key">await</span> parallel([
+      agent(<span class="yaml-val">'innovator'</span>,    <span class="yaml-val">'Проверь архитектуру: ...'</span>),
+      agent(<span class="yaml-val">'pragmatist'</span>,   <span class="yaml-val">'Проверь производительность: ...'</span>),
+      agent(<span class="yaml-val">'conservative'</span>, <span class="yaml-val">'Проверь безопасность: ...'</span>),
+    ]);
+
+    log(<span class="yaml-val">'Все ревью получены, синтезирую...'</span>);
+    <span class="yaml-key">return</span> reviews;
+  });
+
+  <span class="yaml-key">await</span> phase(<span class="yaml-val">'synthesize'</span>, <span class="yaml-key">async</span> () => {
+    <span class="yaml-key">return</span> agent(<span class="yaml-val">'writer-agent'</span>,
+      <span class="yaml-val">'Собери единый отчёт из ревью: ...'</span>);
+  });
+}</code>
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x26a0;&#xfe0f;</span>
+    <span><strong>Важно:</strong> Workflow пишется на JavaScript, не TypeScript.
+    Типы не нужны &mdash; это скрипт-оркестратор, а не библиотека.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ПРИМЕР: НАШИ ДЕБАТЫ -->
+  <h2 id="debates"><span class="emoji">&#x1f525;</span> Пример: наши архитектурные дебаты</h2>
+
+  <p>
+    Мы уже делали мульти-агентные дебаты &mdash; просто руками.
+    Вот как выглядел наш <strong>ручной workflow</strong> и как бы это выглядело
+    автоматически.
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+sequenceDiagram
+    participant U as &#x1f464; Ты
+    participant W as &#x1f3ed; Workflow
+    participant IN as &#x1f9e0; innovator
+    participant PR as &#x2696;&#xfe0f; pragmatist
+    participant CO as &#x1f6e1;&#xfe0f; conservative
+    participant WR as &#x270d;&#xfe0f; writer-agent
+
+    U->>W: Запусти дебаты по архитектуре
+
+    Note over W: Round 1 &mdash; каждый со своим взглядом
+
+    par Параллельно
+        W->>IN: Своя архитектура для задачи X
+        W->>PR: Оцени подход innovator
+        W->>CO: Оцени подход innovator
+    end
+
+    IN-->>W: Инновационный подход
+    PR-->>W: Прагматичные замечания
+    CO-->>W: Консервативные риски
+
+    Note over W: Round 2 &mdash; каждый видит чужие ответы
+
+    par Параллельно
+        W->>IN: Реагируй на замечания PR и CO
+        W->>PR: Реагируй на подход IN и риски CO
+        W->>CO: Реагируй на подход IN и замечания PR
+    end
+
+    IN-->>W: Обновлённая позиция
+    PR-->>W: Обновлённая оценка
+    CO-->>W: Обновлённые риски
+
+    Note over W: Финал &mdash; синтез
+
+    W->>WR: Синтезируй вердикт из 6 ответов
+    WR-->>W: HTML-вердикт с рекомендацией
+
+    W-->>U: &#x1f4cb; Готовый результат
+    </div>
+  </div>
+
+  <div class="comparison-grid">
+    <div class="card card-red">
+      <h3>&#x270b; Как мы делали руками</h3>
+      <ol>
+        <li>Вызвал innovator &rarr; ждёшь ответ</li>
+        <li>Скопировал ответ в промпт pragmatist &rarr; ждёшь</li>
+        <li>Скопировал в промпт conservative &rarr; ждёшь</li>
+        <li>Скопировал все три обратно в innovator &rarr; ждёшь</li>
+        <li>Повторил для двух остальных</li>
+        <li>Вызвал writer на синтез</li>
+        <li>Получил HTML</li>
+      </ol>
+      <p><strong>~6 ручных шагов</strong>, на каждом копируешь контекст.</p>
+    </div>
+
+    <div class="card card-green">
+      <h3>&#x1f680; Как было бы с Workflow</h3>
+      <ol>
+        <li>Пишешь: &laquo;запусти дебаты&raquo;</li>
+        <li>Workflow сам делает всё</li>
+        <li>Получаешь результат</li>
+      </ol>
+      <p><strong>1 командный запуск</strong> &mdash; 0 ручных шагов.</p>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. КОГДА НУЖНО -->
+  <h2 id="usecases"><span class="emoji">&#x1f4af;</span> Когда это нужно</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-accent">
+      <h3>&#x1f50d; Код-ревью по измерениям</h3>
+      <p>Код проверяют 5 агентов параллельно: безопасность, производительность, читаемость,
+      тестопригодность, архитектура. Fan-out &rarr; синтез.</p>
+    </div>
+
+    <div class="card card-green">
+      <h3>&#x1f3d7;&#xfe0f; Архитектурные дебаты</h3>
+      <p>Инноватор, прагматик и консерватор спорят. Два раунда &mdash; сначала каждый со своей
+      позицией, потом все видят чужие ответы. Adversarial.</p>
+    </div>
+
+    <div class="card card-orange">
+      <h3>&#x1f504; Миграция кода</h3>
+      <p>Один агент находит все файлы для миграции &rarr; Fan-out на N агентов (по файлу или группе)
+      &rarr; каждый мигрирует &rarr; Loop проверяет что ничего не сломалось.</p>
+    </div>
+
+    <div class="card card-purple">
+      <h3>&#x1f6e0;&#xfe0f; Рефакторинг</h3>
+      <p>Исследователь находит запахи кода &rarr; архитектор предлагает план &rarr;
+      Fan-out: каждый агент рефакторит свой кусок &rarr; тестер проверяет &rarr;
+      Loop пока тесты не зелёные.</p>
+    </div>
+  </div>
+
+  <div class="card card-yellow">
+    <h3>Правило большого пальца</h3>
+    <p>
+      Если задача укладывается в один контекст одного агента &mdash; workflow не нужен.
+      Если задача <strong>большая</strong> (много файлов, много измерений, много раундов обсуждения)
+      или требует <strong>разных компетенций</strong> &mdash; workflow экономит время и делает результат качественнее.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. СВЯЗЬ С BACKGROUND TASKS -->
+  <h2 id="background"><span class="emoji">&#x1f680;</span> Связь с Background Tasks</h2>
+
+  <p>
+    Workflow может использовать <a href="background-tasks.html">Background Tasks</a>
+    как часть сценария. Это даёт дополнительный параллелизм.
+  </p>
+
+  <div class="card card-accent">
+    <h3>Workflow + Background Tasks</h3>
+    <p>Пока основной workflow выполняет фазу ревью &mdash; в фоне может крутитьсявторостепенныйная задача:
+    проверка CI, анализ зависимостей, генерация доки. Результаты фоновых задач
+    подключаются к workflow на нужной фазе.</p>
+  </div>
+
+  <div class="card card-green">
+    <h3>Схема взаимодействия</h3>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Workflow выполняет основную задачу</span>
+<span class="yaml-key">await</span> phase(<span class="yaml-val">'review'</span>, <span class="yaml-key">async</span> () => {
+  <span class="yaml-key">const</span> reviews = <span class="yaml-key">await</span> parallel([...]);
+  <span class="yaml-key">return</span> reviews;
+});
+
+<span class="yaml-comment"># Параллельно &mdash; фоновая задача (вне workflow)</span>
+<span class="yaml-comment"># claude --bg "проверь CI пока workflow крутится"</span>
+
+<span class="yaml-comment"># Workflow продолжает синтез</span>
+<span class="yaml-key">await</span> phase(<span class="yaml-val">'synthesize'</span>, <span class="yaml-key">async</span> () => {
+  <span class="yaml-key">return</span> agent(<span class="yaml-val">'writer-agent'</span>, <span class="yaml-val">'Собери отчёт...'</span>);
+});</code>
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Но:</strong> Workflow и Background Tasks &mdash; это разные механизмы.
+    Workflow &mdash; это декларативный сценарий внутри сессии.
+    Background Tasks &mdash; это фоновые задачи, которые можно запустить отдельно.
+    Они хорошо дружат, но не обязательно использовать оба.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ИТОГО -->
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Workflow &mdash; это скрипт-оркестратор, который автоматизирует
+      мульти-агентные сценарии. Вместо ручного запуска агентов и копирования контекста &mdash;
+      один файл <code>.workflow.js</code> описывает весь конвейер. Паттерны:
+      Pipeline, Fan-out, Adversarial, Loop-until-dry. Когда задача большая или требует
+      разных компетенций &mdash; workflow экономит время и делает результат лучше. &#x1f3ed;
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+</body>
+</html>

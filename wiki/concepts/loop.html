@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>/loop — запланированные задачи в Claude Code</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .shortcut-table kbd {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+      box-shadow: 0 1px 0 var(--border);
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">← Назад к вики</a>
+
+  <h1>⏰ /loop — запланированные задачи</h1>
+  <p class="subtitle">Будильник для Claude Code: делай что-то каждые N минут и отчитывайся</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое /loop?</a></li>
+      <li><a href="#how">Как это работает</a></li>
+      <li><a href="#formats">Форматы команд</a></li>
+      <li><a href="#intervals">Интервалы</a></li>
+      <li><a href="#limits">Ограничения</a></li>
+      <li><a href="#loopmd">Кастомный loop.md</a></li>
+      <li><a href="#alternatives">Альтернативы</a></li>
+      <li><a href="#ours">Что работает у нас</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ /LOOP -->
+  <h2 id="what"><span class="emoji">⏰</span> Что такое /loop?</h2>
+
+  <p>
+    Представь будильник. Поставил &mdash; он звонит каждые N минут, ты встаёшь и проверяешь что-то.
+    Не надо каждый раз заново будильник ставить &mdash; он сам повторяется.
+  </p>
+
+  <p>
+    <strong>/loop</strong> &mdash; это команда, которая запускает задачу на повторение.
+    Claude Code выполняет её с заданным интервалом иотчёт (отчитывается) о результатах &mdash;
+    пока ты не скажешь остановиться.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> /loop &mdash; это как сказать Claude: «Делай X каждые
+    N минут и говори мне результат». Работает пока сессия жива. Быстро, просто, без лишнего
+    кода.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. КАК ЭТО РАБОТАЕТ -->
+  <h2 id="how"><span class="emoji">⚙️</span> Как это работает</h2>
+
+  <p>Процесс в три шага:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    START(("⏰ Пользователь<br>пишет /loop")) --> PARSE["&#x1f4dd; Парсим команду:<br>интервал + задача"]
+    PARSE --> SCHEDULE["&#x1f4c5; Ставим таймер<br>на N минут"]
+    SCHEDULE --> WAIT["&#x23f3; Ждём..."]
+    WAIT --> FIRES["&#x1f525; Таймер сработал!"]
+    FIRES --> WORK["&#x1f4bb; Claude выполняет задачу"]
+    WORK --> REPORT["&#x1f4cb; Claudeотчёт (сообщает)<br>результат тебе"]
+    REPORT --> STILL_ALIVE{"&#x1f44d; Сессия<br>жива?"}
+
+    STILL_ALIVE -->|"Да"| WAIT
+    STILL_ALIVE -->|"Нет или /stop"| STOP["&#x274c; Loop остановлен"]
+
+    style START fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    style PARSE fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style SCHEDULE fill:#fffde6,stroke:#b08800,stroke-width:2px
+    style WAIT fill:#f6f8fa,stroke:#586069,stroke-width:2px
+    style FIRES fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style WORK fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style REPORT fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style STILL_ALIVE fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style STOP fill:#ffeef0,stroke:#d73a49,stroke-width:2px
+    </div>
+  </div>
+
+  <p>Пошагово:</p>
+
+  <ol>
+    <li><strong>Ввод.</strong> Пишешь <code>/loop 5m проверь статус деплоя</code>.</li>
+    <li><strong>Парсинг.</strong> Claude понимает: интервал &mdash; 5 минут, задача &mdash; проверить деплой.</li>
+    <li><strong>Ожидание.</strong> Таймер тикает. Claude молчит.</li>
+    <li><strong>Выполнение.</strong> Таймер сработал &mdash; Claude проверяет деплой.</li>
+    <li><strong>Отчёт.</strong> Claude пишет тебе результат: «Деплой прошёл, версия 2.4.1 на проде».</li>
+    <li><strong>Повтор.</strong> Ставим таймер заново и ждём следующего круга.</li>
+  </ol>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Важно:</strong> Claude не прерывает текущий ответ ради loop.
+    Он проверяет &laquo;не пора ли?&raquo; только когда ты пишешь следующее сообщение.
+    Поэтому если ты молчишь час &mdash; задача не выполнится, пока не напишешь что-нибудь.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ФОРМАТЫ КОМАНД -->
+  <h2 id="formats"><span class="emoji">📝</span> Форматы команд</h2>
+
+  <p>Есть четыре варианта использования &mdash; от самого гибкого до самого простого:</p>
+
+  <table>
+    <tr>
+      <th>Команда</th>
+      <th>Что делает</th>
+      <th>Интервал</th>
+    </tr>
+    <tr>
+      <td><code>/loop 5m проверь статус деплоя</code></td>
+      <td>Каждые 5 минут проверяет деплой</td>
+      <td>Ты задаёшь</td>
+    </tr>
+    <tr>
+      <td><code>/loop проверь CI</code></td>
+      <td>Claude сам выбирает интервал (обычно ~15 минут)</td>
+      <td>Claude решает</td>
+    </tr>
+    <tr>
+      <td><code>/loop</code></td>
+      <td>Дефолтный loop &mdash; доделать и почистить за собой</td>
+      <td>Claude решает</td>
+    </tr>
+    <tr>
+      <td><code>напомни через час запустить миграцию</code></td>
+      <td>Одноразовое напоминание (не повторяется)</td>
+      <td>Один раз</td>
+    </tr>
+  </table>
+
+  <div class="card card-green">
+    <h3>Примеры из жизни</h3>
+    <ul>
+      <li><code>/loop 10m проверь что тесты проходят</code> &mdash; мониторинг CI</li>
+      <li><code>/loop 2h напомни сделать код-ревью</code> &mdash; периодическое напоминание</li>
+      <li><code>/loop 30s проверь не упал ли сервер</code> &mdash; быстрый health-check</li>
+      <li><code>напомни через 30 минут сделать коммит</code> &mdash; одноразовый таймер</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ИНТЕРВАЛЫ -->
+  <h2 id="intervals"><span class="emoji">⏳</span> Интервалы</h2>
+
+  <p>Поддерживаются четыре единицы времени. Claude понимает их &laquo;по-человечески&raquo;:</p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph intervals["&#x23f0; Поддерживаемые интервалы"]
+        direction TB
+        S["<b>30s</b><br>Секунды<br><small>Быстрые проверки</small>"]
+        M["<b>5m</b><br>Минуты<br><small>Стандартный цикл</small>"]
+        H["<b>2h</b><br>Часы<br><small>Долгие задачи</small>"]
+        D["<b>1d</b><br>Дни<br><small>Разовые события</small>"]
+    end
+
+    S -->|"чаще"| M
+    M -->|"реже"| H
+    H -->|"очень редко"| D
+
+    style S fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style M fill:#f1f8ff,stroke:#0366d6,stroke-width:2px
+    style H fill:#fff8f0,stroke:#e36209,stroke-width:2px
+    style D fill:#f8f4ff,stroke:#6f42c1,stroke-width:2px
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <th>Формат</th>
+      <th>Пример</th>
+      <th>Когда использовать</th>
+    </tr>
+    <tr>
+      <td><code>Xs</code> (секунды)</td>
+      <td><code>/loop 30s проверь логи</code></td>
+      <td>Критичные проверки: health-check, ошибки в проде</td>
+    </tr>
+    <tr>
+      <td><code>Xm</code> (минуты)</td>
+      <td><code>/loop 5m проверь деплой</code></td>
+      <td>Стандартный мониторинг: CI/CD, тесты, статус задач</td>
+    </tr>
+    <tr>
+      <td><code>Xh</code> (часы)</td>
+      <td><code>/loop 2h обнови документацию</code></td>
+      <td>Долгие процессы: сборка, деплой на staging</td>
+    </tr>
+    <tr>
+      <td><code>Xd</code> (дни)</td>
+      <td><code>/loop 1d проверь зависимости</code></td>
+      <td>Разовые проверки: зависимости и безопасность</td>
+    </tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">⚠️</span>
+    <span><strong>Не переборщи.</strong> Интервал <code>30s</code> звучит круто, но если задача
+    выполняется дольше 30 секунд &mdash; таймеры начнут накапливаться. Выбирай интервал
+    с запасом по времени.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ОГРАНИЧЕНИЯ -->
+  <h2 id="limits"><span class="emoji">🚫</span> Ограничения</h2>
+
+  <p>/loop &mdash; это не &laquo;навсегда и бесплатно&raquo;. Есть правила, которые надо знать:</p>
+
+  <div class="card card-red">
+    <h3>Что ограничено</h3>
+    <table>
+      <tr>
+        <th>Ограничение</th>
+        <th>Значение</th>
+      </tr>
+      <tr>
+        <td>Время жизни</td>
+        <td><strong>7 дней</strong> &mdash; потом loop самоуничтожается</td>
+      </tr>
+      <tr>
+        <td>Сессия</td>
+        <td>Работает <strong>только пока сессия открыта</strong></td>
+      </tr>
+      <tr>
+        <td>Терминал</td>
+        <td>Закрыл терминал &mdash; loop умер</td>
+      </tr>
+      <tr>
+        <td>Прерывание</td>
+        <td>Не может проснуться посреди твоего ответа &mdash; только <strong>между</strong> твоими сообщениями</td>
+      </tr>
+      <tr>
+        <td>Остановка</td>
+        <td>Напиши <code>/stop</code> или просто закрой сессию</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Чего loop не может</h3>
+    <ul>
+      <li><strong>Работать без сессии.</strong> Если Claude не запущен &mdash; нет loop. Это не cron.</li>
+      <li><strong>Прерывать ответ.</strong> Если Claude только что тебе ответил и ты набираешь следующее &mdash; loop подождёт.</li>
+      <li><strong>Запускаться сам.</strong> Loop не создаёт новых сессий. Он живёт только внутри текущей.</li>
+      <li><strong>Превышать 7 дней.</strong> Сработает самоликвидация &mdash; дольше не дадут.</li>
+    </ul>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Лайфхак:</strong> Если тебе нужен мониторинг, который работает 24/7 &mdash;
+    loop не подойдёт. Для этого есть GitHub Actions, системный cron + <code>claude -p</code>,
+    или другие механизмы. Loop &mdash; для <em>текущей сессии</em>.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. КАСТОМНЫЙ LOOP.MD -->
+  <h2 id="loopmd"><span class="emoji">📄</span> Кастомный loop.md</h2>
+
+  <p>
+    Дефолтный <code>/loop</code> (без аргументов) делает что-то общее: доделать незаконченное,
+    почистить за собой. Но это можно перенастроить.
+  </p>
+
+  <div class="card card-purple">
+    <h3>Как настроить</h3>
+    <p>Создай файл <code>~/.claude/loop.md</code> и напиши туда инструкции:</p>
+    <div class="code-block">
+      <code><span class="yaml-comment"># ~/.claude/loop.md</span>
+
+<span class="yaml-key">Каждые 15 минут:</span>
+<span class="yaml-val">1. Проверь статус ветки main &mdash; нет ли конфликтов</span>
+<span class="yaml-val">2. Посмотри не упал ли линтер</span>
+<span class="yaml-val">3. Если есть TODO-комментарии &mdash; напомни о них</span>
+
+<span class="yaml-key">Одноразово (перед завершением):</span>
+<span class="yaml-val">- Сделай git status и напомни про незакоммиченные изменения</span></code>
+    </div>
+  </div>
+
+  <p>Теперь когда ты просто пишешь <code>/loop</code> без аргументов &mdash; Claude выполняет то,
+  что написано в <code>loop.md</code>, а не дефолтное поведение.</p>
+
+  <table>
+    <tr>
+      <th>Вариант</th>
+      <th>Что делает</th>
+    </tr>
+    <tr>
+      <td><code>/loop</code> без <code>loop.md</code></td>
+      <td>Дефолт: доделать, почистить, привести в порядок</td>
+    </tr>
+    <tr>
+      <td><code>/loop</code> с <code>~/.claude/loop.md</code></td>
+      <td>То, что ты написал в <code>loop.md</code></td>
+    </tr>
+    <tr>
+      <td><code>/loop 5m что-то конкретное</code></td>
+      <td>Всегда выполняет твою команду, игнорируя <code>loop.md</code></td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. АЛЬТЕРНАТИВЫ -->
+  <h2 id="alternatives"><span class="emoji">🔄</span> Альтернативы</h2>
+
+  <p>Если loop не подходит по каким-то причинам &mdash; есть другие варианты:</p>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>GitHub Actions</h3>
+      <p>Запуск по расписанию прямо в репозитории. Работает 24/7, не зависит от твоей сессии.
+      Идеально для CI/CD мониторинга.</p>
+    </div>
+
+    <div class="card card-accent">
+      <h3>Системный cron + claude -p</h3>
+      <p>Классический <code>crontab</code> + <code>claude -p "задача"</code>.
+      Каждые N минут запускается новая сессия. Надёжно, но дорого по API.</p>
+    </div>
+
+    <div class="card card-orange">
+      <h3>Уведомления в Slack/Telegram</h3>
+      <p>Комбинируем cron + скрипт + webhook. Проверяем что-то и кидаем уведомление
+      в мессенджер. Не нужен открытый терминал.</p>
+    </div>
+
+    <div class="card card-purple">
+      <h3>Интеграция с мониторингом</h3>
+      <p>Prometheus + Grafana, Datadog, Uptime Robot &mdash; если речь про инфру.
+      Claude тут не нужен, есть проверенные инструменты.</p>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. ЧТО РАБОТАЕТ У НАС -->
+  <h2 id="ours"><span class="emoji">🏠</span> Что работает у нас</h2>
+
+  <div class="card card-red" style="border: 2px solid var(--red);">
+    <div class="mode-card">
+      <div class="mode-icon red" style="font-size: 2.5em;">🚫</div>
+      <div class="mode-body">
+        <h4 style="font-size: 1.3em;">/loop через OpenCode НЕ работает</h4>
+        <p>
+          Мы выяснили: <strong>/loop у нас не функционирует</strong>.
+          Причина &mdash; OpenCode-прокси не реализует инструменты
+          <code>CronCreate</code>, <code>CronList</code>, <code>CronDelete</code>.
+          А именно на них завязан весь механизм loop.
+        </p>
+        <p>
+          Когда ты пишешь <code>/loop</code> &mdash; ничего не происходит.
+          Команда не доходит до Claude, потому что прокси не знает что с ней делать.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-green">
+    <h3>Что работает вместо этого</h3>
+    <ul>
+      <li><strong>Системный cron + <code>claude -p</code></strong> &mdash; надёжная замена.
+      Настрой <code>crontab -e</code> и запускай Claude в non-interactive режиме.</li>
+      <li><strong>GitHub Actions</strong> &mdash; если нужен мониторинг в облаке.</li>
+      <li><strong>Просто напомни мне</strong> &mdash; скажи «напомни через час» и я попробую
+      (если сессия будет жива).</li>
+    </ul>
+    <div class="code-block">
+      <code><span class="yaml-comment"># Пример: cron + claude для мониторинга деплоя</span>
+<span class="yaml-comment"># crontab -e</span>
+*/5 * * * * claude -p "Проверь статус деплоя на staging" >> ~/deploy-check.log</code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> /loop &mdash; удобная штука для мониторинга в рамках сессии.
+      Но у нас через OpenCode не работает. Для 24/7 мониторинга используй cron + <code>claude -p</code>
+      или GitHub Actions. А <code>loop.md</code> на всякий случай создай &mdash; пригодится когда починят. ⏰
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

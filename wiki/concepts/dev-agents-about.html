@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Агенты для разработки — типы, паттерны, best practices (2025-2026)</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #2d3436;
+      --text-muted: #636e72;
+      --accent: #6c5ce7;
+      --accent-light: #f0edfc;
+      --code-bg: #f6f8fa;
+      --green: #00b894;
+      --orange: #e17055;
+      --red: #d63031;
+      --purple: #6c5ce7;
+      --teal: #008080;
+      --yellow: #fdcb6e;
+      --blue: #0984e3;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), #a29bfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent { border-left: 4px solid var(--accent); }
+    .card-green { border-left: 4px solid var(--green); background: #f0fff4; }
+    .card-orange { border-left: 4px solid var(--orange); background: #fff5f0; }
+    .card-purple { border-left: 4px solid var(--purple); background: #f8f4ff; }
+    .card-red { border-left: 4px solid var(--red); background: #fff5f5; }
+    .card-teal { border-left: 4px solid var(--teal); background: #f0fffa; }
+    .card-blue { border-left: 4px solid var(--blue); background: #f0f8ff; }
+    .card-yellow { border-left: 4px solid var(--yellow); background: #fffff0; }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code { background: none; padding: 0; }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td { background: #f9fbfd; }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg { max-width: none !important; height: auto !important; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+    .comparison-grid .card { margin: 0; }
+
+    @media (max-width: 700px) {
+      .comparison-grid { grid-template-columns: 1fr; }
+    }
+
+    .tag {
+      display: inline-block;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+    .tag-green { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .tag-blue { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+    .tag-orange { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
+    .tag-purple { background: #f3e5f5; color: #7b1fa2; border: 1px solid #e1bee7; }
+    .tag-red { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+    .tag-teal { background: #e0f2f1; color: #00695c; border: 1px solid #b2dfdb; }
+
+    .priority-flow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px 0;
+      font-size: 1em;
+      font-weight: 600;
+    }
+
+    .priority-item {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 2px solid;
+    }
+
+    .priority-arrow { font-size: 1.4em; color: var(--text-muted); }
+
+    .footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85em;
+      text-align: center;
+    }
+    .footer a { color: var(--accent); }
+
+    .stat-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    .stat-card {
+      flex: 1;
+      min-width: 140px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-card .num {
+      font-size: 2em;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .stat-card .label {
+      font-size: 0.85em;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>Агенты для разработки</h1>
+  <p class="subtitle">Типы агентов, архитектурные паттерны, best practices multi-agent систем — обзор 2025-2026</p>
+
+  <!-- ВСТУПЛЕНИЕ -->
+  <p>
+    Разработка ПО в 2025-2026 переживает фундаментальный сдвиг: ценность инженера смещается от
+    <strong>написания кода</strong> к <strong>оркестрации AI-агентов</strong>, которые этот код пишут.
+    Это не футуризм — это подтверждённый факт из отчёта Anthropic «2026 Agentic Coding Trends Report»
+    (январь 2026) и минимум шести независимых источников.
+  </p>
+
+  <p>
+    Но между «нанять агента писать код» и «построить production-систему» — пропасть.
+    Сколько агентов нужно? Как их оркестрировать? Как не разориться на токенах?
+    В этой статье — карта территории, собранная из исследований Anthropic, Microsoft Azure, Princeton NLP
+    и реальных кейсов (Rakuten, TELUS, CRED).
+  </p>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="num">60%</div>
+      <div class="label">Задач с AI</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">0-20%</div>
+      <div class="label">Полное делегирование</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">15x</div>
+      <div class="label">Рост токенов multi-agent</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">64%</div>
+      <div class="label">Single-agent не хуже</div>
+    </div>
+  </div>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#levels">Три уровня сложности: от промпта до роя агентов</a></li>
+      <li><a href="#patterns">Пять фундаментальных паттернов (Anthropic)</a></li>
+      <li><a href="#azure">Пять паттернов multi-agent оркестрации (Microsoft Azure)</a></li>
+      <li><a href="#types">Типы специализированных агентов</a></li>
+      <li><a href="#pillars">Три столпа agentic coding</a></li>
+      <li><a href="#paradox">Парадокс коллаборации — 60/20</a></li>
+      <li><a href="#economy">Экономика и токены</a></li>
+      <li><a href="#long-lived">Долгоживущие агенты</a></li>
+      <li><a href="#our">Наша экосистема</a></li>
+      <li><a href="#best-practices">Best Practices</a></li>
+    </ol>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- 1. ТРИ УРОВНЯ СЛОЖНОСТИ                      -->
+  <!-- ════════════════════════════════════════════════ -->
+  <h2 id="levels"><span class="emoji">📊</span> Три уровня сложности: от промпта до роя агентов</h2>
+
+  <p>
+    Microsoft Azure Architecture Center делит все AI-системы на <strong>три уровня сложности</strong>.
+    Это полезная шкала — она помогает не прыгнуть сразу в multi-agent там, где хватит одного промпта.
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph L1["<b>Level 1</b>"]
+        direction TB
+        A1["Одиночный промпт<br>без инструментов"]
+        A1note["«Суммаризируй этот текст»"]
+    end
+    subgraph L2["<b>Level 2 ★ Рекомендованный дефолт</b>"]
+        direction TB
+        A2["Single Agent<br>с инструментами"]
+        A2note["«Найди баги в коде,<br>исправь, запусти тесты»"]
+    end
+    subgraph L3["<b>Level 3</b>"]
+        direction TB
+        A3["Multi-agent<br>оркестрация"]
+        A3note["«Разбери задачу, назначь<br>агентам, собери результат»"]
+    end
+
+    L1 -->|"нужны<br>инструменты"| L2
+    L2 -->|"перегрузка,<br>сложность,<br>безопасность"| L3
+
+    style L1 fill:#f0fff4,stroke:#2e7d32,stroke-width:1px
+    style L2 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style L3 fill:#f8f4ff,stroke:#6c5ce7,stroke-width:1px
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <th>Уровень</th>
+      <th>Описание</th>
+      <th>Когда использовать</th>
+      <th>Пример</th>
+    </tr>
+    <tr>
+      <td><strong>L1: Direct Model Call</strong></td>
+      <td>Одиночный промпт. Никакой логики агента, никаких инструментов</td>
+      <td>Простые вопросы-ответы, суммаризация</td>
+      <td>«Перепиши этот абзац»</td>
+    </tr>
+    <tr>
+      <td><strong>L2: Single Agent with Tools</strong> ⭐</td>
+      <td>LLM с рассуждением и доступом к инструментам (Bash, Read, Write, MCP)</td>
+      <td><strong>Рекомендованный дефолт</strong> для enterprise</td>
+      <td>«Найди утечку памяти и исправь»</td>
+    </tr>
+    <tr>
+      <td><strong>L3: Multi-agent Orchestration</strong></td>
+      <td>Несколько специализированных агентов с координацией</td>
+      <td>Когда L2 не справляется (сложность, безопасность, стоимость)</td>
+      <td>«Спроектируй архитектуру → реализуй → проверь → задеплой»</td>
+    </tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Ключевое правило:</strong> Начинай с L2. Переходи на L3 только когда single-agent
+    не справляется. Multi-agent потребляет ~15x больше токенов — это не «бесплатное улучшение»,
+    а осознанный трейд-офф.</span>
+  </div>
+
+  <p style="font-size:0.9em; color:var(--text-muted);">
+    <strong>Источник:</strong> Microsoft Azure Architecture Center, «AI Agent Orchestration Patterns», May 2026.
+    Подтверждено Princeton NLP: single-agent сравнялся или превзошёл multi-agent в 64% бенчмарков.
+  </p>
+
+  <hr class="hr-dashed">
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- 2. ПЯТЬ ФУНДАМЕНТАЛЬНЫХ ПАТТЕРНОВ             -->
+  <!-- ════════════════════════════════════════════════ -->
+  <h2 id="patterns"><span class="emoji">🏗️</span> Пять фундаментальных паттернов (Anthropic)</h2>
+
+  <p>
+    Anthropic в декабре 2024 опубликовали статью «Building Effective Agents», где выделили
+    <strong>пять базовых workflow-паттернов</strong>. Это фундамент — все multi-agent системы
+    собираются из этих блоков как из кирпичиков.
+  </p>
+
+  <!-- 2.1 Prompt Chaining -->
+  <h3>1️⃣ Prompt Chaining — линейная цепочка</h3>
+
+  <div class="card card-green">
+    <p><strong>Суть:</strong> Каждый LLM-вызов обрабатывает результат предыдущего.
+    Как конвейер: шаг A → шаг B → шаг C.</p>
+  </div>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    A["🧩 Шаг 1<br>Генерация тестов"] -->|"результат"| B["🧩 Шаг 2<br>Прогон тестов"]
+    B -->|"результат"| C["🧩 Шаг 3<br>Анализ покрытия"]
+    C -->|"результат"| D["✅ Отчёт"]
+    style A fill:#f0fff4,stroke:#2e7d32,stroke-width:1px
+    style B fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    style C fill:#fff3e0,stroke:#e65100,stroke-width:1px
+    style D fill:#f8f4ff,stroke:#6c5ce7,stroke-width:1px
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Когда использовать</th><th>Примеры</th></tr>
+    <tr>
+      <td>Задачи с чёткими фиксированными шагами, где каждый шаг — ворота для следующего</td>
+      <td>
+        • Генерация тестов → прогон → отчёт<br>
+        • Сборка → деплой на staging → smoke test → деплой в прод<br>
+        • Checkstyle → юнит-тесты → интеграционные тесты
+      </td>
+    </tr>
+  </table>
+
+  <div class="card card-orange">
+    <h3>2️⃣ Routing — маршрутизация</h3>
+    <p><strong>Суть:</strong> Классификатор определяет тип задачи и направляет к специализированному обработчику.</p>
+  </div>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    Q["❓ Запрос"] --> CLASS{"Классификатор"}
+    CLASS -->|"баг"| B["🐛 Bug Fixer"]
+    CLASS -->|"фича"| F["✨ Feature Agent"]
+    CLASS -->|"рефакторинг"| R["🔧 Refactor Agent"]
+    CLASS -->|"документация"| D["📝 Writer Agent"]
+    style Q fill:#f8f4ff,stroke:#6c5ce7,stroke-width:2px
+    style CLASS fill:#fffff0,stroke:#f0e68c,stroke-width:2px
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Когда использовать</th><th>Примеры</th></tr>
+    <tr>
+      <td>Разные типы запросов требуют разных подходов</td>
+      <td>
+        • Тикеты: баг / фича / улучшение → разные агенты<br>
+        • Вопросы:代码 / архитектура / процессы → разные эксперты<br>
+        • Pull Request: bugfix / feature / refactoring → разные ревьюверы
+      </td>
+    </tr>
+  </table>
+
+  <div class="card card-purple">
+    <h3>3️⃣ Parallelization — параллельная работа</h3>
+    <p><strong>Суть:</strong> Агенты работают одновременно (разделение задачи или голосование).</p>
+  </div>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph SECTION["Разделение задачи"]
+        TASK["🔥 Задача"] --> A["Агент 1<br>фронтенд"]
+        TASK --> B["Агент 2<br>бэкенд"]
+        TASK --> C["Агент 3<br>тесты"]
+        A --> MERGE["🧬 Сборка"]
+        B --> MERGE
+        C --> MERGE
+    end
+    subgraph VOTE["Голосование"]
+        Q2["❓ Вопрос"] --> V1["Агент A"]
+        Q2 --> V2["Агент B"]
+        Q2 --> V3["Агент C"]
+        V1 --> RES{"Консенсус<br>большинства"}
+        V2 --> RES
+        V3 --> RES
+    end
+    style TASK fill:#f0fff4,stroke:#2e7d32,stroke-width:1px
+    style Q2 fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Режим</th><th>Когда использовать</th><th>Пример</th></tr>
+    <tr>
+      <td><strong>Разделение</strong></td>
+      <td>Подзадачи независимы и могут выполняться параллельно</td>
+      <td>Реализация фронта, бэка и тестов одновременно</td>
+    </tr>
+    <tr>
+      <td><strong>Голосование</strong></td>
+      <td>Нужен консенсус для критичных решений</td>
+      <td>Три архитектора оценивают подход → берём лучший</td>
+    </tr>
+  </table>
+
+  <div class="card card-blue">
+    <h3>4️⃣ Orchestrator-Workers — оркестратор и воркеры ⭐</h3>
+    <p><strong>Суть:</strong> Центральный оркестратор анализирует задачу, порождает специализированных
+    воркеров и синтезирует результат. <strong>Основной паттерн для coding-инструментов по Anthropic.</strong></p>
+  </div>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TB
+    ORCH["🎯 Оркестратор<br>анализирует задачу"]
+    ORCH -->|"декомпозиция"| W1["👷 Воркер 1<br>пишет код"]
+    ORCH -->|"декомпозиция"| W2["👷 Воркер 2<br>пишет тесты"]
+    ORCH -->|"декомпозиция"| W3["👷 Воркер 3<br>пишет документацию"]
+    W1 --> SYNTH["🧬 Синтез<br>результатов"]
+    W2 --> SYNTH
+    W3 --> SYNTH
+    SYNTH -->|"итог"| ORCH
+    ORCH -->|"нужны правки?"| W1
+    ORCH -->|"нужны правки?"| W2
+    style ORCH fill:#f8f4ff,stroke:#6c5ce7,stroke-width:2px
+    style SYNTH fill:#f0fff4,stroke:#2e7d32,stroke-width:1px
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Когда использовать</th><th>Примеры</th></tr>
+    <tr>
+      <td>
+        Сложные задачи, где заранее неизвестно, сколько воркеров понадобится и какие именно
+      </td>
+      <td>
+        • Реализация фичи: анализ → кодинг → тесты → документация<br>
+        • Исследование: веерный поиск → чтение → верификация → отчёт<br>
+        • Рефакторинг: поиск мест → правка → проверка совместимости
+      </td>
+    </tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">🔥</span>
+    <span><strong>Это наш основной паттерн.</strong> Deep Research workflow (scout → read → verify → synthesize)
+    и openspec-manager (propose → apply → sync → archive) — оба реализуют Orchestrator-Workers.
+    Именно эту архитектуру использует Anthropic в своей production multi-agent research системе
+    (<a href="https://anthropic.com/engineering/built-multi-agent-research-system" target="_blank">Anthropic Engineering Blog</a>).</span>
+  </div>
+
+  <div class="card card-red">
+    <h3>5️⃣ Evaluator-Optimizer — генератор + оценщик в цикле</h3>
+    <p><strong>Суть:</strong> Один агент генерирует, другой оценивает. Цикл до достижения качества.</p>
+  </div>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    GEN["🎨 Генератор"] -->|"вариант"| EVAL{"🧐 Оценщик"}
+    EVAL -->|"принято"| DONE["✅ Готово"]
+    EVAL -->|"нужны правки"| FEED["📋 Фидбек"]
+    FEED --> GEN
+    style GEN fill:#fff3e0,stroke:#e65100,stroke-width:1px
+    style EVAL fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style DONE fill:#f0fff4,stroke:#2e7d32,stroke-width:1px
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Когда использовать</th><th>Примеры</th></tr>
+    <tr>
+      <td>Задачи с множественными критериями качества, где нужна итерация</td>
+      <td>
+        • Архитектурные дебаты (у нас — innovator vs pragmatist vs conservative)<br>
+        • Юридические документы — генерация → проверка → доработка<br>
+        • Переводы — перевод → верификация носителем → корректировка<br>
+        • Code review — код → ревью → исправление
+      </td>
+    </tr>
+  </table>
+
+  <div class="card card-purple">
+    <h3>Сводная таблица паттернов</h3>
+    <table>
+      <tr><th>Паттерн</th><th>Сложность</th><th>Когда выбирать</th></tr>
+      <tr><td><strong>Prompt Chaining</strong></td><td>🟢 Низкая</td><td>Шаги строго последовательны и зависимы</td></tr>
+      <tr><td><strong>Routing</strong></td><td>🟡 Средняя</td><td>Разные типы запросов → разные обработчики</td></tr>
+      <tr><td><strong>Parallelization</strong></td><td>🟡 Средняя</td><td>Независимые подзадачи или нужен консенсус</td></tr>
+      <tr><td><strong>Orchestrator-Workers</strong></td><td>🔴 Высокая</td><td>Сложные задачи с неизвестным заранее набором подзадач</td></tr>
+      <tr><td><strong>Evaluator-Optimizer</strong></td><td>🔴 Высокая</td><td>Критичное качество, множественные критерии</td></tr>
+    </table>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- 3. ПЯТЬ ПАТТЕРНОВ MICROSOFT AZURE             -->
+  <!-- ════════════════════════════════════════════════ -->
+  <h2 id="azure"><span class="emoji">☁️</span> Пять паттернов multi-agent оркестрации (Microsoft Azure)</h2>
+
+  <p>
+    Если Anthropic описывает <em>фундаментальные строительные блоки</em>, то Microsoft Azure
+    — <em>готовые архитектурные решения</em> для multi-agent. Они строятся поверх тех же пяти паттернов.
+  </p>
+
+  <table>
+    <tr>
+      <th>Паттерн Azure</th>
+      <th>Аналог у Anthropic</th>
+      <th>Суть</th>
+    </tr>
+    <tr>
+      <td><span class="tag tag-green">Sequential</span></td>
+      <td>Prompt Chaining</td>
+      <td>Агенты в предопределённом линейном порядке. Пример: генерация контракта (шаблон → пункты → compliance → риски)</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-blue">Concurrent</span></td>
+      <td>Parallelization</td>
+      <td>Параллельные агенты на одной задаче с агрегацией результатов</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-purple">Group Chat</span></td>
+      <td>—</td>
+      <td>Общий чат с координатором. Для брейншторминга и human-in-the-loop</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-orange">Handoff</span></td>
+      <td>Routing</td>
+      <td>Агенты динамически передают управление по контексту. Для customer support</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-red">Magentic</span></td>
+      <td>Orchestrator-Workers</td>
+      <td>Оркестратор с планированием (на базе AutoGen Magentic-One). Для сложных открытых задач</td>
+    </tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Практический совет:</strong> Групповой чат (Group Chat) — единственный паттерн,
+    который действительно сложен в реализации. Sequential и Concurrent — самые простые и надёжные.
+    Начинай с них.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- 4. ТИПЫ СПЕЦИАЛИЗИРОВАННЫХ АГЕНТОВ            -->
+  <!-- ════════════════════════════════════════════════ -->
+  <h2 id="types"><span class="emoji">🎭</span> Типы специализированных агентов</h2>
+
+  <p>
+    Из обзора индустрии (Anthropic, Microsoft, ExplainLLM, TeamDay.ai) вырисовывается
+    следующий набор типовых агентов:
+  </p>
+
+  <table>
+    <tr>
+      <th>Тип агента</th>
+      <th>Рекомендуемый паттерн</th>
+      <th>Что делает</th>
+    </tr>
+    <tr>
+      <td><strong>🎯 Оркестратор</strong></td>
+      <td><span class="tag tag-purple">Orchestrator-Workers</span></td>
+      <td>Анализирует задачу, декомпозирует, назначает воркеров, синтезирует результат</td>
+    </tr>
+    <tr>
+      <td><strong>💻 Coding Agent</strong></td>
+      <td><span class="tag tag-green">Single Agent with Tools</span></td>
+      <td>Пишет код по спецификации. Может иметь доступ к Bash, Read, Write, MCP</td>
+    </tr>
+    <tr>
+      <td><strong>🧪 Testing Agent</strong></td>
+      <td><span class="tag tag-green">Prompt Chaining</span></td>
+      <td>Генерирует тесты → запускает → анализирует покрытие → исправляет упавшие</td>
+    </tr>
+    <tr>
+      <td><strong>🔍 Code Review Agent</strong></td>
+      <td><span class="tag tag-orange">Evaluator-Optimizer</span></td>
+      <td>Ревьюит PR: баги, безопасность, стиль. С итерациями на доработку</td>
+    </tr>
+    <tr>
+      <td><strong>📝 Writer Agent</strong></td>
+      <td><span class="tag tag-green">Prompt Chaining</span></td>
+      <td>Документация по изменениям: README, CHANGELOG, докстринги</td>
+    </tr>
+    <tr>
+      <td><strong>🔬 Research Agent</strong></td>
+      <td><span class="tag tag-purple">Orchestrator-Workers</span></td>
+      <td>Ищет, читает, верифицирует, синтезирует отчёт</td>
+    </tr>
+    <tr>
+      <td><strong>🚀 Deploy Agent</strong></td>
+      <td><span class="tag tag-blue">Sequential</span></td>
+      <td>CI/CD: сборка → деплой → health check → rollback при ошибке</td>
+    </tr>
+    <tr>
+      <td><strong>🏛️ Architect Agent</strong></td>
+      <td><span class="tag tag-red">Evaluator-Optimizer</span></td>
+      <td>Проектирует архитектуру, оценивает риски, предлагает компромиссы</td>
+    </tr>
+  </table>
+
+  <div class="card card-teal">
+    <h3>Что есть у нас</h3>
+    <p>В нашей экосистеме уже есть:</p>
+    <table>
+      <tr><th>Агент</th><th>Тип</th><th>Паттерн</th></tr>
+      <tr><td><code>openspec-manager</code></td><td>🎯 Оркестратор</td><td>Orchestrator-Workers</td></tr>
+      <tr><td><code>innovator / pragmatist / conservative</code></td><td>🏛️ Архитекторы</td><td>Evaluator-Optimizer (дебаты)</td></tr>
+      <tr><td><code>writer-agent</code></td><td>📝 Писатель</td><td>Prompt Chaining</td></tr>
+      <tr><td><code>explorer</code></td><td>🔍 Поиск</td><td>Single Agent</td></tr>
+      <tr><td><code>claude-code-guide</code></td><td>💬 Q&A</td><td>Routing</td></tr>
+      <tr><td><code>statusline-setup</code></td><td>⚙️ Утилита</td><td>Single Agent</td></tr>
+    </tbody></table>
+    <p style="margin-top:12px;">
+      <strong>Чего не хватает:</strong> тестирующего агента, code review агента, deploy-агента.
+      У нас code review — скилл, а не агент. Тестирование — руками через Bash.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- 5. ТРИ СТОЛПА                                 -->
+  <!-- ════════════════════════════════════════════════ -->
+  <h2 id="pillars"><span class="emoji">🏛️</span> Три столпа agentic coding</h2>
+
+  <p>
+    По анализу Apiiro (цитируется TeamDay.ai), любая agentic-система держится на трёх столпах.
+    Если любой проседает — копится техдолг и уязвимости.
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph PILLARS["Три столпа agentic coding"]
+        A["🤖 Autonomy<br>автономность"] --- B["📚 Context<br>контекст"]
+        B --- C["🎛️ Control<br>контроль"]
+        C --- A
+    end
+    A -->|"принимает решения<br>без подтверждения"| DONE["✅ Быстро, но рискованно"]
+    B -->|"видит код, историю,<br>требования"| DONE2["✅ Качественно"]
+    C -->|"guardrails, лимиты,<br>безопасность"| DONE3["✅ Безопасно"]
+
+    style A fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style B fill:#f0fff4,stroke:#2e7d32,stroke-width:2px
+    style C fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Столп</th><th>Что даёт</th><th>Что ломается без него</th></tr>
+    <tr>
+      <td><strong>Autonomy</strong> 🤖</td>
+      <td>Агент сам решает, какие инструменты вызвать и в каком порядке</td>
+      <td>Микро-менеджмент: ты объясняешь каждый шаг — теряется смысл агента</td>
+    </tr>
+    <tr>
+      <td><strong>Context</strong> 📚</td>
+      <td>Агент видит код, историю коммитов, требования, архитектуру</td>
+      <td>Галлюцинации, неверные решения, дублирование усилий</td>
+    </tr>
+    <tr>
+      <td><strong>Control</strong> 🎛️</td>
+      <td>Guardrails: лимиты на файлы, команды, время. Человеческий контроль</td>
+      <td>Уязвимости, порча данных, неконтролируемые изменения</td>
+    </tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">📌</span>
+    <span><strong>У нас:</strong> Context — CLAUDE.md и все memory-файлы. Control — пермишены (allow/deny/ask).
+    Autonomy — агенты с permissionMode: auto. Все три столпа настроены осознанно.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- 6. ПАРАДОКС КОЛЛАБОРАЦИИ                      -->
+  <!-- ════════════════════════════════════════════════ -->
+  <h2 id="paradox"><span class="emoji">🎭</span> Парадокс коллаборации — AI в 60% работы, делегирование 0-20%</h2>
+
+  <p>
+    Anthropic Trends Report выявил интересную закономерность: разработчики используют AI в
+    <strong>~60% рабочего процесса</strong>, но полностью делегируют (без проверки каждой строки)
+    лишь <strong>0-20% задач</strong>.
+  </p>
+
+  <div class="card card-yellow">
+    <p><strong>Почему так?</strong> Это не недоверие к AI. Это осознанный выбор:</p>
+    <ul>
+      <li>Код, написанный AI, требует верификации — как код джуниора</li>
+      <li>Встраивание проверок на каждом этапе даёт лучшие результаты, чем тотальное доверие</li>
+      <li>Самые успешные кейсы (Rakuten — 7 часов автономной работы с верификацией результата) используют <strong>активный контроль</strong></li>
+    </ul>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Что это значит на практике</h3>
+    <p>Проектируй человеческий контроль, а не полную автономию:</p>
+    <ul>
+      <li>Встраивай точки проверки (review gates) на каждом этапе</li>
+      <li>Используй парадигму: <strong>Architect → Orchestrate → Test → Review</strong> (TeamDay.ai)</li>
+      <li>Агент делает черновик — человек утверждает направление — агент доделывает</li>
+      <li>Не пытайся автоматизировать всё — это путь к техдолгу</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- 7. ЭКОНОМИКА                                  -->
+  <!-- ════════════════════════════════════════════════ -->
+  <h2 id="economy"><span class="emoji">💰</span> Экономика и токены</h2>
+
+  <p>
+    Multi-agent системы потребляют <strong>примерно в 15 раз больше токенов</strong>, чем обычный чат
+    (Anthropic Engineering Blog). Использование токенов объясняет <strong>80% вариативности
+    производительности</strong> в бенчмарках (BrowseComp).
+  </p>
+
+  <div class="card card-orange">
+    <h3>Когда multi-agent оправдан экономически</h3>
+    <ul>
+      <li>Высокоценные задачи, где ошибка дороже токенов (архитектура, безопасность)</li>
+      <li>Задачи с активной параллелизацией (10 агентов за 5 минут дешевле, чем 1 агент за час)</li>
+      <li>Исследовательские задачи, где полнота важнее скорости (deep research)</li>
+    </ul>
+  </div>
+
+  <div class="card card-green">
+    <h3>Когда multi-agent НЕ оправдан</h3>
+    <ul>
+      <li>Простые задачи, которые решает один промпт</li>
+      <li>Задачи, где время ожидания важнее качества (перепиши этот текст)</li>
+      <li>Эксперименты «на всякий случай запущу 5 агентов»</li>
+    </ul>
+  </div>
+
+  <div class="card card-accent">
+    <h3>Наша ситуация</h3>
+    <p>Мы используем Deep Research (multi-agent workflow) для сложных исследований —
+    и один сеанс отъедает ~13k токенов на субагентов (как показала практика).
+    Для сравнения: обычная сессия — ~40k токенов на основной контекст.
+    Multi-agent реально в 2-3 раза дороже, не в 15, потому что мы не гоним все 20 агентов
+    последовательно — они работают параллельно в рамках одного workflow.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- 8. LONG-LIVED AGENTS                          -->
+  <!-- ════════════════════════════════════════════════ -->
+  <h2 id="long-lived"><span class="emoji">⏳</span> Долгоживущие агенты (Long-Lived Agents)</h2>
+
+  <p>
+    Anthropic Trends Report (тренд №5): горизонт задач агентов расширяется от минут
+    до <strong>дней и недель</strong>. Агенты больше не делают одноразовые запросы —
+    они живут в проекте.
+  </p>
+
+  <div class="card card-teal">
+    <h3>🔬 Кейс Rakuten</h3>
+    <p>Инженер Kenta Naruse поручил Claude Code реализовать метод извлечения activation vector
+    в репозиторий vLLM (<strong>12.5 млн строк кода</strong>).</p>
+    <p><strong>Результат:</strong> 7 часов автономной работы с точностью 99.9%.</p>
+    <p><em>«Я просто сказал, что нужно сделать, и периодически проверял прогресс»</em></p>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="num">500k</div>
+      <div class="label">Часов экономии TELUS</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">57k</div>
+      <div class="label">Сотрудников TELUS</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">2x</div>
+      <div class="label">Ускорение CRED</div>
+    </div>
+  </div>
+
+  <p>
+    Для нас это не просто кейсы — это модель. <strong>writer-agent</strong> получает задачу
+    «напиши документацию по изменениям» и выполняет её автономно.
+    <strong>openspec-manager</strong> ведёт фичу от спецификации до архивации.
+    Это те же long-lived agents, только в меньшем масштабе.
+  </p>
+
+  <hr class="hr-dashed">
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- 9. НАША ЭКОСИСТЕМА                           -->
+  <!-- ════════════════════════════════════════════════ -->
+  <h2 id="our"><span class="emoji">🧩</span> Наша экосистема с точки зрения best practices</h2>
+
+  <p>Давай честно сравним то, что у нас есть, с industry best practices.</p>
+
+  <h3>Что мы делаем правильно ✅</h3>
+  <ul>
+    <li><strong>Orchestrator-Workers</strong> — openspec-manager и deep-research workflow</li>
+    <li><strong>Evaluator-Optimizer</strong> — архитектурные дебаты (innovator / pragmatist / conservative)</li>
+    <li><strong>MCP isolation</strong> — серверы живут во frontmatter агентов, не засоряют контекст</li>
+    <li><strong>Context через CLAUDE.md</strong> — качество контекста важнее промптов</li>
+    <li><strong>Human-in-the-loop</strong> — permissionMode: auto с возможностью подтвердить или отклонить</li>
+  </ul>
+
+  <h3>Что можно улучшить 🔧</h3>
+  <ul>
+    <li><strong>Нет тестирующего агента</strong> — генерация и прогон тестов вручную через Bash</li>
+    <li><strong>Code Review — скилл, не агент</strong> — работает, но не имеет собственного контекста</li>
+    <li><strong>Нет deploy-агента</strong> — деплой wiki делается через Bash с инструкциями</li>
+    <li><strong>Нет commit-агента</strong> — коммиты пишутся вручную (или через меня)</li>
+    <li><strong>Prompt Chaining не выделен как паттерн</strong> — потенциально: tester-agent</li>
+  </ul>
+
+  <hr class="hr-dashed">
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- 10. BEST PRACTICES                            -->
+  <!-- ════════════════════════════════════════════════ -->
+  <h2 id="best-practices"><span class="emoji">✅</span> Best Practices — сводка</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>✅ Делай</h3>
+      <ul>
+        <li>Начинай с <strong>Single Agent with Tools</strong> (L2)</li>
+        <li>Переходи на multi-agent только когда L2 не справляется</li>
+        <li>Используй <strong>Orchestrator-Workers</strong> для coding-задач</li>
+        <li>Инвестируй в качество CLAUDE.md и контекста</li>
+        <li>Проектируй review gates на каждом этапе</li>
+        <li>Изолируй MCP-серверы во frontmatter агентов</li>
+        <li>Измеряй cost-per-task, не только скорость</li>
+      </ul>
+    </div>
+
+    <div class="card card-red">
+      <h3>❌ Не делай</h3>
+      <ul>
+        <li>Не строй multi-agent «на всякий случай»</li>
+        <li>Не верь маркетингу «multi-agent — единственное будущее»</li>
+        <li>Не давай агентам полную автономию без guardrails</li>
+        <li>Не игнорируй стоимость токенов</li>
+        <li>Не микроменеджь агента — дай ему autonomy</li>
+        <li>Не пиши длинные промпты — лучше улучши CLAUDE.md</li>
+        <li>Не пытайся автоматизировать всё — 0-20% делегирования норма</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card card-accent">
+    <h3>📋 Рекомендуемая архитектура для разработки</h3>
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+flowchart TB
+    SUBJ["📝 Задача"] --> ORCH["🎯 Оркестратор<br>openspec-manager"]
+    ORCH -->|"spec"| CODE["💻 Coding Agent<br>(Claude Code)"]
+    ORCH -->|"тесты"| TEST["🧪 Testing Agent<br>❗у нас нет"]
+    ORCH -->|"ревью"| REVIEW["🔍 Code Review Agent<br>пока скилл"]
+    ORCH -->|"доки"| WRITER["📝 Writer Agent<br>✅ есть"]
+    ORCH -->|"деплой"| DEPLOY["🚀 Deploy Agent<br>❗у нас нет"]
+    ORCH -->|"архитектура"| ARCH["🏛️ Architect Debate<br>✅ innovator/pragmatist/conservative"]
+
+    style SUBJ fill:#f8f4ff,stroke:#6c5ce7,stroke-width:1px
+    style ORCH fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style TEST fill:#ffebee,stroke:#c62828,stroke-width:1px
+    style DEPLOY fill:#ffebee,stroke:#c62828,stroke-width:1px
+    style REVIEW fill:#fff3e0,stroke:#e65100,stroke-width:1px
+    </div>
+    </div>
+    <p style="margin-top:12px;">
+      Красным — что стоит добавить. Всё остальное у нас уже есть.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- ВЫВОДЫ -->
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Индустрия движется к <strong>Orchestrator-Workers</strong> как основному паттерну
+      для coding-задач. Multi-agent не заменяет single-agent, а дополняет его.
+      Начинай с малого (L2), добавляй сложность только когда оправдано.
+      Инвестируй в контекст, а не в промпты.
+      Проектируй человеческий контроль — и не пытайся автоматизировать всё.
+    </p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Источники</h3>
+    <ol style="font-size:0.9em;">
+      <li>Anthropic — <a href="https://resources.anthropic.com/hubfs/2026+Agentic+Coding+Trends+Report.pdf" target="_blank">2026 Agentic Coding Trends Report</a> (January 2026)</li>
+      <li>Microsoft Azure — <a href="https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns" target="_blank">AI Agent Orchestration Patterns</a> (May 2026)</li>
+      <li>TeamDay.ai — <a href="https://teamday.ai/blog/complete-guide-agentic-coding-2026" target="_blank">The Complete Guide to Agentic Coding in 2026</a> (February 2026)</li>
+      <li>Anthropic Engineering Blog — <a href="https://anthropic.com/engineering/built-multi-agent-research-system" target="_blank">How we built our multi-agent research system</a> (June 2025)</li>
+      <li>ExplainLLM — <a href="https://explainllm.ru/ru/applications/agentic-coding" target="_blank">Agentic Coding: AI-агенты, которые пишут, тестируют и исправляют код</a></li>
+      <li>Anthropic — <a href="https://docs.anthropic.com/en/docs/build-with-claude/agentic" target="_blank">Building Effective Agents</a> (December 2024)</li>
+    </ol>
+  </div>
+
+  <footer class="footer">
+    Создано <strong>writer-agent</strong> через Workflow tool.
+    <br>Актуально на 2026-06-17.
+    <br><a href="../../index.html">Назад к вики</a>
+  </footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  })
+</script>
+</body>
+</html>

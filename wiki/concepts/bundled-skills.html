@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Базовые скиллы Claude Code — шпаргалка</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .skill-cmd {
+      font-weight: 700;
+      color: var(--accent);
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    .skill-emoji {
+      font-size: 1.3em;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .group-label {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      font-weight: 600;
+    }
+
+    .group-code { background: #e8f5e9; color: #2e7d32; }
+    .group-run { background: #e3f2fd; color: #1565c0; }
+    .group-research { background: #f3e5f5; color: #7b1fa2; }
+    .group-util { background: #fff3e0; color: #e65100; }
+    .group-config { background: #fce4ec; color: #c62828; }
+
+    .vs-table td:first-child {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .tag-bundled {
+      display: inline-block;
+      background: var(--accent-light);
+      color: var(--accent);
+      border: 1px solid #c6ddf8;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tag-custom {
+      display: inline-block;
+      background: #f8f4ff;
+      color: var(--purple);
+      border: 1px solid #d5c4f0;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 0.82em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a href="../../index.html" class="back-link">← Назад к вики</a>
+
+  <h1>⚡ Базовые скиллы Claude Code</h1>
+  <p class="subtitle">Шпаргалка по всем встроенным скиллам — что делают, когда вызывать и чем отличаются</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое скиллы?</a></li>
+      <li><a href="#all">Все базовые скиллы — полная таблица</a></li>
+      <li><a href="#groups">Группировка по назначению</a></li>
+      <li><a href="#vs-code-review-vs-review">/code-review vs /review — в чём разница?</a></li>
+      <li><a href="#our-skills">Наши скиллы (OpenSpec)</a></li>
+      <li><a href="#tips">Лайфхаки по использованию</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ СКИЛЛЫ -->
+  <h2 id="what"><span class="emoji">🧩</span> Что такое скиллы?</h2>
+
+  <p>
+    Скиллы — это <strong>готовые инструкции</strong>, которые Claude Code умеет выполнять.
+    Они вызываются через <code>/имя-скилла</code> прямо в чате и работают как встроенные команды.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> Скиллы — это не тулы и не расширения. Это <strong>промпты</strong>,
+    которые говорят Claude: «сделай то-то, вот тебе инструкция». Они уже встроены в Claude Code —
+    ничего ставить не надо. Просто напиши <code>/code-review</code> и готово.</p>
+  </div>
+
+  <p>Есть два типа скиллов:</p>
+
+  <ul>
+    <li><span class="tag-bundled">базовые</span> — от Anthropic, встроены «из коробки»</li>
+    <li><span class="tag-custom">кастомные</span> — пишем сами, кладём в <code>~/.claude/skills/</code></li>
+  </ul>
+
+  <p>Все базовые скиллы описаны в таблице ниже. Кастомные — отдельная тема (про OpenSpec расскажем в конце).</p>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ПОЛНАЯ ТАБЛИЦА -->
+  <h2 id="all"><span class="emoji">📋</span> Все базовые скиллы</h2>
+
+  <div style="overflow-x: auto;">
+  <table>
+    <tr>
+      <th>Скилл</th>
+      <th></th>
+      <th>Что делает</th>
+      <th>Когда вызывать</th>
+      <th>Группа</th>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/code-review</span></td>
+      <td><span class="skill-emoji">🔍</span></td>
+      <td>Проверяет текущие изменения на баги, проблемы безопасности, стиль</td>
+      <td>Перед коммитом, когда хочешь быстрый взгляд на diff</td>
+      <td><span class="group-label group-code">Код и ревью</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/review</span></td>
+      <td><span class="skill-emoji">👁️</span></td>
+      <td>Полноценное ревью PR (может постить комментарии в GitHub)</td>
+      <td>Когда готов отправить PR и нужен полный разбор</td>
+      <td><span class="group-label group-code">Код и ревью</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/simplify</span></td>
+      <td><span class="skill-emoji">🧹</span></td>
+      <td>Упрощает код, убирает дублирование</td>
+      <td>После того как написал — пробежаться и причесать</td>
+      <td><span class="group-label group-code">Код и ревью</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/security-review</span></td>
+      <td><span class="skill-emoji">🛡️</span></td>
+      <td>Аудит безопасности текущих изменений</td>
+      <td>Для sensitive-кода: auth, payments, API keys</td>
+      <td><span class="group-label group-code">Код и ревью</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/debug</span></td>
+      <td><span class="skill-emoji">🐛</span></td>
+      <td>Анализирует ошибки, помогает дебажить</td>
+      <td>Когда упали тесты или странное поведение</td>
+      <td><span class="group-label group-util">Утилиты</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/batch</span></td>
+      <td><span class="skill-emoji">📦</span></td>
+      <td>Обрабатывает несколько запросов за раз</td>
+      <td>Когда нужно сделать однотипные операции на многих файлах</td>
+      <td><span class="group-label group-util">Утилиты</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/loop</span></td>
+      <td><span class="skill-emoji">🔄</span></td>
+      <td>Повторяет задачу по расписанию</td>
+      <td>Мониторинг деплоя, проверка CI</td>
+      <td><span class="group-label group-util">Утилиты</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/claude-api</span></td>
+      <td><span class="skill-emoji">📖</span></td>
+      <td>Справка по Claude API</td>
+      <td>Когда забыл параметры API</td>
+      <td><span class="group-label group-research">Поиск и исследования</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/run</span></td>
+      <td><span class="skill-emoji">▶️</span></td>
+      <td>Запускает приложение (определяет как сам)</td>
+      <td>Хочешь увидеть что получилось</td>
+      <td><span class="group-label group-run">Запуск и проверка</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/verify</span></td>
+      <td><span class="skill-emoji">✅</span></td>
+      <td>Проверяет что изменение работает в живом приложении</td>
+      <td>После фикса бага — убедиться что починил</td>
+      <td><span class="group-label group-run">Запуск и проверка</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/run-skill-generator</span></td>
+      <td><span class="skill-emoji">🏗️</span></td>
+      <td>Учит <code>/run</code> как правильно запускать твой проект</td>
+      <td>Один раз на проект, если <code>/run</code> не угадал</td>
+      <td><span class="group-label group-run">Запуск и проверка</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/deep-research</span></td>
+      <td><span class="skill-emoji">🎓</span></td>
+      <td>Фанаут-поиск по интернету с верификацией</td>
+      <td>Нужна достоверная информация с источниками</td>
+      <td><span class="group-label group-research">Поиск и исследования</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/init</span></td>
+      <td><span class="skill-emoji">🚀</span></td>
+      <td>Создаёт <code>CLAUDE.md</code> для проекта</td>
+      <td>Когда начинаешь новый проект</td>
+      <td><span class="group-label group-config">Настройка</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/update-config</span></td>
+      <td><span class="skill-emoji">⚙️</span></td>
+      <td>Помогает настроить <code>settings.json</code></td>
+      <td>Когда нужно что-то поменять в конфиге</td>
+      <td><span class="group-label group-config">Настройка</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/fewer-permission-prompts</span></td>
+      <td><span class="skill-emoji">🤫</span></td>
+      <td>Оптимизирует разрешения, чтобы меньше дёргать</td>
+      <td>Когда достали постоянные запросы подтверждения</td>
+      <td><span class="group-label group-config">Настройка</span></td>
+    </tr>
+    <tr>
+      <td><span class="skill-cmd">/keybindings-help</span></td>
+      <td><span class="skill-emoji">⌨️</span></td>
+      <td>Показывает и настраивает шорткаты</td>
+      <td>Когда хочешь настроить клавиатуру</td>
+      <td><span class="group-label group-config">Настройка</span></td>
+    </tr>
+  </table>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span>Скиллы — это <strong>не слэш-команды терминала</strong>. Это команды, которые ты пишешь
+    прямо в чате Claude Code. Набери <code>/</code> и увидишь автодополнение со всеми доступными скиллами.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ГРУППИРОВКА -->
+  <h2 id="groups"><span class="emoji">🗂️</span> Группировка по назначению</h2>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph code["🔍 Код и ревью"]
+        direction TB
+        CR["/code-review<br><small>быстрый diff</small>"]
+        R["/review<br><small>полное PR-ревью</small>"]
+        S["/simplify<br><small>рефакторинг</small>"]
+        SR["/security-review<br><small>аудит</small>"]
+    end
+
+    subgraph run["▶️ Запуск и проверка"]
+        direction TB
+        RUN["/run<br><small>запуск приложения</small>"]
+        V["/verify<br><small>проверка фикса</small>"]
+        RSG["/run-skill-generator<br><small>обучение /run</small>"]
+    end
+
+    subgraph search["🎓 Поиск и исследования"]
+        direction TB
+        DR["/deep-research<br><small>поиск в интернете</small>"]
+        API["/claude-api<br><small>справка API</small>"]
+    end
+
+    subgraph util["📦 Утилиты"]
+        direction TB
+        B["/batch<br><small>пакетная обработка</small>"]
+        D["/debug<br><small>дебаг ошибок</small>"]
+        L["/loop<br><small>по расписанию</small>"]
+    end
+
+    subgraph config["⚙️ Настройка"]
+        direction TB
+        I["/init<br><small>CLAUDE.md</small>"]
+        UC["/update-config<br><small>настройки</small>"]
+        FP["/fewer-permission-prompts<br><small>разрешения</small>"]
+        KB["/keybindings-help<br><small>шорткаты</small>"]
+    end
+
+    style code fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style run fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style search fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style util fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style config fill:#fce4ec,stroke:#c62828,stroke-width:2px
+    </div>
+  </div>
+
+  <h3>🔍 Код и ревью</h3>
+  <div class="card card-green">
+    <p>Вся работа с кодом: проверка, ревью, упрощение, аудит безопасности. Основные «рабочие лошадки».</p>
+    <ul>
+      <li><code>/code-review</code> — быстрый, на уровне диффа</li>
+      <li><code>/review</code> — глубокий, с контекстом всего PR</li>
+      <li><code>/simplify</code> — причесывает код после написания</li>
+      <li><code>/security-review</code> — находит уязвимости в чувствительном коде</li>
+    </ul>
+  </div>
+
+  <h3>▶️ Запуск и проверка</h3>
+  <div class="card card-accent">
+    <p>Всё, что связано с запуском приложения и проверкой результатов:</p>
+    <ul>
+      <li><code>/run</code> — запускает проект (сам определяет команду)</li>
+      <li><code>/verify</code> — проверяет, что фикс реально работает</li>
+      <li><code>/run-skill-generator</code> — обучает <code>/run</code> твоему проекту (разовый setup)</li>
+    </ul>
+  </div>
+
+  <h3>🎓 Поиск и исследования</h3>
+  <div class="card card-purple">
+    <p>Когда нужна информация извне:</p>
+    <ul>
+      <li><code>/deep-research</code> — глубокий поиск с верификацией источников</li>
+      <li><code>/claude-api</code> — быстрая справка по API Claude</li>
+    </ul>
+  </div>
+
+  <h3>📦 Утилиты</h3>
+  <div class="card card-orange">
+    <p>Помощники для рутинных задач:</p>
+    <ul>
+      <li><code>/batch</code> — пакетная обработка (много файлов за раз)</li>
+      <li><code>/debug</code> — анализ ошибок и дебаг</li>
+      <li><code>/loop</code> — повторение по расписанию</li>
+    </ul>
+  </div>
+
+  <h3>⚙️ Настройка</h3>
+  <div class="card card-red">
+    <p>Настройка самого Claude Code и его поведения:</p>
+    <ul>
+      <li><code>/init</code> — генерация <code>CLAUDE.md</code> для нового проекта</li>
+      <li><code>/update-config</code> — редактирование <code>settings.json</code></li>
+      <li><code>/fewer-permission-prompts</code> — меньше запросов «можно?»</li>
+      <li><code>/keybindings-help</code> — настройка горячих клавиш</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. /code-review vs /review -->
+  <h2 id="vs-code-review-vs-review"><span class="emoji">⚔️</span> /code-review vs /review — в чём разница?</h2>
+
+  <p>Это два самых частых скилла, и их легко путают. Вот чёткое сравнение:</p>
+
+  <div style="overflow-x: auto;">
+  <table class="vs-table">
+    <tr>
+      <th></th>
+      <th><span class="skill-cmd">/code-review</span> 🔍</th>
+      <th><span class="skill-cmd">/review</span> 👁️</th>
+    </tr>
+    <tr>
+      <td>Что смотрит</td>
+      <td>Текущий diff (незакоммиченные изменения)</td>
+      <td>Весь PR целиком + контекст проекта</td>
+    </tr>
+    <tr>
+      <td>Глубина</td>
+      <td>Быстрый взгляд — баги, стиль, очевидные проблемы</td>
+      <td>Полноценное ревью — архитектура, паттерны, тесты</td>
+    </tr>
+    <tr>
+      <td>GitHub</td>
+      <td>Нет — только пишет в чат</td>
+      <td>Да — может постить комментарии прямо в PR</td>
+    </tr>
+    <tr>
+      <td>Когда</td>
+      <td>Перед коммитом, «погляди на мой код»</td>
+      <td>Готов отправить PR, нужен формальный разбор</td>
+    </tr>
+    <tr>
+      <td>Аналогия</td>
+      <td>Коллега бегло смотрит экран</td>
+      <td>Формальный Code Review на GitHub</td>
+    </tr>
+  </table>
+  </div>
+
+  <div class="card card-green">
+    <strong>Простое правило:</strong><br>
+    🔍 <code>/code-review</code> = «глянь мой дифф перед коммитом»<br>
+    👁️ <code>/review</code> = «сделай полное ревью PR с комментариями в GitHub»
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. НАШИ СКИЛЛЫ -->
+  <h2 id="our-skills"><span class="emoji">🔧</span> Наши скиллы (OpenSpec)</h2>
+
+  <p>Помимо базовых, у нас есть <strong>кастомные скиллы</strong> — OpenSpec. Они живут в
+  <code>~/.claude/skills/</code> и работают по специальной методологии spec-driven разработки.</p>
+
+  <div class="card card-purple">
+    <h3>OpenSpec скиллы</h3>
+    <p>Это отдельная экосистема для управления процессом разработки через спеки:</p>
+    <ul>
+      <li><code>openspec-propose</code> — предложить изменение</li>
+      <li><code>openspec-apply</code> — применить спеку</li>
+      <li><code>openspec-sync</code> — синхронизировать</li>
+      <li><code>openspec-archive</code> — архивировать завершённое</li>
+      <li><code>openspec-explore</code> — исследовать кодовую базу</li>
+      <li><code>openspec-ff</code> — feature flag управление</li>
+      <li><code>openspec-new</code> — начать новый сценарий</li>
+      <li><code>openspec-continue</code> — продолжить работу</li>
+      <li><code>openspec-verify</code> — верифицировать результат</li>
+      <li><code>openspec-bulk-archive</code> — массовый архив</li>
+      <li><code>openspec-onboard</code> — онбординг нового разработчика</li>
+    </ul>
+    <p style="margin-top: 12px; color: var(--text-muted);">
+      Подробно про OpenSpec — в отдельной статье. Здесь просто знай, что они существуют.
+    </p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">💡</span>
+    <span><strong>Как отличить базовый от кастомного:</strong> Набери <code>/</code> в чате — автодополнение
+    покажет все доступные скиллы. Базовые помечены как built-in, кастомные — по имени файла из
+    <code>~/.claude/skills/</code>.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. ЛАЙФХАКИ -->
+  <h2 id="tips"><span class="emoji">🎯</span> Лайфхаки по использованию</h2>
+
+  <div class="card card-green">
+    <h3>1. Комбинация скиллов для полного цикла</h3>
+    <p>Идеальный workflow при работе с фичей:</p>
+    <div class="code-block">
+      <code><span class="yaml-comment"># 1. Написал код</span>
+/verify <span class="yaml-comment">→ убедился что работает</span>
+
+<span class="yaml-comment"># 2. Почистил</span>
+/simplify <span class="yaml-comment">→ убрал дубли, причесал</span>
+
+<span class="yaml-comment"># 3. Проверил</span>
+/code-review <span class="yaml-comment">→ быстрый взгляд перед коммитом</span>
+
+<span class="yaml-comment"># 4. Для важного кода</span>
+/security-review <span class="yaml-comment">→ если там auth, payments, API keys</span>
+
+<span class="yaml-comment"># 5. Коммит и PR</span>
+/review <span class="yaml-comment">→ полноценное ревью PR</span></code>
+    </div>
+  </div>
+
+  <div class="card card-orange">
+    <h3>2. /debug — первый друг при ошибке</h3>
+    <p>Когда тесты упали или пошло что-то странное — не пытайся разобраться сам.
+    Скинь ошибку Claude через <code>/debug</code>. Он проанализирует стектрейс, найдёт
+    связанные файлы и предложит фикс. Это быстрее, чем гуглить.</p>
+  </div>
+
+  <div class="card card-accent">
+    <h3>3. /batch для миграций</h3>
+    <p>Нужно поменять API-вызов в 50 файлах? <code>/batch</code> сделает это за раз.
+    Опиши паттерн «найти все вызовы <code>oldApi()</code> и заменить на <code>newApi()</code>» —
+    и Claude обработает всё.</p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>4. /run-skill-generator — настрой один раз</h3>
+    <p>Если <code>/run</code> не угадал, как запускать твой проект — вызови
+    <code>/run-skill-generator</code>. Он создаст инструкцию, и потом <code>/run</code>
+    будет знать как запускать именно твой проект.</p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">⚡</span>
+    <span><strong>Автодополнение — твой друг.</strong> Просто набери <code>/</code> в чате и
+    Claude покажет все доступные скиллы. Не надо запоминать названия — достаточно начать вводить
+    и выбрать из списка.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> 16 базовых скиллов — от быстрого <code>/code-review</code>
+      до глубокого <code>/deep-research</code>. Они уже встроены, ничего ставить не надо.
+      Просто набери <code>/</code> и выбери нужный. 🚀
+    </p>
+  </div>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вердикт: Нужен ли архитектурный отдел?</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --surface: #ffffff;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #656d76;
+      --accent: #0969da;
+      --accent-light: #ddf4ff;
+      --green: #1a7f37;
+      --green-light: #dafbe1;
+      --red: #cf222e;
+      --red-light: #ffebe9;
+      --yellow: #9a6700;
+      --yellow-light: #fff8c5;
+      --purple: #8250df;
+      --purple-light: #fbefff;
+      --innovator: #0969da;
+      --pragmatist: #1a7f37;
+      --conservative: #8250df;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    header .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    .meta-line {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 40px 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 24px 0 12px 0;
+    }
+
+    p, li {
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    p { margin-bottom: 12px; }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    /* Agent cards */
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .agent-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .agent-card .agent-name {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .agent-card .agent-model {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      font-family: monospace;
+    }
+
+    .agent-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .agent-card li {
+      padding: 4px 0;
+      font-size: 0.88rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .agent-card li:last-child { border-bottom: none; }
+
+    .agent-card.innovator { border-top: 3px solid var(--innovator); }
+    .agent-card.pragmatist { border-top: 3px solid var(--pragmatist); }
+    .agent-card.conservative { border-top: 3px solid var(--conservative); }
+
+    .agent-card.innovator .agent-name { color: var(--innovator); }
+    .agent-card.pragmatist .agent-name { color: var(--pragmatist); }
+    .agent-card.conservative .agent-name { color: var(--conservative); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) td { background: #fafbfc; }
+
+    /* Consensus / divergence */
+    .consensus-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .consensus-item:last-child { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-green { background: var(--green-light); color: var(--green); }
+    .badge-red { background: var(--red-light); color: var(--red); }
+
+    /* Meta block */
+    .meta-block {
+      background: linear-gradient(135deg, var(--purple-light), var(--accent-light));
+      border: 2px solid var(--purple);
+      border-radius: 12px;
+      padding: 28px;
+      margin: 32px 0;
+      position: relative;
+    }
+
+    .meta-block h2 {
+      color: var(--purple);
+      border: none;
+      margin-top: 0;
+      padding-bottom: 0;
+    }
+
+    .meta-block .irony {
+      font-size: 1.3rem;
+      font-style: italic;
+      color: var(--purple);
+      margin: 16px 0;
+      text-align: center;
+    }
+
+    .meta-block p {
+      font-size: 0.95rem;
+    }
+
+    /* Diagram wrapper */
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    /* Verdict box */
+    .verdict {
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 28px;
+      margin: 32px 0;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .verdict h2 {
+      color: var(--accent);
+      border: none;
+      margin-top: 0;
+      padding-bottom: 0;
+    }
+
+    .verdict ol {
+      padding-left: 20px;
+      margin: 16px 0;
+    }
+
+    .verdict li {
+      margin-bottom: 8px;
+    }
+
+    footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .agents-grid { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.5rem; }
+      .container { padding: 24px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header>
+      <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>Вердикт: Нужен ли архитектурный отдел?</h1>
+      <p class="subtitle">Дебаты архитектурного совета &mdash; два раунда, три позиции, один итог</p>
+      <p class="meta-line">15 июня 2026 &middot; 3 архитектора &middot; 2 раунда &middot; 16 файлов обмена через .triage/</p>
+    </header>
+
+    <!-- Meta block -->
+    <div class="meta-block">
+      <h2>Meta: Ирония дебатов</h2>
+      <div class="irony">
+        "Три агента обсуждают, нужен ли архитектурный отдел&hellip; в котором они сами состоят."
+      </div>
+      <p>
+        Сам факт проведения дебатов &mdash; это уже аргумент в пользу совета. Агенты продемонстрировали
+        структурированное мышление, умение находить общие точки и корректировать позиции под давлением
+        аргументов. Они использовали Context7 для поиска, file-share для обмена файлами и выдали
+        три итерации позиций, которые конвергировали к consensus.
+      </p>
+      <p>
+        Если бы отдела не было &mdash; кто бы задал этот вопрос? И кто бы ответил?
+      </p>
+    </div>
+
+    <!-- Participants -->
+    <h2>Участники дебатов</h2>
+    <div class="agents-grid">
+      <div class="agent-card innovator">
+        <div class="agent-name">Innovator</div>
+        <div class="agent-model">minimax-m3</div>
+        <ul>
+          <li>Архитектура как поток, не как отдел</li>
+          <li>Распределённое мышление</li>
+          <li>CI-контроль вместо комитетов</li>
+          <li>Spec-driven &mdash; основа</li>
+        </ul>
+      </div>
+      <div class="agent-card pragmatist">
+        <div class="agent-name">Pragmatist</div>
+        <div class="agent-model">deepseek-v4-pro</div>
+        <ul>
+          <li>ROI отрицательный при 3 агентах</li>
+          <li>Один агент, 3 стадии</li>
+          <li>Триггер &mdash; только сложные задачи</li>
+          <li>Замер через месяц</li>
+        </ul>
+      </div>
+      <div class="agent-card conservative">
+        <div class="agent-name">Conservative</div>
+        <div class="agent-model">qwen3.7-plus</div>
+        <ul>
+          <li>Преждевременная бюрократизация</li>
+          <li>Паралич решений</li>
+          <li>Human-in-the-loop обязателен</li>
+          <li>Аудит &mdash; ежемесячно</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Diagram 1: Evolution of positions -->
+    <h2>1. Эволюция позиций: Round 1 &rarr; Round 2</h2>
+    <p>Как менялись позиции каждого архитектора после прочтения аргументов оппонентов:</p>
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart LR
+  subgraph IN ["Innovator (minimax-m3)"]
+    direction TB
+    I1["R1: Отдел — анахронизм.\nРаспределённая функция.\nКаждая команда = архитектор."]
+    I2["R2: Два агента\n(Proposer + Reviewer)\n+ Conservative как\nasync-чекер"]
+    I1 -->|"Смягчил:\nпринял триггер"| I2
+  end
+
+  subgraph PR ["Pragmatist (deepseek-v4-pro)"]
+    direction TB
+    P1["R1: ROI отрицательный.\n1 агент с 3 режимами.\nЗамена отдела целиком."]
+    P2["R2: 1 агент,\nно 3 стадии workflow:\nDiverge → Converge\n→ Decide"]
+    P1 -->|"Уточнил:\nрежимы → стадии"| P2
+  end
+
+  subgraph CO ["Conservative (qwen3.7-plus)"]
+    direction TB
+    C1["R1: Бюрократизация.\nПаралич решений.\nОтдел не нужен вообще."]
+    C2["R2: Можно, но с\nусловиями: триггер\n[arch], HITA, аудит"]
+    C1 -->|"Смягчил:\nпринял альтернативу"| C2
+  end
+
+  style IN fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+  style PR fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+  style CO fill:#fbefff,stroke:#8250df,stroke-width:2px
+      </pre>
+    </div>
+
+    <!-- Diagram 2: Debate sequence -->
+    <h2>2. Хронология дебатов</h2>
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+sequenceDiagram
+    box rgb(240,240,240) Initiation
+    participant U as User
+    end
+    box rgb(221,244,255) Round 1 — Открытые позиции
+    participant I1 as Innovator
+    participant P1 as Pragmatist
+    participant C1 as Conservative
+    end
+    box rgb(218,251,225) Round 2 — Rebuttal
+    participant I2 as Innovator
+    participant P2 as Pragmatist
+    participant C2 as Conservative
+    end
+    box rgb(251,239,255) Синтез
+    participant S as Вердикт
+    end
+
+    U->>I1: Вопрос: нужен ли отдел?
+    U->>P1: Вопрос: нужен ли отдел?
+    U->>C1: Вопрос: нужен ли отдел?
+
+    par Innovator
+        I1-->>I1: "Отдел = анахронизм.\nРоль, не структура."
+    and Pragmatist
+        P1-->>P1: "ROI < 0. Один агент\nс 3 режимами."
+    and Conservative
+        C1-->>C1: "Бюрократизация.\nПаралич решений."
+    end
+
+    I1-->>U: "Распределённая архитектура"
+    P1-->>U: "Один режимный агент"
+    C1-->>U: "Один агент по требованию"
+
+    Note over I1,C1: Все трое против отдела. Разные альтернативы.
+
+    I2-->>I2: Читает P1, C1
+    P2-->>P2: Читает I1, C1
+    C2-->>C2: Читает I1, P1
+
+    I2-->>U: "Два агента + async-чекер"
+    P2-->>U: "Один агент, 3 стадии"
+    C2-->>U: "Можно, но с условиями"
+
+    Note over I2,C2: Конвергенция: общие точки сходятся.
+
+    S-->>S: "Департамент = нет.\nФункция = да. С триггером."
+      </pre>
+    </div>
+
+    <!-- Diagram 3: Final proposals comparison -->
+    <h2>3. Три итоговых предложения</h2>
+    <p>Каждый архитектор вынес финальное предложение. Общие черты выделены жирным:</p>
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart TD
+    Q["Вопрос:\nАрхитектурный отдел?"]
+
+    Q --> I["Innovator\n2 агента: Proposer + Reviewer\n+ Conservative async"]
+    Q --> P["Pragmatist\n1 агент, 3 стадии:\nDiverge → Converge → Decide"]
+    Q --> C["Conservative\n1 агент + человек-архитектор\nс правом вето"]
+
+    I -->|"Согласны все"| T1["Триггер [arch] или >3 файлов"]
+    P -->|"Согласны все"| T1
+    C -->|"Согласны все"| T1
+
+    I -->|"Согласны все"| T2["Writer — только по запросу"]
+    P -->|"Согласны все"| T2
+    C -->|"Согласны все"| T2
+
+    I -->|"Согласны все"| T3["Human-in-the-loop"]
+    P -->|"Согласны все"| T3
+    C -->|"Согласны все"| T3
+
+    I -->|"Согласны все"| T4["Spec-driven подход"]
+    P -->|"Согласны все"| T4
+    C -->|"Согласны все"| T4
+
+    T1 --> RESULT["Вердикт:\nНе отдел, а функция.\nТонкая прослойка\nбез бюрократии."]
+    T2 --> RESULT
+    T3 --> RESULT
+    T4 --> RESULT
+
+    style Q fill:#fff8c5,stroke:#9a6700,stroke-width:2px
+    style I fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style P fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style C fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style RESULT fill:#f6f8fa,stroke:#1f2328,stroke-width:3px
+    style T1 fill:#dafbe1,stroke:#1a7f37
+    style T2 fill:#dafbe1,stroke:#1a7f37
+    style T3 fill:#dafbe1,stroke:#1a7f37
+    style T4 fill:#dafbe1,stroke:#1a7f37
+      </pre>
+    </div>
+
+    <!-- Consensus and divergence table -->
+    <h2>4. Консенсус и расхождения</h2>
+
+    <h3>Общий консенсус (все трое согласны)</h3>
+    <div class="card">
+      <div class="consensus-item">
+        <span class="badge badge-green">CONSENSUS</span>
+        <span>Отдел из трёх отдельных агентов &mdash; избыточен для текущего масштаба</span>
+      </div>
+      <div class="consensus-item">
+        <span class="badge badge-green">CONSENSUS</span>
+        <span>Триггер по сложности обязателен: <code>[arch]</code> или >3 затронутых файлов</span>
+      </div>
+      <div class="consensus-item">
+        <span class="badge badge-green">CONSENSUS</span>
+        <span>Writer &mdash; только по запросу (<code>/doc</code>), не автоматически</span>
+      </div>
+      <div class="consensus-item">
+        <span class="badge badge-green">CONSENSUS</span>
+        <span>Человек с правом вето нужен (human-in-the-loop)</span>
+      </div>
+      <div class="consensus-item">
+        <span class="badge badge-green">CONSENSUS</span>
+        <span>Spec-driven подход &mdash; основа архитектурного мышления</span>
+      </div>
+      <div class="consensus-item">
+        <span class="badge badge-green">CONSENSUS</span>
+        <span>Замер эффективности через месяц пилота</span>
+      </div>
+    </div>
+
+    <h3>Точки расхождения</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Вопрос</th>
+          <th style="color:var(--innovator)">Innovator</th>
+          <th style="color:var(--pragmatist)">Pragmatist</th>
+          <th style="color:var(--conservative)">Conservative</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Формат</strong></td>
+          <td>2 агента (Proposer + Reviewer)</td>
+          <td>1 агент, 3 стадии workflow</td>
+          <td>1 агент + человек-архитектор</td>
+        </tr>
+        <tr>
+          <td><strong>Роль человека</strong></td>
+          <td>Не указана явно</td>
+          <td>Не нужен &mdash; агент покрывает</td>
+          <td>Обязателен: арбитр, аудит, вето</td>
+        </tr>
+        <tr>
+          <td><strong>Разнообразие</strong></td>
+          <td>Разные модели = разные слепые пятна</td>
+          <td>Один LLM, 3 промпта внутри</td>
+          <td>Агент + человек = гарантированное разнообразие</td>
+        </tr>
+        <tr>
+          <td><strong>Риск</strong></td>
+          <td>Фрагментация без лидера</td>
+          <td>Залипание в одном режиме</td>
+          <td>Человеческий фактор: не поставит тег</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Diagram 4: The irony -->
+    <h2>5. Архитектура совета: irony.exe</h2>
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart TB
+    A["Три агента получают запрос:\n'Нужен ли архитектурный отдел?'"]
+    A --> B["Innovator: 'Отдел не нужен.\nФункция — да.'"]
+    A --> C["Pragmatist: 'Отдел — убыток.\n1 агент хватит.'"]
+    A --> D["Conservative: 'Бюрократизация.\nНе делайте этого.'"]
+
+    B --> E{"Все трое\nотвечают 'НЕТ'"}
+    C --> E
+    D --> E
+
+    E --> F["Ирония: для этого ответа\nпотребовался архитектурный совет"]
+    F --> G["Вывод: совет доказал\nсвою ценность тем,\nчто его провели"]
+    F --> H["Meta: если бы совета не было —\nникто бы не задал вопрос,\nникто бы не дал ответ"]
+
+    G --> I["Вердикт:\nОтдел — нет.\nФункция — да.\nСам факт дебатов — лучшая реклама."]
+
+    style A fill:#fff8c5,stroke:#9a6700,stroke-width:2px
+    style E fill:#ffebe9,stroke:#cf222e,stroke-width:2px
+    style F fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style G fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style H fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style I fill:#f6f8fa,stroke:#1f2328,stroke-width:3px
+      </pre>
+    </div>
+
+    <!-- Final verdict -->
+    <div class="verdict">
+      <h2>Итоговый вердикт</h2>
+      <p>
+        Архитектурный отдел в классическом понимании (комитет из трёх агентов + Writer)
+        <strong>не нужен</strong>. Все три участника пришли к этому выводу независимо.
+      </p>
+      <p>Но архитектурная функция &mdash; нужна. Итоговая рекомендация:</p>
+
+      <ol>
+        <li>
+          <strong>Один субагент-архитектор</strong> с three-stage workflow (Diverge &rarr; Converge &rarr; Decide)
+          &mdash; компромисс Pragmatist'а, принятый Innovator'ом и Conservative'ом.
+        </li>
+        <li>
+          <strong>Триггер <code>[arch]</code></strong> или >3 изменённых файлов. 80% задач проходят мимо.
+        </li>
+        <li>
+          <strong>Человек с правом вето</strong> (архитектор-роль, не комитет). Кросс-командные споры, аудит, стандарты.
+        </li>
+        <li>
+          <strong>Writer по запросу</strong> (<code>/doc</code>), не автоматически.
+        </li>
+        <li>
+          <strong>Пилот 1 месяц</strong>, замер: сколько задач реально потребовали Diverge-стадии.
+          Если <5% &mdash; упрощаем. Если >10% &mdash; расширяем.
+        </li>
+      </ol>
+
+      <p style="margin-top: 16px; font-style: italic; color: var(--text-muted);">
+        Не отдел. Не распределённый консилиус. А самая тонкая прослойка,
+        которая не даёт системе рассыпаться, но и не тормозит её.
+      </p>
+    </div>
+
+    <!-- File index -->
+    <h2>Файлы дебатов</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Раунд</th>
+            <th>Файл</th>
+            <th>Автор</th>
+            <th>Вердикт</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><code>round-1/01-innovator.md</code></td>
+            <td>Innovator</td>
+            <td>Отдел = анахронизм</td>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td><code>round-1/02-pragmatist.md</code></td>
+            <td>Pragmatist</td>
+            <td>ROI отрицательный</td>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td><code>round-1/03-conservative.md</code></td>
+            <td>Conservative</td>
+            <td>Бюрократизация</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><code>round-2/01-innovator-rebuttal.md</code></td>
+            <td>Innovator</td>
+            <td>2 агента + async</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><code>round-2/02-pragmatist-rebuttal.md</code></td>
+            <td>Pragmatist</td>
+            <td>1 агент, 3 стадии</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><code>round-2/03-conservative-rebuttal.md</code></td>
+            <td>Conservative</td>
+            <td>Можно с условиями</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer>
+      Вердикт архитектурного совета &middot; сгенерирован writer-agent (claude-go-mimo-v2.5) &middot; 15.06.2026
+    </footer>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: { useMaxWidth: false },
+      sequence: { useMaxWidth: false }
+    });
+  </script>
+</body>
+</html>

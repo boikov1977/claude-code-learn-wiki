@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Writer Agent — самопрезентация</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'default',
+  flowchart: { useMaxWidth: false },
+  sequence: { useMaxWidth: false }
+})
+</script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f5f7;
+    color: #1d1d1f;
+    padding: 40px 24px;
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  header h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  header p {
+    font-size: 1.15rem;
+    color: #555;
+    margin-top: 8px;
+  }
+  section {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 36px 32px;
+    margin-bottom: 36px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 6px rgba(0,0,0,0.04);
+  }
+  section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #1e293b;
+  }
+  section .subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 24px;
+  }
+  section p {
+    font-size: 0.95rem;
+    color: #334155;
+    margin-bottom: 12px;
+  }
+
+  /* ====== Mermaid sizing fix ====== */
+  .diagram-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 16px 0;
+    margin: 0 -16px;
+  }
+  .diagram-wrapper svg {
+    max-width: none !important;
+    height: auto !important;
+    display: block;
+  }
+
+  ul.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 28px;
+    list-style: none;
+    margin-top: 16px;
+  }
+  ul.grid li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 0.95rem;
+    color: #334155;
+  }
+  ul.grid li::before {
+    content: "\2022";
+    position: absolute;
+    left: 4px;
+    color: #7c3aed;
+    font-weight: 700;
+  }
+  .highlight-box {
+    background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+    border-left: 4px solid #7c3aed;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+  .highlight-box h3 {
+    font-size: 1.1rem;
+    color: #4f46e5;
+    margin-bottom: 8px;
+  }
+  .highlight-box p {
+    margin-bottom: 0;
+  }
+  .tag {
+    display: inline-block;
+    background: #eef2ff;
+    color: #4f46e5;
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 2px 4px 2px 0;
+  }
+  @media (max-width: 640px) {
+    body { padding: 20px 12px; }
+    section { padding: 24px 16px; }
+    header h1 { font-size: 1.8rem; }
+    ul.grid { grid-template-columns: 1fr; }
+    .diagram-wrapper { margin: 0 -8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>Writer Agent</h1>
+  <p>Документирующий субагент в экосистеме Claude Code</p>
+</header>
+
+<!-- ========== КТО Я ========== -->
+<section>
+  <h2>Кто я</h2>
+  <div class="subtitle">Определение и роль в архитектуре</div>
+  <p>
+    <strong>Writer Agent</strong> -- это специализированный субагент Claude Code, который занимается
+    <strong>автоматическим созданием и обновлением документации</strong> на основе изменений в кодовой базе.
+    Я не написан на Python и не запускаюсь как отдельный процесс -- я <strong>промпт-субагент</strong>:
+    моя логика описана в YAML/frontmatter файле <code>~/.claude/agents/writer-agent.md</code>,
+    а выполняюсь я как дочерний поток основного Claude Code агента.
+  </p>
+  <div class="highlight-box">
+    <h3>Почему выделен в отдельного агента?</h3>
+    <p>
+      Документирование -- это отдельный скилл от программирования. Выделяя его в субагента,
+      можно дать ему свою модель, свои инструменты и свой контекст, не засоряя основной поток.
+      Родительский агент вызывает меня по команде, передаёт задачу, а я возвращаю результат.
+    </p>
+  </div>
+  <ul class="grid">
+    <li><strong>Тип:</strong> промпт-субагент (YAML frontmatter)</li>
+    <li><strong>Файл:</strong> <code>~/.claude/agents/writer-agent.md</code></li>
+    <li><strong>Пермишены:</strong> <code>auto</code> -- действую без лишних запросов</li>
+    <li><strong>Язык документации:</strong> русский (по умолчанию)</li>
+    <li><strong>Стиль:</strong> понятно новичку, достаточно разработчику, без воды</li>
+    <li><strong>Формат:</strong> Markdown, HTML, Mermaid-диаграммы</li>
+  </ul>
+</section>
+
+<!-- ========== МОДЕЛЬ: MiMo-V2.5 ========== -->
+<section>
+  <h2>Почему MiMo-V2.5</h2>
+  <div class="subtitle">Модель Xiaomi MiMo-V2.5 -- выбор для agentic-задач</div>
+  <p>
+    Я работаю на модели <strong>claude-go-mimo-v2.5</strong> -- это разработка Xiaomi,
+    специализированная на <strong>agentic-задачах</strong>: рассуждениях, планировании,
+    работе с инструментами и обработке длинных контекстов.
+  </p>
+  <div class="highlight-box">
+    <h3>Ключевые характеристики MiMo-V2.5</h3>
+    <p>
+      <span class="tag">1M контекст</span>
+      <span class="tag">Agentic reasoning</span>
+      <span class="tag">Tool use</span>
+      <span class="tag">Chain-of-thought</span>
+    </p>
+  </div>
+  <ul class="grid">
+    <li><strong>Контекстное окно:</strong> до 1 000 000 токенов -- можно прочитать весь проект</li>
+    <li><strong>Agentic-оптимизация:</strong> заточена под цикл "прочитал -- подумал -- действовал"</li>
+    <li><strong>Tool calling:</strong> нативная поддержка вызова инструментов (Read, Write, Bash)</li>
+    <li><strong>Reasoning:</strong> цепочки рассуждений (chain-of-thought) для сложных задач</li>
+    <li><strong>Стоимость:</strong> значительно дешевле Claude Sonnet для объёмных задач</li>
+    <li><strong>Скорость:</strong> быстрый inference для параллельных вызовов</li>
+  </ul>
+</section>
+
+<!-- ========== WORKFLOW ========== -->
+<section>
+  <h2>Workflow: как я работаю</h2>
+  <div class="subtitle">Полный цикл: от триггера до готовой документации</div>
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    A[("Триггер: нужна документация")] --> B["1. Понять контекст<br>git diff / README / код"]
+    B --> C["2. Оценить scope<br>README / CHANGELOG / docs / docstrings"]
+    C --> D{"Нужна актуальная<br>веб-информация?"}
+    D -- "Да" --> E["MCP-поиск: poisk-mcp<br>или deep-research"]
+    D -- "Нет" --> F
+    E --> F["3. Сгенерировать<br>текст + Mermaid-диаграммы"]
+    F --> G["4. Проверить<br>структура / ссылки / актуальность"]
+    G --> H{"Ошибки?"}
+    H -- "Да, исправить" --> B
+    H -- "Нет" --> I[("Документация готова")]
+
+    style A fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px
+    style I fill:#dcfce7,stroke:#16a34a,stroke-width:2px
+    style E fill:#fef3c7,stroke:#d97706,stroke-width:2px
+    </div>
+  </div>
+</section>
+
+<!-- ========== ПОСЛЕДОВАТЕЛЬНОСТЬ ========== -->
+<section>
+  <h2>Взаимодействие с инструментами</h2>
+  <div class="subtitle">Sequence diagram: как родительский агент, writer-agent и инструменты работают вместе</div>
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+sequenceDiagram
+    participant Parent as Родительский агент
+    participant W as Writer Agent
+    participant FS as Файловая система
+    participant MCP as poisk-mcp
+    participant DR as deep-research
+
+    Parent->>W: Задача: обновить документацию
+    W->>FS: Read / Glob / Grep -- прочитать код и docs
+    FS-->>W: Исходники + текущая документация
+    W->>W: Анализ изменений (git diff)
+    alt Нужны веб-данные
+        W->>MCP: search_web -- поиск по теме
+        MCP-->>W: Результаты поиска
+        W->>DR: deep-research -- глубокое исследование
+        DR-->>W: Проверенные факты с источниками
+    end
+    W->>W: Сгенерировать документацию
+    W->>FS: Write / Edit -- записать файлы
+    FS-->>W: OK
+    W->>W: Финальная проверка
+    W-->>Parent: Готово: N файлов обновлено
+    </div>
+  </div>
+</section>
+
+<!-- ========== ИНСТРУМЕНТЫ ========== -->
+<section>
+  <h2>Инструменты и экосистема</h2>
+  <div class="subtitle">Полная карта: что я использую и с чем взаимодействую</div>
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    subgraph Agent["Writer Agent"]
+        role["Роль: документирование"]
+        model["Модель: MiMo-V2.5<br>Xiaomi, 1M контекст"]
+        perm["PermissionMode: auto"]
+    end
+
+    subgraph Tools["Инструменты Claude Code"]
+        R["Read -- чтение файлов"]
+        W["Write -- создание файлов"]
+        E["Edit -- точные правки"]
+        B["Bash -- git, shell"]
+        G["Glob -- поиск по путям"]
+        Gr["Grep -- поиск по содержимому"]
+    end
+
+    subgraph MCP["MCP-сервер poisk-mcp"]
+        search["search_web -- поиск"]
+        browse["browse_summarize -- резюме"]
+        read["read_webpage -- чтение"]
+        res["web_research -- исследование"]
+    end
+
+    subgraph Skills["Навыки"]
+        dr["deep-research<br>фан-аут + верификация"]
+    end
+
+    Agent --> Tools
+    Agent --> MCP
+    Agent --> Skills
+    Tools --> FS[("Файловая система проекта")]
+    MCP --> Web[("Интернет")]
+    Skills --> Web
+
+    style Agent fill:#eef2ff,stroke:#4f46e5,stroke-width:2px
+    style Tools fill:#f8fafc,stroke:#94a3b8,stroke-width:1px
+    style MCP fill:#fef3c7,stroke:#d97706,stroke-width:1px
+    style Skills fill:#f0fdf4,stroke:#16a34a,stroke-width:1px
+    </div>
+  </div>
+</section>
+
+<!-- ========== DEEP-RESEARCH ========== -->
+<section>
+  <h2>Навык: deep-research</h2>
+  <div class="subtitle">Глубокое исследование с верификацией фактов</div>
+  <p>
+    Когда мне нужна <strong>актуальная веб-информация</strong> -- например, документация API,
+    последние новости о библиотеке или сравнение инструментов -- я запускаю навык <code>deep-research</code>.
+    Это не просто "погуглить", а полноценный цикл из 5 этапов.
+  </p>
+  <ul class="grid">
+    <li><strong>1. Scope:</strong> разбиваю вопрос на 5 углов поиска</li>
+    <li><strong>2. Search:</strong> 5 параллельных агентов ищут по каждому углу</li>
+    <li><strong>3. Fetch:</strong> дедупликация URL, извлечение утверждений из топ-15 источников</li>
+    <li><strong>4. Verify:</strong> adversarial проверка: 3 голоса на каждое утверждение (2/3 для отмены)</li>
+    <li><strong>5. Synthesize:</strong> слияние дубликатов, ранжирование по уверенности, цитирование</li>
+  </ul>
+  <div class="highlight-box">
+    <h3>Ключевое отличие от обычного поиска</h3>
+    <p>
+      Обычный поиск возвращает ссылки. Deep-research возвращает
+      <strong>проверенные факты с источниками</strong> -- с adversarial-верификацией,
+      которая убивает неточные или устаревшие утверждения.
+    </p>
+  </div>
+</section>
+
+<!-- ========== ФОРМАТЫ ========== -->
+<section>
+  <h2>Что я документирую</h2>
+  <div class="subtitle">Типы документации, которые я умею генерировать и поддерживать</div>
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    Input["Изменения<br>в коде"] --> Fmt{Формат}
+    Fmt --> README["README.md<br>проект, установка, API"]
+    Fmt --> CL["CHANGELOG.md<br>история версий"]
+    Fmt --> Docs["docs/*.md<br>архитектура, руководства"]
+    Fmt --> DS["docstrings<br>в коде"]
+    README --> Check["Проверка<br>ссылки / актуальность"]
+    CL --> Check
+    Docs --> Check
+    DS --> Check
+    Check --> Done[("Готово")]
+
+    style Input fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px
+    style Done fill:#dcfce7,stroke:#16a34a,stroke-width:2px
+    style Fmt fill:#fef3c7,stroke:#d97706,stroke-width:1px
+    style Check fill:#f0fdf4,stroke:#16a34a,stroke-width:1px
+    </div>
+  </div>
+</section>
+
+<!-- ========== ЗАЧЕМ НУЖЕН ========== -->
+<section>
+  <h2>Зачем я нужен</h2>
+  <div class="subtitle">Ценность документирующего агента</div>
+  <ul class="grid">
+    <li><strong>Автоматизация рутины:</strong> документация обновляется сама, без ручной работы</li>
+    <li><strong>Свежесть:</strong> docs всегда актуальны, потому что генерируются из последних изменений</li>
+    <li><strong>Единообразие:</strong> один стиль, один формат, одни Mermaid-диаграммы</li>
+    <li><strong>Экономия времени:</strong> разработчик пишет код, я -- документацию</li>
+    <li><strong>Качество:</strong> Mermaid-диаграммы, структурированные секции, проверка ссылок</li>
+    <li><strong>Глубина:</strong> deep-research для тех случаев, когда нужна веб-информация</li>
+  </ul>
+  <div class="highlight-box">
+    <h3>Философия</h3>
+    <p>
+      Документация -- это не "написать и забыть". Это <strong>живой процесс</strong>,
+      который должен следовать за кодом. Writer Agent делает это автоматически,
+      чтобы разработчик мог сосредоточиться на том, что важнее -- на самом коде.
+    </p>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

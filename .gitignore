@@ -2,3 +2,10 @@
 .claude/settings.local.json
 __pycache__/
 *.pyc
+
+# MCP перенесён в глобальный ~/.claude/settings.json
+.mcp.json
+
+# Агенты и скиллы — глобальные, см. ~/.claude/agents/ и ~/.claude/skills/
+.claude/agents/
+.claude/skills/
