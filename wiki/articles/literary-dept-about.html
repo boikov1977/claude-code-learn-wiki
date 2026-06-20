@@ -278,6 +278,11 @@
     .diagram-wrapper svg {
       max-width: none !important;
       height: auto !important;
+      background: #ffffff;
+    }
+    .diagram-wrapper {
+      background: #ffffff;
+      border-radius: 8px;
     }
 
     /* Checklist */
@@ -1097,7 +1102,17 @@ sequenceDiagram
   <script>
     mermaid.initialize({
       startOnLoad: true,
-      theme: 'neutral',
+      theme: 'base',
+      themeVariables: {
+        darkMode: false,
+        background: '#ffffff',
+        primaryColor: '#f1f0ff',
+        primaryBorderColor: '#6c5ce7',
+        lineColor: '#1f2328',
+        textColor: '#1f2328',
+        secondaryColor: '#ddf4ff',
+        tertiaryColor: '#ffffff'
+      },
       flowchart: { useMaxWidth: false },
       sequence: { useMaxWidth: false },
       stateDiagram: { useMaxWidth: false }
