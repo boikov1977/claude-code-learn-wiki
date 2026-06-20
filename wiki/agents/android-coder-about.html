@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Android Coder — субагент для Android-разработки</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    darkMode: false,
+    background: '#ffffff'
+  },
+  flowchart: { useMaxWidth: false },
+  sequence: { useMaxWidth: false }
+})
+</script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f5f7;
+    color: #1d1d1f;
+    padding: 40px 24px;
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  header h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  header p {
+    font-size: 1.15rem;
+    color: #555;
+    margin-top: 8px;
+  }
+  section {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 36px 32px;
+    margin-bottom: 36px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 6px rgba(0,0,0,0.04);
+  }
+  section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #1e293b;
+  }
+  section .subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 24px;
+  }
+  section p {
+    font-size: 0.95rem;
+    color: #334155;
+    margin-bottom: 12px;
+  }
+
+  /* ====== Mermaid sizing fix ====== */
+  .diagram-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 16px 0;
+    margin: 0 -16px;
+  }
+  .diagram-wrapper svg {
+    max-width: none !important;
+    height: auto !important;
+    display: block;
+  }
+
+  ul.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 28px;
+    list-style: none;
+    margin-top: 16px;
+  }
+  ul.grid li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 0.95rem;
+    color: #334155;
+  }
+  ul.grid li::before {
+    content: "\2022";
+    position: absolute;
+    left: 4px;
+    color: #7c3aed;
+    font-weight: 700;
+  }
+  .highlight-box {
+    background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+    border-left: 4px solid #7c3aed;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+  .highlight-box h3 {
+    font-size: 1.1rem;
+    color: #4f46e5;
+    margin-bottom: 8px;
+  }
+  .highlight-box p {
+    margin-bottom: 0;
+  }
+  .tag {
+    display: inline-block;
+    background: #eef2ff;
+    color: #4f46e5;
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 2px 4px 2px 0;
+  }
+  .tag.android {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  .tag.tool {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.93rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  th {
+    font-weight: 600;
+    color: #1e293b;
+    background: #f8fafc;
+  }
+  td {
+    color: #334155;
+  }
+  code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: #4f46e5;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+  .back-link:hover {
+    text-decoration: underline;
+  }
+  @media (max-width: 640px) {
+    body { padding: 20px 12px; }
+    section { padding: 24px 16px; }
+    header h1 { font-size: 1.8rem; }
+    ul.grid { grid-template-columns: 1fr; }
+    .diagram-wrapper { margin: 0 -8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+
+  <h1>Android Coder</h1>
+  <p>Senior Android Developer в экосистеме Claude Code</p>
+</header>
+
+<!-- ========== КТО Я ========== -->
+<section>
+  <h2>Кто я</h2>
+  <div class="subtitle">Определение и роль в архитектуре</div>
+  <p>
+    <strong>Android Coder</strong> —это специализированный субагент Claude Code, который занимается
+    <strong>написанием, рефакторингом и отладкой Android-приложений</strong>.
+    Как и все субагенты в экосистеме, я —<strong>промпт-субагент</strong>: моя логика описана в файле
+    <code>~/.claude/agents/android-coder.md</code>, а выполняюсь я как дочерний поток
+    основного Claude Code агента.
+  </p>
+  <div class="highlight-box">
+    <h3>Почему выделен в отдельного агента?</h3>
+    <p>
+      Android-разработка —это обширная экосистема со своими инструментами, шаблонами и best practices.
+      Выделяя её в субагент, можно дать ему доступ к <strong>Android CLI</strong> (инструменту Google для
+      управления проектами), <strong>context7</strong> (CLI-инструменту для API-документации) и специфичный
+      контекст —без засорения основного потока рассуждениями о Gradle-конфигах и Compose state hoisting.
+    </p>
+  </div>
+  <ul class="grid">
+    <li><strong>Тип:</strong> промпт-субагент (YAML frontmatter)</li>
+    <li><strong>Файл:</strong> <code>~/.claude/agents/android-coder.md</code></li>
+    <li><strong>Пермишены:</strong> <code>auto</code> —действую без лишних запросов</li>
+    <li><strong>Дата создания:</strong> 20 июня 2026</li>
+    <li><strong>Язык:</strong> Kotlin + Kotlin DSL (Gradle), XML (ресурсы)</li>
+    <li><strong>UI:</strong> Jetpack Compose + Material 3</li>
+    <li><strong>Архитектура:</strong> MVVM / MVI, ViewModel + UiState, Repository</li>
+    <li><strong>Тесты:</strong> JUnit 5, Compose UI Test, Espresso, MockK, Turbine</li>
+  </ul>
+</section>
+
+<!-- ========== ПОЧЕМУ DEEPSEEK-V4-FLASH ========== -->
+<section>
+  <h2>Почему DeepSeek-V4-Flash</h2>
+  <div class="subtitle">Модель DeepSeek-V4-Flash —выбор для Android-задач</div>
+  <p>
+    Я работаю на модели <strong>claude-go-deepseek-v4-flash</strong> —это разработка DeepSeek,
+    доступная через OpenCode-прокси. Для Android-задач она подходит лучше, чем может показаться.
+  </p>
+  <div class="highlight-box">
+    <h3>Ключевые характеристики DeepSeek-V4-Flash</h3>
+    <p>
+      <span class="tag">Быстрый inference</span>
+      <span class="tag">Хорошее знание Kotlin</span>
+      <span class="tag">Кодогенерация</span>
+      <span class="tag">Экономичный</span>
+    </p>
+  </div>
+  <ul class="grid">
+    <li><strong>Скорость:</strong> быстрый inference —критично, когда агент делает много вызовов инструментов последовательно (анализ, код, тесты, сборка)</li>
+    <li><strong>Знание экосистемы:</strong> хорошее понимание Kotlin, Gradle, Jetpack Compose, Android SDK</li>
+    <li><strong>Стоимость:</strong> значительно дешевле Sonnet —а Android-задачи часто требуют множества итераций</li>
+    <li><strong>Соотношение цена/качество:</strong> для кодогенерации по шаблонам (MVVM, Compose-компоненты, DI-модули) —оптимальный выбор</li>
+    <li><strong>Параллелизм:</strong> подходит для работы в паре с другими субагентами (например, tester-agent пишет тесты параллельно)</li>
+    <li><strong>Реалистичный компромисс:</strong> для большинства Android-задач —CRUD-экраны, навигация, работа с API —этого хватает</li>
+  </ul>
+  <p style="margin-top:16px;">
+    Если задача требует <strong>глубокого архитектурного проектирования</strong> или работы со
+    сложными legacy-кодовыми базами, родительский агент (DeepSeek-V4-Flash) может взять её на себя
+    или подключить более мощную модель. Но для 90% повседневной Android-разработки --
+    Flash справляется эффективно.
+  </p>
+</section>
+
+<!-- ========== ANDROID CLI ========== -->
+<section>
+  <h2>Android CLI</h2>
+  <div class="subtitle">Уникальный инструмент: Android CLI от Google (апрель 2026)</div>
+  <p>
+    Моя главная фишка —<strong>Android CLI</strong>: официальный инструмент от Google, появившийся
+    в апреле 2026 года. Это не просто обёртка над <code>adb</code> —это полноценный CLI
+    для управления жизненным циклом Android-проекта: от создания до деплоя и документации.
+  </p>
+  <div class="highlight-box">
+    <h3>Установка и расположение</h3>
+    <p>
+      Android CLI установлен в <code>/home/andrei/.local/bin/android</code>.
+      SDK обнаружен автоматически в <code>/home/andrei/Android/Sdk</code>.
+      Версия: стабильная, обновляется командой <code>android update</code>.
+    </p>
+  </div>
+  <table>
+    <tr><th>Команда</th><th>Назначение</th><th>Пример</th></tr>
+    <tr>
+      <td><code>android create</code></td>
+      <td>Создание проектов с шаблонами</td>
+      <td><code>android create empty-activity-compose --output=./MyApp</code></td>
+    </tr>
+    <tr>
+      <td><code>android sdk</code></td>
+      <td>Управление SDK (установка, удаление, список)</td>
+      <td><code>android sdk install platforms/android-35</code></td>
+    </tr>
+    <tr>
+      <td><code>android emulator</code></td>
+      <td>Создание и запуск эмуляторов</td>
+      <td><code>android emulator create --profile=medium_phone</code></td>
+    </tr>
+    <tr>
+      <td><code>android run</code></td>
+      <td>Сборка и деплой на устройство/эмулятор</td>
+      <td><code>android run --apks=app/build/outputs/apk/debug/app-debug.apk</code></td>
+    </tr>
+    <tr>
+      <td><code>android docs search</code></td>
+      <td>Поиск по официальной Android-документации</td>
+      <td><code>android docs search "Compose lazy column best practices"</code></td>
+    </tr>
+    <tr>
+      <td><code>android docs fetch</code></td>
+      <td>Загрузка документации офлайн</td>
+      <td><code>android docs fetch --topic=navigation</code></td>
+    </tr>
+    <tr>
+      <td><code>android screen</code></td>
+      <td>Скриншоты и определение разрешения</td>
+      <td><code>android screen capture</code></td>
+    </tr>
+    <tr>
+      <td><code>android layout</code></td>
+      <td>Анализ layout-иерархии приложения</td>
+      <td><code>android layout</code></td>
+    </tr>
+    <tr>
+      <td><code>android studio</code></td>
+      <td>Интеграция с Android Studio</td>
+      <td><code>android studio --open=./MyApp</code></td>
+    </tr>
+    <tr>
+      <td><code>android describe</code></td>
+      <td>Анализ проекта и генерация метаданных</td>
+      <td><code>android describe</code></td>
+    </tr>
+  </table>
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph CLI["Android CLI"]
+        create["create<br>проекты"]
+        sdk["sdk<br>SDK-пакеты"]
+        emulator["emulator<br>эмуляторы"]
+        run["run<br>деплой"]
+        docs["docs<br>документация"]
+        screen["screen<br>скриншоты"]
+        layout["layout<br>иерархия"]
+        studio["studio<br>IDE"]
+    end
+
+    subgraph Targets["Цели"]
+        proj[("Проект")]
+        SDK[("Android SDK")]
+        EMU[("Эмулятор")]
+        DEV[("Устройство")]
+        WEB[("Документация Google")]
+        API[("Android API")]
+    end
+
+    create --> proj
+    sdk --> SDK
+    emulator --> EMU
+    run --> DEV
+    docs --> WEB
+    screen --> DEV
+    layout --> API
+    studio --> proj
+
+    style CLI fill:#eef2ff,stroke:#4f46e5,stroke-width:2px
+    style Targets fill:#f8fafc,stroke:#94a3b8,stroke-width:1px
+    </div>
+  </div>
+</section>
+
+<!-- ========== ИНСТРУМЕНТЫ И ЭКОСИСТЕМА ========== -->
+<section>
+  <h2>Инструменты и экосистема</h2>
+  <div class="subtitle">Полная карта: что я использую и с чем взаимодействую</div>
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    subgraph Agent["Android Coder"]
+        role["Роль: Android-разработка"]
+        model["Модель: DeepSeek-V4-Flash<br>быстрый inference"]
+        perm["PermissionMode: auto"]
+    end
+
+    subgraph Tools["Инструменты Claude Code"]
+        R["Read —чтение файлов"]
+        W["Write —создание файлов"]
+        E["Edit —точные правки"]
+        B["Bash —Gradle, CLI, shell"]
+        G["Glob —поиск по путям"]
+        Gr["Grep —поиск по содержимому"]
+    end
+
+    subgraph AndroidCLI["Android CLI (Google)"]
+        ac["create / sdk / emulator"]
+        ar["run / screen / layout"]
+        ad["docs search / docs fetch"]
+        ast["studio / describe"]
+    end
+
+    subgraph C7["CLI-инструмент context7"]
+        c7k["kotlin —API Kotlin"]
+        c7c["compose —Jetpack Compose"]
+        c7h["hilt —Hilt DI"]
+        c7m["material3 —Material 3"]
+    end
+
+    subgraph Skills["Навыки"]
+        fp["fewer-permission-prompts"]
+    end
+
+    Agent --> Tools
+    Agent --> AndroidCLI
+    Agent --> C7
+    Agent --> Skills
+    Tools --> FS[("Файловая система")]
+    AndroidCLI --> SDK[("Android SDK / Устройства")]
+    C7 --> Docs[("API-документация")]
+    Skills --> Perm[("Пермишены Claude Code")]
+
+    style Agent fill:#eef2ff,stroke:#4f46e5,stroke-width:2px
+    style Tools fill:#f8fafc,stroke:#94a3b8,stroke-width:1px
+    style AndroidCLI fill:#d1fae5,stroke:#065f46,stroke-width:1px
+    style C7 fill:#fef3c7,stroke:#d97706,stroke-width:1px
+    style Skills fill:#f0fdf4,stroke:#16a34a,stroke-width:1px
+    </div>
+  </div>
+
+  <div class="highlight-box">
+    <h3>context7: зачем ещё одна точка доступа к документации?</h3>
+    <p>
+      Android CLI даёт доступ к <strong>официальной Android-документации Google</strong> (best practices,
+      гайды, архитектурные рекомендации). А context7 —это <strong>API-документация библиотек</strong>:
+      сигнатуры функций, параметры, примеры из исходников. Разные источники для разных задач:
+      <code>android docs search</code> для "как правильно", <code>npx ctx7 docs</code> для "какой параметр".
+    </p>
+  </div>
+</section>
+
+<!-- ========== РАБОЧИЙ ПРОЦЕСС ========== -->
+<section>
+  <h2>Рабочий процесс</h2>
+  <div class="subtitle">3 фазы: от анализа до контроля качества</div>
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart TD
+    Start[("Задача от родительского агента")] --> P1
+
+    subgraph Phase1["Фаза 1: Анализ"]
+        P1A["Изучить структуру проекта<br>find / Gradle / build.gradle.kts"]
+        P1B["Определить SDK, AGP, библиотеки"]
+        P1C["Понять архитектуру<br>MVVM / MVI / Clean"]
+        P1D["Проверить CLAUDE.md<br>и .specs/"]
+    end
+
+    P1A --> P1B --> P1C --> P1D --> P2
+
+    subgraph Phase2["Фаза 2: Реализация"]
+        P2A["Data layer<br>модели, repository, source"]
+        P2B["Domain layer<br>use cases, mapper"]
+        P2C["UI layer<br>ViewModel, UiState, composables"]
+        P2D["DI + Navigation<br>Hilt/Koin модули, NavGraph"]
+        P2E["Тесты<br>JUnit 5, Compose UI Test"]
+        P2F["Сборка<br>./gradlew assembleDebug"]
+    end
+
+    P2A --> P2B --> P2C --> P2D --> P2E --> P2F --> P3
+
+    subgraph Phase3["Фаза 3: Контроль качества"]
+        P3A["./gradlew lint"]
+        P3B["./gradlew test"]
+        P3C["Edge cases<br>поворот, сеть, null"]
+        P3D["Accessibility<br>contentDescription, touch target"]
+        P3E["Material 3<br>консистентность темы"]
+        P3F["Безопасность<br>нет секретов, ProGuard"]
+    end
+
+    P3A --> P3B --> P3C --> P3D --> P3E --> P3F --> Done[("Готово: код + тесты + сборка")]
+
+    style Start fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px
+    style Done fill:#dcfce7,stroke:#16a34a,stroke-width:2px
+    style Phase1 fill:#eff6ff,stroke:#3b82f6,stroke-width:1px
+    style Phase2 fill:#f0fdf4,stroke:#22c55e,stroke-width:1px
+    style Phase3 fill:#fef3c7,stroke:#d97706,stroke-width:1px
+    </div>
+  </div>
+
+  <p>
+    Каждая фаза завершается конкретным результатом. Если на любом этапе возникает вопрос --
+    я <strong>задаю его</strong>, а не додумываю. Принцип: если решение очевидно — действуй, не спрашивай на каждом шагу.
+  </p>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+sequenceDiagram
+    participant Parent as Родительский агент
+    participant AC as Android Coder
+    participant FS as Файловая система
+    participant CLI as Android CLI
+    participant C7 as context7 CLI
+    participant Gradle as Gradle
+
+    Parent->>AC: Задача: написать Android-фичу
+    AC->>FS: Read / Glob / Grep —анализ проекта
+    FS-->>AC: Структура, зависимости, конфиги
+
+    Note over AC: Фаза 1: Анализ
+
+    alt Нужен API
+        AC->>C7: npx ctx7 docs compose "..."
+        C7-->>AC: Сигнатуры, примеры
+    end
+
+    alt Нужен best practice
+        AC->>CLI: android docs search "..."
+        CLI-->>AC: Рекомендации Google
+    end
+
+    Note over AC: Фаза 2: Реализация
+
+    AC->>FS: Write / Edit —создание кода
+    FS-->>AC: OK
+
+    AC->>FS: Write —тесты
+    FS-->>AC: OK
+
+    AC->>Gradle: ./gradlew assembleDebug
+    Gradle-->>AC: BUILD SUCCESSFUL
+
+    Note over AC: Фаза 3: Контроль качества
+
+    AC->>Gradle: ./gradlew lint
+    Gradle-->>AC: OK, 0 warnings
+
+    AC->>Gradle: ./gradlew test
+    Gradle-->>AC: All tests passed
+
+    AC-->>Parent: Готово: файлы, сборка, тесты
+    </div>
+  </div>
+</section>
+
+<!-- ========== ЧЕК-ЛИСТ КАЧЕСТВА ========== -->
+<section>
+  <h2>Чек-лист качества</h2>
+  <div class="subtitle">Что я проверяю перед сдачей каждого экрана</div>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+flowchart LR
+    subgraph Kotlin["Kotlin"]
+        K1["Idiomatic"]
+        K2["Coroutines + Flow"]
+        K3["Sealed classes"]
+        K4["Immutability"]
+    end
+
+    subgraph Compose["Compose"]
+        C1["State hoisting"]
+        C2["Side effects"]
+        C3["Previews"]
+        C4["Composable functions"]
+    end
+
+    subgraph M3["Material 3"]
+        M1["Цветовые схемы"]
+        M2["Dynamic colors"]
+        M3C["MaterialTheme"]
+    end
+
+    subgraph Arch["Архитектура"]
+        A1["MVVM / MVI"]
+        A2["ViewModel + UiState"]
+        A3["Repository pattern"]
+        A4["DI (Hilt / Koin)"]
+    end
+
+    subgraph Test["Тесты"]
+        T1["JUnit 5"]
+        T2["Compose UI Test"]
+        T3["Espresso"]
+        T4["MockK"]
+        T5["Turbine (Flow)"]
+    end
+
+    subgraph Safety["Безопасность"]
+        S1["Нет секретов"]
+        S2["ProGuard / R8"]
+        S3["Permissions"]
+        S4["SSL pinning"]
+    end
+
+    style Kotlin fill:#eef2ff,stroke:#4f46e5,stroke-width:1px
+    style Compose fill:#fce7f3,stroke:#db2777,stroke-width:1px
+    style M3 fill:#d1fae5,stroke:#065f46,stroke-width:1px
+    style Arch fill:#fef3c7,stroke:#d97706,stroke-width:1px
+    style Test fill:#ede9fe,stroke:#7c3aed,stroke-width:1px
+    style Safety fill:#fee2e2,stroke:#dc2626,stroke-width:1px
+    </div>
+  </div>
+
+  <ul class="grid">
+    <li><strong>Kotlin:</strong> idiomatic, Coroutines + Flow, sealed classes, extension functions, immutability</li>
+    <li><strong>Compose:</strong> composable-функции, state hoisting, side effects (LaunchedEffect, remember), previews</li>
+    <li><strong>Material 3:</strong> цветовые схемы, компоненты (MaterialTheme), dynamic colors</li>
+    <li><strong>Архитектура:</strong> MVVM / MVI, ViewModel + UiState, Repository pattern, DI (Hilt / Koin)</li>
+    <li><strong>Gradle:</strong> AGP-совместимость, version catalogs, Kotlin DSL</li>
+    <li><strong>Тесты:</strong> JUnit 5, Compose UI Test, Espresso, MockK, Turbine (Flow)</li>
+    <li><strong>Безопасность:</strong> нет секретов/токенов, ProGuard/R8, permissions handling, SSL pinning</li>
+    <li><strong>Error handling:</strong> UiState с Success / Error / Loading, исключения не проглатываются</li>
+    <li><strong>Edge cases:</strong> пустые списки, null, ошибки сети, поворот экрана, lifecycle</li>
+    <li><strong>Accessibility:</strong> contentDescription, фокус, размер touch target (>48dp)</li>
+  </ul>
+
+  <div class="highlight-box">
+    <h3>Формат ответа после завершения</h3>
+    <p>
+      После каждой задачи я отчитываюсь по шаблону:<br>
+      <code>Сделано:</code> что именно написано<br>
+      <code>Файлы:</code> список созданных/изменённых файлов<br>
+      <code>Сборка:</code> ok / ошибки<br>
+      <code>Тесты:</code> покрытие<br>
+      <code>Вопросы:</code> если остались открытые вопросы
+    </p>
+  </div>
+</section>
+
+<!-- ========== ЗАЧЕМ НУЖЕН ========== -->
+<section>
+  <h2>Зачем я нужен</h2>
+  <div class="subtitle">Ценность Android-агента в команде</div>
+  <ul class="grid">
+    <li><strong>Автоматизация Android-рутины:</strong> CRUD-экраны, навигация, DI —пишу по шаблонам, не изобретая велосипед</li>
+    <li><strong>Android CLI:</strong> проект, SDK, эмулятор, деплой, документация —всё из одного терминала</li>
+    <li><strong>Актуальные best practices:</strong> <code>android docs search</code> + context7 —всегда актуальный API</li>
+    <li><strong>3-фазный контроль:</strong> анализ, реализация, проверка —ничего не забывается</li>
+    <li><strong>Полная проверка:</strong> lint, сборка, тесты, edge cases, accessibility —перед сдачей</li>
+    <li><strong>Экономия:</strong> DeepSeek-V4-Flash —быстрый и дешёвый для большинства Android-задач</li>
+  </ul>
+  <div class="highlight-box">
+    <h3>Философия</h3>
+    <p>
+      Android-разработка —это не просто "написать код". Это SDK, Gradle, эмулятор, документация,
+      best practices, accessibility. Android Coder берёт на себя <strong>весь этот стек</strong>,
+      чтобы родительский агент мог сосредоточиться на архитектурных решениях, а не на том,
+      какую версию AGP использовать.
+    </p>
+  </div>
+</section>
+
+</div>
+</body>
+</html>
