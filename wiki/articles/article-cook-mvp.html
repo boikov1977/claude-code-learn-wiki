@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Как мы делали Cook MVP — AI-кулинарный помощник за 12 часов</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --surface: #ffffff;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #656d76;
+      --accent: #6c5ce7;
+      --accent-light: #f1f0ff;
+      --green: #1a7f37;
+      --green-light: #dafbe1;
+      --red: #cf222e;
+      --red-light: #ffebe9;
+      --orange: #9a6700;
+      --orange-light: #fff8c5;
+      --blue: #0969da;
+      --blue-light: #ddf4ff;
+      --purple: #8250df;
+      --purple-light: #fbefff;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header .tag {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.82em;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    header .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 580px;
+      margin: 0 auto 24px;
+    }
+
+    header .meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin: 48px 0;
+      box-shadow: var(--shadow);
+    }
+    .toc h2 { font-size: 1.1em; margin-bottom: 14px; color: var(--accent); }
+    .toc ol { padding-left: 22px; }
+    .toc li { margin-bottom: 6px; }
+    .toc a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .toc a:hover { color: var(--accent); }
+
+    section { margin: 56px 0; }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 40px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 24px 0 12px;
+    }
+
+    p { margin-bottom: 12px; }
+    p, li { font-size: 0.95rem; line-height: 1.65; }
+
+    ul, ol {
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+    li { margin-bottom: 6px; }
+
+    strong { color: inherit; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px 24px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      margin: 16px 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    pre code {
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+      font-size: 0.88em;
+      line-height: 1.6;
+      color: #d4d4d4;
+      background: none;
+      padding: 0;
+    }
+    code {
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+      background: #f0f0f0;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 0.88em;
+    }
+    .code-label {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 0.78em;
+      color: #8b949e;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .hl-green { color: #3fb950; }
+    .hl-red { color: #f85149; }
+    .hl-orange { color: #d29922; }
+    .hl-blue { color: #58a6ff; }
+    .hl-purple { color: #a29bfe; }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-accent { border-left: 4px solid var(--accent); }
+    .card-green { border-left: 4px solid var(--green); }
+    .card-orange { border-left: 4px solid var(--orange); }
+    .card-red { border-left: 4px solid var(--red); }
+    .card-blue { border-left: 4px solid var(--blue); }
+    .card h4 { margin-bottom: 8px; font-size: 1.05em; }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .stat .number {
+      font-size: 2em;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat .label { font-size: 0.82em; color: var(--text-muted); margin-top: 6px; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+    tr:nth-child(even) td { background: #fafbfc; }
+
+    /* Blockquote */
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 12px 20px;
+      margin: 20px 0;
+      background: var(--surface);
+      border-radius: 0 8px 8px 0;
+      color: var(--text-muted);
+      font-style: italic;
+      box-shadow: var(--shadow);
+    }
+
+    /* Diagram wrapper */
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 24px 0;
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* Callouts */
+    .callout {
+      background: var(--accent-light);
+      border: 1px solid #c4b5fd;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    .callout-fire {
+      background: var(--red-light);
+      border: 1px solid rgba(248, 81, 73, 0.3);
+    }
+    .callout h4 { margin-bottom: 8px; }
+    .callout ul { margin-bottom: 0; }
+
+    /* Fire moment */
+    .fire-moment {
+      text-align: center;
+      padding: 60px 24px;
+      margin: 48px 0;
+      background: linear-gradient(135deg, var(--accent-light) 0%, #fff 50%, var(--accent-light) 100%);
+      border: 1px solid var(--accent);
+      border-radius: 16px;
+    }
+    .fire-moment .emoji { font-size: 4em; display: block; margin-bottom: 16px; }
+    .fire-moment h2 {
+      border: none;
+      font-size: 2.4em;
+      color: var(--orange);
+      margin-bottom: 12px;
+    }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+    /* Footer */
+    footer {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85em;
+      text-align: center;
+    }
+    footer strong { color: var(--text); }
+
+    @media (max-width: 700px) {
+      header h1 { font-size: 1.5rem; }
+      .container { padding: 24px 16px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .fire-moment h2 { font-size: 1.6em; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+    <span class="tag">Postmortem</span>
+    <h1>Как мы делали Cook MVP</h1>
+    <p class="subtitle">AI-кулинарный помощник: от пустого репозитория до приложения на телефоне за одну сессию</p>
+    <p class="meta">Команда Cook &middot; 2026 &middot; Python + Kotlin &middot; 12 часов, 57 тестов, один пивот</p>
+  </header>
+
+  <!-- TOC -->
+  <nav class="toc">
+    <h2>Содержание</h2>
+    <ol>
+      <li><a href="#intro">Зачем это нужно</a></li>
+      <li><a href="#spec">Spec-Driven подход</a></li>
+      <li><a href="#roast">Прожарка архитектуры</a></li>
+      <li><a href="#backend">Backend: FastAPI + LLM</a></li>
+      <li><a href="#android">Android: Jetpack Compose</a></li>
+      <li><a href="#pivot">Большой пивот: CameraX &rarr; Intent</a></li>
+      <li><a href="#review">Code Review: 6 P1 findings</a></li>
+      <li><a href="#testing">57 тестов</a></li>
+      <li><a href="#fire">ОГОНЬ!!!! ЙЁЁЁЁЁЁ</a></li>
+      <li><a href="#insights">Выводы и инсайты</a></li>
+    </ol>
+  </nav>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- 1. Зачем это нужно                     -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="intro">
+    <h2>1. Зачем это нужно</h2>
+
+    <p>Представьте: вы открыли холодильник, а там курица, три яйца и что-то подозрительное в банке. Вопрос &mdash; что с этим делать? Загуглить? Too many tabs open. Спросить у ChatGPT? Ну да, вы же каждый раз будете описывать свой холодильник текстом. А что, если просто сфотографировать и получить рецепт?</p>
+
+    <p><strong>Cook</strong> &mdash; это AI-кулинарный помощник. Фотографируешь продукты телефоном, он распознаёт, что на фото, и генерирует рецепт. Три уровня сложности &mdash; от общажного повара до мишленовской звезды. Вот что мы получили в итоге:</p>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="number">7</div>
+        <div class="label">Python-модулей</div>
+      </div>
+      <div class="stat">
+        <div class="number">9</div>
+        <div class="label">Kotlin-файлов</div>
+      </div>
+      <div class="stat">
+        <div class="number">57</div>
+        <div class="label">Тестов</div>
+      </div>
+      <div class="stat">
+        <div class="number">~12ч</div>
+        <div class="label">Разработки</div>
+      </div>
+    </div>
+
+    <div class="card card-accent">
+      <h4>Stack</h4>
+      <table>
+        <tr><td><strong>Backend</strong></td><td>Python 3.11+, FastAPI, httpx, Pydantic</td></tr>
+        <tr><td><strong>Android</strong></td><td>Kotlin, Jetpack Compose, Retrofit, Kotlin Serialization</td></tr>
+        <tr><td><strong>LLM</strong></td><td>OpenCode Go API (OpenAI-compatible)</td></tr>
+        <tr><td><strong>Vision</strong></td><td>mimo-v2.5, fallback qwen3.7-plus</td></tr>
+        <tr><td><strong>Recipes</strong></td><td>deepseek-v4-flash</td></tr>
+        <tr><td><strong>Workflow</strong></td><td>OpenSpec + Claude Code</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- 2. Spec-Driven подход                  -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="spec">
+    <h2>2. Spec-Driven подход</h2>
+
+    <p>Мы не писали код с порога. Сначала &mdash; спецификации. Инструмент &mdash; <strong>OpenSpec</strong>, встроенный в Claude Code через скиллы.</p>
+
+    <p>Цикл выглядел так:</p>
+
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+flowchart LR
+    A["proposal\nЧто делаем?"] --> B["design\nКак делаем?"]
+    B --> C["specs\nДетали API"]
+    C --> D["tasks\nЗадачи по файлам"]
+    D --> E["code\nПишем код"]
+
+    style A fill:#6c5ce7,stroke:#6c5ce7,color:#fff
+    style B fill:#a29bfe,stroke:#a29bfe,color:#000
+    style C fill:#58a6ff,stroke:#58a6ff,color:#fff
+    style D fill:#3fb950,stroke:#3fb950,color:#fff
+    style E fill:#e1e4e8,stroke:#d0d7de,color:#000
+      </div>
+    </div>
+
+    <p>Каждый шаг &mdash; отдельный файл. Всё лежало в <code>/openspec/changes/ai-cook-assistant/</code> (сейчас заархивировано). Proposal описывал видение, design &mdash; архитектурные решения, specs &mdash; API-контракты и модели данных, tasks &mdash; конкретные файлы и что в них писать.</p>
+
+    <div class="card card-accent">
+      <h4>Почему spec-driven, а не &laquo;напишем потом документацию&raquo;?</h4>
+      <p>Потому что когда субагент пишет код по спеке, у него нет опции &laquo;я тут додумаю сам&raquo;. Спецификация &mdash; это контракт. Агент получает <em>точное</em> описание: какой файл, какая функция, какая сигнатура, какой ответ. Результат &mdash; код, который не нужно потом переписывать.</p>
+    </div>
+
+    <p>41 задача, разбитых на backend (7 модулей) и android (9 файлов). Каждая задача &mdash; конкретный файл с конкретным интерфейсом.</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- 3. Прожарка архитектуры                -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="roast">
+    <h2>3. Прожарка архитектуры</h2>
+
+    <p>Спецификации &mdash; это не Библия. Перед тем как начать писать код, мы провели <strong>прожарку</strong> &mdash; архитектурный ревью, который провёл прагматик-субагент.</p>
+
+    <blockquote>
+      &laquo;Давай-ка я посмотрю на ваши design-решения, пока вы не потратили 12 часов на код, который потом придётся переписывать.&raquo;
+      <br>&mdash; Прагматик, наверное
+    </blockquote>
+
+    <p>Что нашли:</p>
+
+    <ul>
+      <li><strong>Дублирование моделей</strong> &mdash; три отдельных модели рецептов (DormRecipe, RestaurantRecipe, MichelinRecipe) вместо одной Recipe с опциональными полями. Прагматик объединил в одну.</li>
+      <li><strong>CameraX в MVP</strong> &mdash; ~150 строк кода для камеры, когда система через Intent делает то же самое за 20 строк. Но об этом позже.</li>
+      <li><strong>Навигация</strong> &mdash; NavHost с пятью экранами. Прагматик предложил sealed class ScreenState вместо навигации. Проще, менее подвержено багам, идеально для пяти экранов.</li>
+      <li><strong>Rate limiting</strong> &mdash; без Semaphore для LLM-вызовов, OpenCode API мог бы вернуть 429. Добавили <code>asyncio.Semaphore(1)</code>.</li>
+    </ul>
+
+    <p>Итог прожарки: спецификации обновлены, код ещё не написан, а мы уже сэкономили себе часы работы. Это не паранойя &mdash; это инженерия.</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- 4. Backend: FastAPI + LLM              -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="backend">
+    <h2>4. Backend: FastAPI + LLM</h2>
+
+    <h3>Архитектура</h3>
+
+    <p>Backend &mdash; 7 модулей в <code>app/</code>. Чистая структура, без избыточности:</p>
+
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+flowchart TB
+    API["FastAPI app\nmain.py"] --> Router["Router\nrouters/cook.py"]
+    Router --> Vision["VisionService\nservices/vision.py"]
+    Router --> Chef["ChefService\nservices/chefs.py"]
+    Vision --> LLM["LLMClient\nservices/llm_client.py"]
+    Chef --> LLM
+    LLM --> OC["OpenCode Go\nAPI"]
+    API --> Config["Settings\nconfig.py"]
+    Vision --> Utils["Utils\nservices/utils.py"]
+    Chef --> Utils
+
+    style API fill:#6c5ce7,stroke:#6c5ce7,color:#fff
+    style LLM fill:#cf222e,stroke:#cf222e,color:#fff
+    style OC fill:#9a6700,stroke:#9a6700,color:#fff
+    style Config fill:#656d76,stroke:#656d76,color:#fff
+      </div>
+    </div>
+
+    <h3>Два эндпоинта &mdash; два шага</h3>
+
+    <p>Весь UX сводится к двум HTTP-вызовам:</p>
+
+    <pre><code><span class="code-label">POST /api/cook</span>
+Фото JPEG (multipart)  -->  [{"name": "курица"}, {"name": "рис"}]
+
+<span class="code-label">POST /api/recipe</span>
+{"products": ["курица", "рис"], "level": "dorm"}  -->  Recipe JSON</code></pre>
+
+    <h3>Три повара</h3>
+
+    <p>Идея простая: один и тот же LLM получает разные промпты в зависимости от уровня. Не три модели &mdash; один промпт меняет контекст:</p>
+
+    <table>
+      <tr>
+        <th>Уровень</th>
+        <th>Кто ты</th>
+        <th>Ингредиенты</th>
+        <th>Время</th>
+      </tr>
+      <tr>
+        <td><strong>Общажный</strong></td>
+        <td>Повар из общаги</td>
+        <td>4-6</td>
+        <td>до 20 мин</td>
+      </tr>
+      <tr>
+        <td><strong>Ресторан</strong></td>
+        <td>Шеф ресторана</td>
+        <td>7-12</td>
+        <td>20-60 мин</td>
+      </tr>
+      <tr>
+        <td><strong>Мишлен</strong></td>
+        <td>Шеф с мишленовской звездой</td>
+        <td>10-18</td>
+        <td>без ограничений</td>
+      </tr>
+    </table>
+
+    <p>Промпт для общажного повара начинается так:</p>
+
+    <pre><code><span class="code-label">chefs.py &mdash; DORM_PROMPT</span>
+Ты &mdash; общажный повар. У тебя минимум инструментов
+(сковорода, кастрюля, нож, микроволновка).
+Максимум 4-6 ингредиентов. Время готовки до 20 минут.
+Только базовые техники.
+Формат ответа &mdash; строгий JSON на русском языке...</code></pre>
+
+    <h3>Единая Recipe модель</h3>
+
+    <p>После прожарки все три уровня сводятся к одной модели. Общие поля всегда есть, специфичные для уровня &mdash; nullable:</p>
+
+    <pre><code><span class="code-label">models/schemas.py</span>
+class Recipe(BaseModel):
+    title: str
+    ingredients: list[Ingredient]
+    steps: list[str]
+    cook_time: str
+    difficulty: Literal["easy", "medium", "hard"]
+
+    # Опциональные (зависят от уровня)
+    techniques: list[str] | None = None
+    equipment: list[str] | None = None
+    plating: str | None = None
+    chef_tip: str | None = None
+    pairing: str | None = None</code></pre>
+
+    <h3>LLMClient: Semaphore и fallback</h3>
+
+    <p>OpenCode API &mdash; штука деликатная. Одновременно два запроса &mdash; и он может вернуть 429. Решение: <code>asyncio.Semaphore(1)</code>. Один запрос за раз, остальные ждут:</p>
+
+    <pre><code><span class="code-label">llm_client.py</span>
+self._semaphore = asyncio.Semaphore(
+    settings.max_concurrent_llm_requests  # = 1
+)
+
+async def chat_completion(self, model, messages, ...):
+    async with self._semaphore:
+        response = await self._client.post(
+            "/chat/completions", json=payload
+        )
+        response.raise_for_status()
+        return response.json()</code></pre>
+
+    <p>Fallback работает просто: primary model &rarr; exception &rarr; fallback model. Если VISION_MODEL (mimo-v2.5) упал, пробуем qwen3.7-plus. Если оба упали &mdash; возвращаем пустой список. Пользователь видит &laquo;Продукты не распознаны&raquo;, а не краш.</p>
+
+    <h3>Парсинг JSON от LLM</h3>
+
+    <p>LLM-модели иногда отвечают чистым JSON, иногда оборачивают в markdown code fence, иногда добавляют текст до/после. Утилита <code>extract_json_object</code> проходит три стадии:</p>
+
+    <pre><code><span class="code-label">services/utils.py</span>
+def extract_json_object(text: str) -> dict | None:
+    # 1. Прямой парсинг
+    result = json.loads(text)           # Чистый JSON?
+    if isinstance(result, dict): return result
+
+    # 2. Code fence
+    fenced = extract_code_fence(text)   # ```json ... ```?
+    result = json.loads(fenced)
+    if isinstance(result, dict): return result
+
+    # 3. Regex с подсчётом скобок
+    # Ищем {...} с правильным балансом
+    for i, ch in enumerate(text):
+        if ch == "{":
+            # ... балансируем depth ...</code></pre>
+
+    <h3>MIME spoofing и валидация</h3>
+
+    <p>Кто-то попробует загрузить PNG с заголовком JPEG? Не пройдёт. Проверяем magic bytes:</p>
+
+    <pre><code><span class="code-label">routers/cook.py</span>
+# Валидация content-type
+if image.content_type not in settings.allowed_image_formats:
+    raise HTTPException(422, "Файл должен быть JPEG")
+
+# Валидация magic bytes (анти-spoofing)
+if contents[:3] != b"\xff\xd8\xff":
+    raise HTTPException(422, "Файл не является JPEG")
+
+# Валидация размера (bounded read, защита от OOM)
+max_bytes = settings.max_image_size_mb * 1024 * 1024
+contents = await image.read(max_bytes + 1)</code></pre>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- 5. Android: Jetpack Compose            -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="android">
+    <h2>5. Android: Jetpack Compose</h2>
+
+    <h3>Навигация без NavHost</h3>
+
+    <p>Вместо навигационного графа &mdash; sealed class. Каждый экран &mdash; состояние. ViewModel хранит <code>StateFlow&lt;ScreenState&gt;</code>, Composable делает <code>when</code>:</p>
+
+    <pre><code><span class="code-label">CookViewModel.kt</span>
+sealed class ScreenState {
+    data object Camera : ScreenState()
+    data class AnalyzingProducts(...) : ScreenState()
+    data class Products(val items: List&lt;String&gt;) : ScreenState()
+    data class GeneratingRecipe(...) : ScreenState()
+    data class Recipe(val recipe: RecipeData) : ScreenState()
+    data class Error(val message: String) : ScreenState()
+}
+
+<span class="code-label">MainActivity.kt</span>
+@Composable
+fun CookApp(viewModel: CookViewModel = viewModel()) {
+    val state by viewModel.state.collectAsState()
+    when (val s = state) {
+        is ScreenState.Camera -> CameraScreen(...)
+        is ScreenState.Products -> ProductScreen(...)
+        is ScreenState.Recipe -> RecipeScreen(...)
+        // ...
+    }
+}</code></pre>
+
+    <p>Пять экранов, ни одной навигационной ошибки. <code>backToCamera()</code> просто ставит <code>_state.value = ScreenState.Camera</code>. Попробуй так сломать.</p>
+
+    <h3>Экраны</h3>
+
+    <table>
+      <tr>
+        <th>Экран</th>
+        <th>Файл</th>
+        <th>Что делает</th>
+      </tr>
+      <tr>
+        <td>Camera</td>
+        <td><code>CameraScreen.kt</code></td>
+        <td>Кнопка &laquo;Сделать фото&raquo;, запуск Intent</td>
+      </tr>
+      <tr>
+        <td>AnalyzingProducts</td>
+        <td><code>LoadingScreen.kt</code></td>
+        <td>Спиннер + &laquo;Анализирую продукты...&raquo;</td>
+      </tr>
+      <tr>
+        <td>Products</td>
+        <td><code>ProductScreen.kt</code></td>
+        <td>Чипсы с продуктами, выбор уровня повара</td>
+      </tr>
+      <tr>
+        <td>GeneratingRecipe</td>
+        <td><code>LoadingScreen.kt</code></td>
+        <td>Спиннер + &laquo;Шеф-повар готовит рецепт...&raquo;</td>
+      </tr>
+      <tr>
+        <td>Recipe</td>
+        <td><code>RecipeScreen.kt</code></td>
+        <td>Полный рецепт: ингредиенты, шаги, советы</td>
+      </tr>
+    </table>
+
+    <h3>Network: Retrofit + Kotlin Serialization</h3>
+
+    <p>Два метода в API-интерфейсе, один Retrofit-клиент с таймаутами и логированием:</p>
+
+    <pre><code><span class="code-label">CookApi.kt</span>
+interface CookApi {
+    @Multipart
+    @POST("api/cook")
+    suspend fun recognizeProducts(
+        @Part image: MultipartBody.Part,
+    ): CookResponse
+
+    @POST("api/recipe")
+    suspend fun generateRecipe(
+        @Body request: RecipeRequest,
+    ): RecipeResponse
+}</code></pre>
+
+    <p>Logging включён только в debug. <code>BuildConfig.DEBUG</code> определяет уровень логирования &mdash; HEADERS в dev, NONE в release. Не засоряем Logcat на продакшене.</p>
+
+    <h3>EXIF rotation</h3>
+
+    <p>Смартфоны любят поворачивать JPEG по EXIF-ориентации. Без обработки фото от камеры приходит боком. Функция <code>compressWithExifRotation</code> читает <code>ExifInterface</code>, строит <code>Matrix</code>, применяет поворот + downscale, и сжимает обратно в JPEG:</p>
+
+    <pre><code><span class="code-label">CameraScreen.kt &mdash; compressWithExifRotation</span>
+val exif = ExifInterface(ByteArrayInputStream(jpegBytes))
+val orientation = exif.getAttributeInt(
+    ExifInterface.TAG_ORIENTATION,
+    ExifInterface.ORIENTATION_NORMAL,
+)
+
+when (orientation) {
+    ORIENTATION_ROTATE_90  -> matrix.postRotate(90f)
+    ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+    ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+    // + flip, transpose, transverse
+}
+
+val result = Bitmap.createBitmap(
+    bitmap, 0, 0, bitmap.width, bitmap.height,
+    matrix, true
+)</code></pre>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- 6. Большой пивот: CameraX -> Intent    -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="pivot">
+    <h2>6. Большой пивот: CameraX &rarr; Intent</h2>
+
+    <p>Это была самая болезненная и самая правильная вещь, которую мы сделали за всю разработку.</p>
+
+    <div class="card card-red">
+      <h4>CameraX: что было</h4>
+      <p>CameraX с ImageAnalysis, PreviewView, use cases, lifecycle-обвязка, permission handling, превью на экране, сохранение в MediaStore. <strong>150+ строк кода.</strong> Три файла: CameraFragment, CameraConfig, CameraHelper.</p>
+      <p>И всё это для MVP. Для приложения, где пользователь делает одно фото и всё.</p>
+    </div>
+
+    <div class="card card-green">
+      <h4>Intent: что стало</h4>
+      <p><code>ActivityResultContracts.TakePicture()</code> + FileProvider. Системная камера, минимум кода, zero permission (CAMERA не нужен, приложение не открывает камеру &mdash; оно просит систему это сделать).</p>
+    </div>
+
+    <pre><code><span class="code-label">CameraScreen.kt &mdash; вся логика камеры</span>
+val cameraLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.TakePicture(),
+    onResult = { success ->
+        if (success && photoFile.exists()) {
+            val bytes = photoFile.readBytes()
+            val compressed = compressWithExifRotation(bytes)
+            onPhotoCaptured(compressed)
+        }
+    },
+)
+
+Button(onClick = { cameraLauncher.launch(photoUri) }) {
+    Text("Сделать фото")
+}</code></pre>
+
+    <p><strong>~20 строк кода</strong> вместо 150+. Не нужен CAMERA permission. Не нужно управлять lifecycle камеры. Не нужно делать превью. Системное приложение камеры делает всё это лучше, чем мы напишем за неделю.</p>
+
+    <div class="callout">
+      <h4>Почему так правильно для MVP</h4>
+      <ul>
+        <li>MVP &mdash; это проверка гипотезы, а не production-ready приложение</li>
+        <li>Пользователь не различает, какая камера &mdash; системную или встроенную</li>
+        <li>Мы сэкономили <strong>~130 строк кода</strong> и часы на отладку CameraX</li>
+        <li>Когда гипотеза подтвердится &mdash; переписать на CameraX будет тривиально</li>
+      </ul>
+    </div>
+
+    <p>Удалили dependency на CameraX из <code>build.gradle.kts</code>, выпилили три файла, оставили один <code>CameraScreen.kt</code>. Чистота.</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- 7. Code Review: 6 P1 findings          -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="review">
+    <h2>7. Code Review: 6 P1 findings</h2>
+
+    <p>Код написан &mdash; не значит готово. Запустили <strong>code-review-workflow</strong> &mdash; самодельный workflow на TypeScript из <code>.claude/workflows/</code>.</p>
+
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+flowchart LR
+    Code["Код"] --> Reviewer["code-reviewer\n(DeepSeek v4-pro)"]
+    Reviewer --> Report["6 P1 findings"]
+    Report --> Fix["Исправления"]
+    Fix --> Re-review["Re-review"]
+    Re-review --> Pass["All clear"]
+
+    style Reviewer fill:#cf222e,stroke:#cf222e,color:#fff
+    style Report fill:#9a6700,stroke:#9a6700,color:#fff
+    style Pass fill:#1a7f37,stroke:#1a7f37,color:#fff
+      </div>
+    </div>
+
+    <p>Reviewer &mdash; read-only агент на <code>deepseek-v4-pro</code>. Он смотрит код и выдаёт findings. Все P1 (критические) нашли и пофиксили:</p>
+
+    <table>
+      <tr>
+        <th>#</th>
+        <th>Finding</th>
+        <th>Что было</th>
+        <th>Что стало</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>MIME spoofing</td>
+        <td>Проверялся только content-type</td>
+        <td>Добавлена проверка magic bytes <code>\xff\xd8\xff</code></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Rate limit</td>
+        <td>Нет ограничения на LLM-вызовы</td>
+        <td><code>Semaphore(1)</code> в LLMClient</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>OOM на загрузке</td>
+        <td><code>await image.read()</code> без лимита</td>
+        <td><code>read(max_bytes + 1)</code> bounded read</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>EXIF rotation</td>
+        <td>Фото могло прийти боком</td>
+        <td><code>compressWithExifRotation</code> с Matrix</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>LLM JSON парсинг</td>
+        <td>Только прямой <code>json.loads</code></td>
+        <td>3-уровневый парсинг: direct &rarr; fence &rarr; regex</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>Logging в debug</td>
+        <td>HTTP logging всегда включён</td>
+        <td><code>BuildConfig.DEBUG</code> / <code>DEBUG_LOGGING</code></td>
+      </tr>
+    </table>
+
+    <p>Каждый finding &mdash; реальная проблема, которая могла бы сломать приложение на продакшене. Code review перед деплоем &mdash; не формальность, а необходимость.</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- 8. 57 тестов                           -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="testing">
+    <h2>8. 57 тестов</h2>
+
+    <p>57 тестов. Ни один не написан вручную. Все &mdash; субагентом по тестам на <code>mimo-v2.5</code>.</p>
+
+    <div class="card card-blue">
+      <h4>Распределение тестов</h4>
+      <table>
+        <tr><td><code>test_api.py</code></td><td>Интеграционные тесты эндпоинтов</td><td><strong>14</strong> тестов</td></tr>
+        <tr><td><code>test_vision.py</code></td><td>VisionService + JSON extraction</td><td><strong>17</strong> тестов</td></tr>
+        <tr><td><code>test_chefs.py</code></td><td>ChefService + prompts + utils</td><td><strong>26</strong> тестов</td></tr>
+      </table>
+    </div>
+
+    <h3>Что покрыто</h3>
+
+    <ul>
+      <li><strong>Happy path</strong> &mdash; все три уровня повара, все эндпоинты</li>
+      <li><strong>Retry logic</strong> &mdash; primary model падает, fallback спасает</li>
+      <li><strong>JSON extraction</strong> &mdash; code fence, surrounding text, malformed</li>
+      <li><strong>Validation</strong> &mdash; пустые списки, невалидные уровни, MIME spoofing</li>
+      <li><strong>Boundary cases</strong> &mdash; файл > 2MB, PNG вместо JPEG, None в content</li>
+      <li><strong>Prompts</strong> &mdash; проверка что каждый промпт содержит нужные поля</li>
+    </ul>
+
+    <pre><code><span class="code-label">test_api.py &mdash; MIME spoofing test</span>
+def test_non_jpeg_magic_bytes(self, client):
+    """JPEG content-type but wrong magic bytes -> 422."""
+    response = client.post(
+        "/api/cook",
+        files={"image": ("photo.jpg", b"\x89PNG", "image/jpeg")},
+    )
+    assert response.status_code == 422
+    assert "JPEG" in response.json()["detail"]</code></pre>
+
+    <p>Пушкин, что ли, будет тесты писать? Субагент &mdash; напишет. И написал. 57 штук, все зелёные.</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- 9. ОГОНЬ!!!!                           -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="fire">
+    <div class="fire-moment">
+      <span class="emoji">🔥</span>
+      <h2>ОГОНЬ!!!! ЙЁЁЁЁЁЁ</h2>
+      <p style="font-size:1.15em; color: var(--text-muted); max-width:500px; margin:0 auto;">Когда всё заработало впервые</p>
+    </div>
+
+    <p>Запустили backend на <code>localhost:8080</code>. Открыли приложение на телефоне. Нажали &laquo;Сделать фото&raquo;. Сфотографировали курицу и яйца на кухне.</p>
+
+    <p>Спиннер крутился секунд 5. Потом &mdash; экран с продуктами:</p>
+
+    <div class="card card-green">
+      <h4>Распознано:</h4>
+      <p>куриное филе, яйца, молоко</p>
+    </div>
+
+    <p>Нажали &laquo;Общажный&raquo;. Подождали ещё секунд 10. И на экране появился рецепт:</p>
+
+    <div class="card card-accent">
+      <h4>Яичница с курицей по-общажному</h4>
+      <p><strong>Ингредиенты:</strong> куриное филе (200г), яйца (3 шт), молоко (50мл), масло (1 ст.л.)</p>
+      <p><strong>Шаги:</strong></p>
+      <ol>
+        <li>Нарезать куриное филе мелкими кусочками</li>
+        <li>Обжарить на сковороде до золотистого цвета</li>
+        <li>Взбить яйца с молоком</li>
+        <li>Залить курицу яйцами, жарить 3-4 минуты</li>
+      </ol>
+      <p><strong>Время:</strong> 15 минут &middot; <strong>Сложность:</strong> easy</p>
+      <p><strong>Совет:</strong> Используйте готовый рис для экономии времени</p>
+    </div>
+
+    <p>Всё. Вот это момент. Сфоткал еду &mdash; получил рецепт. Backend распознал продукты через vision model, передал в deepseek, тот сгенерировал рецепт, android отрисовал. Весь pipeline работает.</p>
+  </section>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- 10. Выводы и инсайты                   -->
+  <!-- ═══════════════════════════════════════ -->
+  <section id="insights">
+    <h2>9. Выводы и инсайты</h2>
+
+    <div class="card card-accent">
+      <h4>Spec-driven работает</h4>
+      <p>41 задача, ни одна не переписана. Когда спецификация чёткая, субагент пишет код правильно с первого раза. Не потому что модель умная, а потому что ей не нужно думать &laquo;а что имелось в виду&raquo;.</p>
+    </div>
+
+    <div class="card card-orange">
+      <h4>Прожарка экономит время</h4>
+      <p>Три модели рецептов вместо одной, NavHost вместо sealed class, CameraX вместо Intent &mdash; всё это нашли ДО написания кода. Один час ревью сэкономил десять часов переделки.</p>
+    </div>
+
+    <div class="card card-green">
+      <h4>MVP = удалять, а не добавлять</h4>
+      <p>Самое важное решение &mdash; выпилить CameraX. Не &laquo;давайте допилим&raquo;, а &laquo;давайте уберём&raquo;. 130 строк кода, которые не нужны для проверки гипотезы. MVP про минимальность, а не про &laquo;почти готово&raquo;.</p>
+    </div>
+
+    <div class="card card-blue">
+      <h4>Многоагентный workflow</h4>
+      <p>Пять разных агентов за одну сессию:</p>
+      <ul>
+        <li><strong>openspec-manager</strong> &mdash; спецификации</li>
+        <li><strong>pragmatist</strong> &mdash; архитектурный ревью</li>
+        <li><strong>android-coder</strong> + <strong>py-backend-coder</strong> &mdash; код</li>
+        <li><strong>code-reviewer</strong> &mdash; ревью</li>
+        <li><strong>tester-agent</strong> &mdash; тесты</li>
+      </ul>
+      <p>Каждый делает своё дело. Никто не пытается быть всемогущим.</p>
+    </div>
+
+    <div class="card card-red">
+      <h4>LLM-парсинг &mdash; это боль</h4>
+      <p>LLM возвращают JSON по-разному: чистый, в code fence, с текстом вокруг. <code>extract_json_object</code> с тремя стадиями парсинга &mdash; это не перестраховка, а необходимость. Оставлять LLM додумывать &mdash; она не додумает.</p>
+    </div>
+
+    <h3>Числа за сессию</h3>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="number">41</div>
+        <div class="label">Задача в спеках</div>
+      </div>
+      <div class="stat">
+        <div class="number">57</div>
+        <div class="label">Тестов написано</div>
+      </div>
+      <div class="stat">
+        <div class="number">6</div>
+        <div class="label">P1 fixes</div>
+      </div>
+      <div class="stat">
+        <div class="number">1</div>
+        <div class="label">Пивот (правильный)</div>
+      </div>
+    </div>
+
+    <h3>Технический стек итого</h3>
+
+    <pre><code><span class="code-label">Структура проекта</span>
+cook/
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # FastAPI entry, lifespan
+│   │   ├── config.py            # Settings (pydantic-settings)
+│   │   ├── models/schemas.py    # Product, Recipe, Request/Response
+│   │   ├── routers/cook.py      # POST /api/cook, POST /api/recipe
+│   │   └── services/
+│   │       ├── llm_client.py    # HTTPX + Semaphore + fallback
+│   │       ├── vision.py        # VisionService (mimo-v2.5)
+│   │       ├── chefs.py         # ChefService (3 prompts)
+│   │       └── utils.py         # JSON extraction (3 strategies)
+│   └── tests/                   # 57 tests (pytest-asyncio)
+│
+├── android/app/src/main/
+│   ├── AndroidManifest.xml
+│   └── java/com/cook/app/
+│       ├── MainActivity.kt      # Single activity
+│       ├── CookViewModel.kt     # StateFlow + sealed class
+│       ├── network/
+│       │   ├── CookApi.kt       # Retrofit interface
+│       │   ├── Models.kt        # Kotlinx serialization
+│       │   └── RetrofitClient.kt# Singleton client
+│       └── ui/
+│           ├── CameraScreen.kt  # Intent camera + EXIF
+│           ├── ProductScreen.kt # Chips + level cards
+│           ├── RecipeScreen.kt  # Full recipe display
+│           └── LoadingScreen.kt # Progress indicators</code></pre>
+
+    <hr>
+
+    <p style="text-align:center; color:var(--text-muted); font-size:1.1em; margin-top:40px;">
+      <em>12 часов от пустого репозитория до работающего приложения на телефоне.</em><br>
+      <em>Spec-driven + многоагентный workflow + правильный MVP = огонь.</em>
+    </p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    Написано <strong>сборной агентов</strong>:
+    openspec-manager, pragmatist, py-backend-coder, android-coder, code-reviewer, tester-agent.
+    <br>Актуально на 2026-06-21.
+    <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+  </footer>
+
+</div><!-- .container -->
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      darkMode: false,
+      background: '#ffffff',
+      primaryColor: '#f1f0ff',
+      primaryBorderColor: '#6c5ce7',
+      lineColor: '#1f2328',
+      textColor: '#1f2328',
+      secondaryColor: '#ddf4ff',
+      tertiaryColor: '#ffffff'
+    },
+    flowchart: { useMaxWidth: false },
+    sequence: { useMaxWidth: false }
+  });
+</script>
+
+</body>
+</html>
