@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Start: Claude Code + агенты за 10 минут</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #fafbfc;
+    --card-bg: #ffffff;
+    --border: #e0e0e0;
+    --text: #2d3436;
+    --text-muted: #636e72;
+    --accent: #6c5ce7;
+    --accent-light: #f3f0ff;
+    --code-bg: #f6f8fa;
+    --green: #00b894;
+    --orange: #e17055;
+    --red: #d63031;
+    --purple: #6c5ce7;
+    --teal: #008080;
+    --yellow: #b08800;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 0 16px;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 0 80px;
+  }
+
+  h1 {
+    font-size: 2.2em;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 1.15em;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+  }
+
+  section {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 36px 32px;
+    margin-bottom: 36px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 6px rgba(0,0,0,0.04);
+  }
+
+  section h2 {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  section h2 .emoji { margin-right: 8px; }
+
+  section .section-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+
+  h3 {
+    font-size: 1.15em;
+    margin: 24px 0 10px;
+    color: var(--accent);
+  }
+
+  p { margin-bottom: 14px; }
+
+  .highlight-box {
+    background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+
+  .highlight-box h3 {
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin-bottom: 8px;
+    margin-top: 0;
+  }
+
+  .highlight-box p { margin-bottom: 0; }
+
+  .tag {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 2px 4px 2px 0;
+  }
+
+  ul.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 28px;
+    list-style: none;
+    margin-top: 16px;
+    padding: 0;
+  }
+
+  ul.grid li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  ul.grid li::before {
+    content: "\2022";
+    position: absolute;
+    left: 4px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.9em;
+    overflow-x: auto;
+    margin: 14px 0;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 0.9em;
+  }
+
+  .code-block code {
+    background: none;
+    padding: 0;
+  }
+
+  .yaml-key { color: var(--accent); font-weight: 600; }
+  .yaml-val { color: var(--green); }
+  .yaml-comment { color: var(--text-muted); font-style: italic; }
+
+  kbd {
+    display: inline-block;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 0.9em;
+    box-shadow: 0 1px 0 var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.92em;
+  }
+
+  th {
+    background: var(--accent-light);
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:hover td {
+    background: #f9fbfd;
+  }
+
+  .tip {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fffff0;
+    border: 1px solid #f0e68c;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 0.95em;
+  }
+
+  .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+  .diagram-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 16px 0;
+    margin: 0 -16px;
+  }
+  .diagram-wrapper svg {
+    max-width: none !important;
+    height: auto !important;
+  }
+
+  ul, ol { padding-left: 24px; margin: 10px 0; }
+  li { margin-bottom: 6px; }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .toc {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 28px;
+    margin: 24px 0;
+  }
+
+  .toc h3 { margin-top: 0; color: var(--text); }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin-bottom: 4px; }
+
+  .hr-dashed {
+    border: none;
+    border-top: 2px dashed var(--border);
+    margin: 40px 0;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+  }
+
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  .comparison-grid .card {
+    margin: 0;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 20px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-green { border-left: 4px solid var(--green); background: #f6fff8; }
+  .card-orange { border-left: 4px solid var(--orange); background: #fff8f0; }
+  .card-purple { border-left: 4px solid var(--purple); background: #f8f4ff; }
+  .card-red { border-left: 4px solid var(--red); background: #fff5f5; }
+  .card-yellow { border-left: 4px solid var(--yellow); background: #fffde6; }
+
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.9em;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .step-header h3 {
+    margin: 0;
+    font-size: 1.15em;
+  }
+
+  @media (max-width: 700px) {
+    .comparison-grid, ul.grid {
+      grid-template-columns: 1fr;
+    }
+    section { padding: 24px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>Quick Start: Claude Code + агенты за 10 минут</h1>
+  <p class="subtitle">Установка, настройка прокси, подключение MCP и первый запуск субагента &mdash; всё по шагам</p>
+
+  <!-- ═══════════ СОДЕРЖАНИЕ ═══════════ -->
+
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#intro">Что такое Claude Code и зачем субагенты</a></li>
+      <li><a href="#install">Установка и запуск Claude Code</a></li>
+      <li><a href="#proxy">Подключение OpenCode-прокси</a></li>
+      <li><a href="#mcp">Подключение MCP-поиска</a></li>
+      <li><a href="#first-agent">Первый запуск агента</a></li>
+      <li><a href="#commands">Пять команд, которые нужно знать</a></li>
+      <li><a href="#create-agent">Как создать своего агента</a></li>
+      <li><a href="#architecture">Архитектура: экосистема</a></li>
+      <li><a href="#next">Что дальше</a></li>
+    </ol>
+  </div>
+
+  <!-- ═══════════ 1. ВВЕДЕНИЕ ═══════════ -->
+
+  <section>
+    <h2 id="intro"><span class="emoji">&#x1f680;</span> Что такое Claude Code и зачем субагенты</h2>
+    <div class="section-subtitle">Коротко: терминальный AI-ассистент, который пишет код и управляет файлами</div>
+
+    <p>
+      <strong>Claude Code</strong> &mdash; это терминальный инструмент от Anthropic.
+      Запускаешь в терминале, он видит твой проект, читает файлы, пишет код,
+      делает коммиты, запускает тесты. Работает как AI pair programmer
+      прямо в консоли.
+    </p>
+
+    <p>
+      Но один Claude &mdash; как один разработчик: хорошо делает одно,
+      но не может одновременно кодить, проводить ревью, документировать и тестировать.
+      <strong>Субагенты</strong> &mdash; это специализированные AI-помощники,
+      каждый со своей ролью. Один пишет бэкенд, другой &mdash; фронт,
+      третий &mdash; документацию. Основной Claude управляет ими как тимлид.
+    </p>
+
+    <div class="highlight-box">
+      <h3>Что ты получишь через 10 минут</h3>
+      <p>
+        <span class="tag">Установленный Claude Code</span>
+        <span class="tag">OpenCode-прокси с DeepSeek</span>
+        <span class="tag">MCP-поиск poisk-mcp</span>
+        <span class="tag">Готовые субагенты</span>
+      </p>
+    </div>
+
+    <ul class="grid">
+      <li><strong>Claude Code</strong> &mdash; терминальный AI-ассистент для кода</li>
+      <li><strong>Субагенты</strong> &mdash; markdown-файлы с конфигурацией (имя, модель, инструменты) и системным промптом в <code>~/.claude/agents/</code></li>
+      <li><strong>OpenCode-прокси</strong> &mdash; перенаправление запросов от Claude Code к другим моделям (DeepSeek, MiMo, MiniMax)</li>
+      <li><strong>MCP</strong> &mdash; протокол для подключения внешних инструментов (поиск, файлы, БД)</li>
+    </ul>
+  </section>
+
+  <!-- ═══════════ 2. УСТАНОВКА ═══════════ -->
+
+  <section>
+    <h2 id="install"><span class="emoji">&#x1f4e6;</span> Установка и запуск Claude Code</h2>
+    <div class="section-subtitle">npm install, проверка версии, запуск в проекте</div>
+
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <h3>Установка</h3>
+    </div>
+
+    <p>Claude Code ставится через npm. Если Node.js уже есть:</p>
+
+    <div class="code-block">
+      <code><span class="yaml-comment"># Установка (если не установлен)</span>
+npm install -g @anthropic-ai/claude-code
+
+<span class="yaml-comment"># Проверить версию</span>
+claude --version</code>
+    </div>
+
+    <div class="tip">
+      <span class="tip-icon">&#x1f4a1;</span>
+      <span>Если <code>npm</code> не установлен &mdash; сначала поставь Node.js:
+      <code>curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && sudo apt install -y nodejs</code></span>
+    </div>
+
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <h3>Запуск</h3>
+    </div>
+
+    <p>Перейди в директорию проекта и запусти:</p>
+
+    <div class="code-block">
+      <code><span class="yaml-comment"># Перейти в проект</span>
+cd /path/to/your/project
+
+<span class="yaml-comment"># Запустить Claude Code</span>
+claude</code>
+    </div>
+
+    <p>
+      Откроется интерактивный терминал. Claude увидит структуру проекта
+      и будет готов к работе. Можно сразу задавать вопросы или ставить задачи.
+    </p>
+
+    <div class="highlight-box">
+      <h3>Первый запуск</h3>
+      <p>
+        При первом запуске Claude предложит создать файл <code>CLAUDE.md</code> &mdash;
+        это память проекта: контекст, правила, особенности. Соглашайся &mdash;
+        потом сможешь отредактировать.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════ 3. ПРОКСИ ═══════════ -->
+
+  <section>
+    <h2 id="proxy"><span class="emoji">&#x1f50c;</span> Подключение OpenCode-прокси</h2>
+    <div class="section-subtitle">DeepSeek, MiMo и другие модели через единый прокси</div>
+
+    <p>
+      Claude Pro/Team подписки нет &mdash; напрямую к Anthropic API подключаться не получится.
+      <strong>OpenCode-прокси</strong> решает эту проблему: он принимает запросы
+      Claude Code и перенаправляет их в другие модели (DeepSeek, MiMo, MiniMax).
+    </p>
+
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <h3>Установка прокси</h3>
+    </div>
+
+    <div class="code-block">
+      <code><span class="yaml-comment"># OpenCode-прокси может быть развёрнут как Go-сервис или Docker-контейнер.</span>
+<span class="yaml-comment"># Уточни способ установки в документации OpenCode.</span>
+<span class="yaml-comment"># После запуска прокси — укажи его в ~/.claude.json:</span></code>
+    </div>
+
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <h3>Настройка Claude Code</h3>
+    </div>
+
+    <p>Добавь прокси в <code>~/.claude.json</code>:</p>
+
+    <div class="code-block">
+      <code>{
+  <span class="yaml-key">"proxy"</span>: <span class="yaml-val">"http://localhost:8080"</span>
+}</code>
+    </div>
+
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <h3>Доступные модели</h3>
+    </div>
+
+    <p>Каждая модель оптимизирована под свой тип задач:</p>
+
+    <table>
+      <tr>
+        <th>Модель</th>
+        <th>Назначение</th>
+        <th>Кто использует</th>
+      </tr>
+      <tr>
+        <td><code>claude-go-deepseek-v4-flash</code></td>
+        <td>Быстрая, для coding-задач</td>
+        <td>Основной Claude, py-backend-coder, frontend-coder, android-coder</td>
+      </tr>
+      <tr>
+        <td><code>claude-go-deepseek-v4-pro</code></td>
+        <td>Мощная, для анализа</td>
+        <td>code-reviewer, pragmatist</td>
+      </tr>
+      <tr>
+        <td><code>claude-go-mimo-v2.5</code></td>
+        <td>Agentic reasoning, длинный контекст</td>
+        <td>writer-agent, tester-agent</td>
+      </tr>
+      <tr>
+        <td><code>claude-go-minimax-m3</code></td>
+        <td>Архитектурные решения</td>
+        <td>innovator</td>
+      </tr>
+    </table>
+
+    <div class="tip">
+      <span class="tip-icon">&#x1f4a1;</span>
+      <span>Прокси просто передаёт model ID в OpenCode Go &mdash; сам не решает,
+      какую модель использовать. Модель указывается в frontmatter каждого агента.</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 4. MCP ═══════════ -->
+
+  <section>
+    <h2 id="mcp"><span class="emoji">&#x1f50d;</span> Подключение MCP-поиска</h2>
+    <div class="section-subtitle">poisk-mcp &mdash; веб-поиск и чтение страниц для Claude</div>
+
+    <p>
+      Встроенный <code>WebSearch</code> Claude Code через OpenCode-прокси
+      <strong>не работает</strong> (ошибка схемы DeepSeek). Для веб-поиска нужен
+      MCP-сервер &mdash; внешний процесс, который Claude вызывает как инструмент.
+    </p>
+
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <h3>Подключение poisk-mcp</h3>
+    </div>
+
+    <div class="code-block">
+      <code><span class="yaml-comment"># Добавить MCP-сервер глобально</span>
+claude mcp add poisk-mcp --stdio \
+  /home/andrei/mcp/poisk-mcp/venv/bin/python \
+  /home/andrei/mcp/poisk-mcp/server.py
+
+<span class="yaml-comment"># Проверить, что сервер подключён</span>
+claude mcp list</code>
+    </div>
+
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <h3>Основные инструменты</h3>
+    </div>
+
+    <ul class="grid">
+      <li><code>search_web</code> &mdash; поиск по запросу, возвращает ссылки с описаниями</li>
+      <li><code>read_webpage</code> &mdash; чтение содержимого страницы (HTML &rarr; текст)</li>
+      <li><code>browse_summarize</code> &mdash; чтение + автоматическое резюме</li>
+      <li><code>web_research</code> &mdash; глубокое исследование за один вызов</li>
+    </ul>
+
+    <div class="highlight-box">
+      <h3>Пример вызова</h3>
+      <p>
+        Claude вызывает <code>search_web("MCP servers 2026")</code> &mdash;
+        poisk-mcp ищет в вебе, возвращает список ссылок.
+        Claude читает лучшие через <code>read_webpage</code> и анализирует.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════ 5. ПЕРВЫЙ АГЕНТ ═══════════ -->
+
+  <section>
+    <h2 id="first-agent"><span class="emoji">&#x1f916;</span> Первый запуск агента</h2>
+    <div class="section-subtitle">Субагенты &mdash; это markdown-файлы с промптом и конфигурацией</div>
+
+    <p>
+      Агенты живут в <code>~/.claude/agents/</code> &mdash; это markdown-файлы
+      с YAML-frontmatter. В frontmatter указываются имя, описание, модель
+      и доступные инструменты. Claude Code загружает их и вызывает
+      через Agent tool.
+    </p>
+
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <h3>Посмотри, какие агенты уже есть</h3>
+    </div>
+
+    <div class="code-block">
+      <code>ls ~/.claude/agents/</code>
+    </div>
+
+    <p>Типичный набор:</p>
+
+    <ul class="grid">
+      <li><code>py-backend-coder</code> &mdash; Python и backend</li>
+      <li><code>frontend-coder</code> &mdash; React/TS/Vue</li>
+      <li><code>code-reviewer</code> &mdash; ревью кода, read-only</li>
+      <li><code>writer-agent</code> &mdash; документация</li>
+      <li><code>tester-agent</code> &mdash; тесты</li>
+      <li><code>explorer</code> &mdash; быстрый поиск по коду</li>
+      <li><code>innovator</code> &mdash; архитектор-инноватор</li>
+      <li><code>pragmatist</code> &mdash; архитектор-прагматик</li>
+    </ul>
+
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <h3>Вызов агента</h3>
+    </div>
+
+    <p>Чтобы вызвать субагента, скажи Claude:</p>
+
+    <div class="code-block">
+      <code><span class="yaml-comment"># Прямой вызов &mdash; в интерактивном чате</span>
+Используй агента py-backend-coder
+Задача: напиши simple HTTP сервер на FastAPI
+
+<span class="yaml-comment"># Или через Agent tool (автоматически)</span>
+Claude сам решит, какого агента вызвать,
+исходя из описания задачи</code>
+    </div>
+
+    <div class="card card-accent">
+      <h3>Как это работает внутри</h3>
+      <p>
+        Claude Code читает файл агента, берёт оттуда промпт и frontmatter,
+        создаёт дочерний поток с указанной моделью и инструментами,
+        передаёт задачу. Агент выполняет, возвращает результат.
+        Основной Claude получает ответ и интегрирует его в работу.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════ 6. КОМАНДЫ ═══════════ -->
+
+  <section>
+    <h2 id="commands"><span class="emoji">&#x2328;&#xfe0f;</span> Пять команд, которые нужно знать</h2>
+    <div class="section-subtitle">Базовый набор для повседневной работы</div>
+
+    <table>
+      <tr>
+        <th>Команда</th>
+        <th>Что делает</th>
+        <th>Когда использовать</th>
+      </tr>
+      <tr>
+        <td><kbd>/init</kbd></td>
+        <td>Инициализирует проект: создаёт <code>CLAUDE.md</code> с контекстом</td>
+        <td>Первый запуск в новом проекте</td>
+      </tr>
+      <tr>
+        <td><kbd>/compact</kbd></td>
+        <td>Сжимает контекст сессии</td>
+        <td>Когда контекст переполнен и Claude начинает "забывать"</td>
+      </tr>
+      <tr>
+        <td><kbd>/context</kbd></td>
+        <td>Показывает, сколько контекста занято</td>
+        <td>Чтобы понять, сколько ещё места осталось</td>
+      </tr>
+      <tr>
+        <td><code>claude mcp list</code></td>
+        <td>Показывает активные MCP-серверы</td>
+        <td>Проверить, подключены ли poisk-mcp и другие</td>
+      </tr>
+      <tr>
+        <td><kbd>/agent &lt;name&gt;</kbd></td>
+        <td>Запускает субагента по имени</td>
+        <td>Когда нужно delegation конкретному агенту</td>
+      </tr>
+    </table>
+
+    <div class="tip">
+      <span class="tip-icon">&#x1f4a1;</span>
+      <span><strong>Совет:</strong> <kbd>/compact</kbd> &mdash; первый друг, когда сессия
+      длинная. Claude начнёт повторяться или терять контекст &mdash;
+      компактифицируй, и он сожмёт историю до ключевых фактов.</span>
+    </div>
+  </section>
+
+  <!-- ═══════════ 7. СОЗДАНИЕ АГЕНТА ═══════════ -->
+
+  <section>
+    <h2 id="create-agent"><span class="emoji">&#x270f;&#xfe0f;</span> Как создать своего агента</h2>
+    <div class="section-subtitle">Копируй существующий, меняй frontmatter и промпт</div>
+
+    <p>Самый простой способ &mdash; скопировать уже работающего агента и адаптировать:</p>
+
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <h3>Скопируй шаблон</h3>
+    </div>
+
+    <div class="code-block">
+      <code>cp ~/.claude/agents/explorer.md ~/.claude/agents/my-agent.md</code>
+    </div>
+
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <h3>Отредактируй frontmatter</h3>
+    </div>
+
+    <p>Frontmatter &mdash; это YAML-блок в начале файла между <code>---</code>:</p>
+
+    <div class="code-block">
+      <code><span class="yaml-comment">---</span>
+<span class="yaml-key">name</span>: <span class="yaml-val">my-agent</span>
+<span class="yaml-key">description</span>: <span class="yaml-val">Мой кастомный агент для конкретной задачи</span>
+<span class="yaml-key">model</span>: <span class="yaml-val">claude-go-deepseek-v4-flash</span>
+<span class="yaml-key">tools</span>:
+  - <span class="yaml-val">Read</span>
+  - <span class="yaml-val">Write</span>
+  - <span class="yaml-val">Bash</span>
+<span class="yaml-key">---</span>
+
+<span class="yaml-comment"># Промпт агента</span>
+
+Ты &mdash; агент, который занимается [описание задачи].
+
+<span class="yaml-key">## Правила</span>
+- Правило 1
+- Правило 2</code>
+    </div>
+
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <h3>Ключевые поля frontmatter</h3>
+    </div>
+
+    <table>
+      <tr>
+        <th>Поле</th>
+        <th>Тип</th>
+        <th>Описание</th>
+      </tr>
+      <tr>
+        <td><code>name</code></td>
+        <td>string</td>
+        <td>Уникальное имя агента (используется для вызова)</td>
+      </tr>
+      <tr>
+        <td><code>description</code></td>
+        <td>string</td>
+        <td>Описание роли &mdash; Claude читает его, чтобы выбрать агента</td>
+      </tr>
+      <tr>
+        <td><code>model</code></td>
+        <td>string</td>
+        <td>ID модели: <code>inherit</code> (от родителя) или конкретная модель</td>
+      </tr>
+      <tr>
+        <td><code>tools</code></td>
+        <td>list</td>
+        <td>Какие инструменты доступны: Read, Write, Bash, Agent, Skill и т.д.</td>
+      </tr>
+    </table>
+
+    <div class="highlight-box">
+      <h3>model: inherit</h3>
+      <p>
+        Если указать <code>model: inherit</code> &mdash; агент унаследует модель
+        родительского Claude. Это удобно, когда не нужна отдельная модель.
+        Конкретная модель (например, <code>claude-go-mimo-v2.5</code>) нужна,
+        когда задача требует специализации.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════ 8. АРХИТЕКТУРА ═══════════ -->
+
+  <section>
+    <h2 id="architecture"><span class="emoji">&#x1f4ca;</span> Архитектура: экосистема</h2>
+    <div class="section-subtitle">Как всё связано: Claude Code, прокси, MCP и агенты</div>
+
+    <div class="diagram-wrapper">
+      <div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {'darkMode': false, 'background': '#ffffff'}}}%%
+flowchart TD
+    DEV["&#x1f464; Разработчик<br>Терминал"]
+
+    CC["&#x1f916; Claude Code<br>Основной агент"]
+    PROXY["&#x1f50c; OpenCode Proxy<br>localhost:8080"]
+    MODEL["&#x1f4a1; DeepSeek / MiMo<br>Backend LLM"]
+
+    MCP["&#x1f50d; MCP Servers<br>poisk-mcp, filesystem..."]
+
+    subgraph AGENTS["&#x1f4e6; Субагенты"]
+        direction LR
+        A1["py-backend-coder"]
+        A2["frontend-coder"]
+        A3["code-reviewer"]
+        A4["writer-agent"]
+        A5["tester-agent"]
+        A6["...другие"]
+    end
+
+    FS["&#x1f4c1; Файловая система<br>Проект"]
+
+    DEV <-->|"Интерактивный чат"| CC
+    CC <-->|"API-запросы"| PROXY
+    PROXY <-->|"Модель"| MODEL
+    CC <-->|"Инструменты"| MCP
+    CC -->|"Agent tool"| AGENTS
+    CC <-->|"Чтение/запись"| FS
+
+    style DEV fill:#f3f0ff,stroke:#6c5ce7,stroke-width:2px
+    style CC fill:#6c5ce7,color:#fff,stroke:none,font-weight:700
+    style PROXY fill:#e17055,color:#fff,stroke:none
+    style MODEL fill:#00b894,color:#fff,stroke:none
+    style MCP fill:#b08800,color:#fff,stroke:none
+    style AGENTS fill:#f3f0ff,stroke:#6c5ce7,stroke-width:2px
+    style FS fill:#636e72,color:#fff,stroke:none
+      </div>
+    </div>
+
+    <div class="card card-accent">
+      <h3>Поток данных</h3>
+      <ol>
+        <li>Разработчик пишет запрос в терминале</li>
+        <li>Claude Code получает запрос, анализирует задачу</li>
+        <li>Если нужен веб-поиск &mdash; вызывает MCP-сервер (poisk-mcp)</li>
+        <li>Если задача delegation &mdash; вызывает субагента через Agent tool</li>
+        <li>Запрос к модели идёт через OpenCode-прокси (DeepSeek/MiMo)</li>
+        <li>Результат возвращается разработчику в терминал</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ═══════════ 9. ЧТО ДАЛЬШЕ ═══════════ -->
+
+  <section>
+    <h2 id="next"><span class="emoji">&#x1f31f;</span> Что дальше</h2>
+    <div class="section-subtitle">Полезные статьи для углубления</div>
+
+    <p>Ты настроил рабочую среду. Вот куда двигаться дальше:</p>
+
+    <div class="comparison-grid">
+      <div class="card card-green">
+        <h3 style="margin-top:0;">Типы агентов</h3>
+        <p>
+          <a href="../concepts/dev-agents-about.html">dev-agents-about</a> &mdash;
+          какие бывают агенты, чем отличаются, когда какой использовать.
+        </p>
+      </div>
+
+      <div class="card card-purple">
+        <h3 style="margin-top:0;">Исследование</h3>
+        <p>
+          <a href="research-workflow.html">research-workflow</a> &mdash;
+          deep-research workflow: веерный поиск, верификация, синтез отчёта.
+        </p>
+      </div>
+
+      <div class="card card-orange">
+        <h3 style="margin-top:0;">Команда агентов</h3>
+        <p>
+          <a href="../agents/agents-team-article.html">agents-team-article</a> &mdash;
+          как собрать команду агентов под конкретный проект.
+        </p>
+      </div>
+
+      <div class="card card-accent">
+        <h3 style="margin-top:0;">MCP-протокол</h3>
+        <p>
+          <a href="../concepts/mcp.html">mcp</a> &mdash;
+          что такое MCP, какие серверы бывают, как подключать свои.
+        </p>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h3>Быстрый старт для нетерпеливых</h3>
+      <p>
+        Установил Claude Code &rarr; настроил прокси &rarr; подключил poisk-mcp
+        &rarr; сказал <code>"Используй агента py-backend-coder и напиши HTTP сервер"</code>
+        &mdash; и работаешь. Остальное &mdash; по мере необходимости.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════ ИТОГО ═══════════ -->
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Установка Claude Code &mdash; одна команда npm.
+      Прокси &mdash; один Python-процесс. MCP &mdash; один <code>claude mcp add</code>.
+      Агенты &mdash; markdown-файлы в <code>~/.claude/agents/</code>.
+      Через 10 минут у тебя рабочая мультиагентная среда.
+      Остальное &mdash; по мере необходимости.
+    </p>
+  </div>
+
+  <footer style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.85em;text-align:center;">
+      Создано <strong>writer-agent</strong> через Workflow tool.
+      <br>Актуально на 2026-06-20.
+      <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+  </footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      darkMode: false,
+      background: '#ffffff'
+    },
+    flowchart: { useMaxWidth: false }
+  });
+</script>
+</body>
+</html>
