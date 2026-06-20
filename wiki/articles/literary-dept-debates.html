@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Литературный отдел: дебаты архитекторов</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --surface: #ffffff;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #656d76;
+      --accent: #0969da;
+      --accent-light: #ddf4ff;
+      --green: #1a7f37;
+      --green-light: #dafbe1;
+      --red: #cf222e;
+      --red-light: #ffebe9;
+      --yellow: #9a6700;
+      --yellow-light: #fff8c5;
+      --purple: #8250df;
+      --purple-light: #fbefff;
+      --innovator: #0969da;
+      --pragmatist: #1a7f37;
+      --conservative: #8250df;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    header .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    .meta-line {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 40px 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 24px 0 12px 0;
+    }
+
+    p, li {
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    p { margin-bottom: 12px; }
+
+    ul, ol {
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+    li { margin-bottom: 6px; }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    /* Agent cards */
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .agent-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .agent-card .agent-name {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .agent-card .agent-model {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      font-family: monospace;
+    }
+
+    .agent-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .agent-card li {
+      padding: 4px 0;
+      font-size: 0.88rem;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .agent-card li:last-child { border-bottom: none; }
+
+    .agent-card.innovator { border-top: 3px solid var(--innovator); }
+    .agent-card.pragmatist { border-top: 3px solid var(--pragmatist); }
+    .agent-card.conservative { border-top: 3px solid var(--conservative); }
+
+    .agent-card.innovator .agent-name { color: var(--innovator); }
+    .agent-card.pragmatist .agent-name { color: var(--pragmatist); }
+    .agent-card.conservative .agent-name { color: var(--conservative); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) td { background: #fafbfc; }
+
+    /* Consensus items */
+    .consensus-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .consensus-item:last-child { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-green { background: var(--green-light); color: var(--green); }
+    .badge-red { background: var(--red-light); color: var(--red); }
+    .badge-yellow { background: var(--yellow-light); color: var(--yellow); }
+    .badge-blue { background: var(--accent-light); color: var(--accent); }
+
+    /* Quote / highlight blocks */
+    .quote-block {
+      background: linear-gradient(135deg, #f6f8fa, #eef1f5);
+      border-left: 4px solid var(--purple);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-style: italic;
+      color: var(--text-muted);
+    }
+
+    .highlight-block {
+      background: var(--yellow-light);
+      border: 1px solid var(--yellow);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+
+    /* Diagram wrapper */
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    /* Verdict box */
+    .verdict {
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 28px;
+      margin: 32px 0;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .verdict h2 {
+      color: var(--accent);
+      border: none;
+      margin-top: 0;
+      padding-bottom: 0;
+    }
+
+    .verdict ol {
+      padding-left: 20px;
+      margin: 16px 0;
+    }
+
+    .verdict li {
+      margin-bottom: 8px;
+    }
+
+    /* Status indicators */
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .status-row:last-child { border-bottom: none; }
+
+    .status-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    /* Round label */
+    .round-label {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 12px;
+    }
+
+    .round-1 { background: var(--yellow-light); color: var(--yellow); }
+    .round-2 { background: var(--green-light); color: var(--green); }
+
+    footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      margin: 16px 0;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      .agents-grid { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.5rem; }
+      .container { padding: 24px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header>
+      <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+      <h1>Литературный отдел: дебаты архитекторов</h1>
+      <p class="subtitle">Два раунда, три позиции, один вердикт &mdash; как спроектировали отдел из двух агентов</p>
+      <p class="meta-line">20 июня 2026 &middot; 3 архитектора &middot; 2 раунда &middot; 7 файлов обмена через .triage/</p>
+    </header>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 1. Зачем литературный отдел            -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>1. Зачем нужен литературный отдел</h2>
+
+    <p>
+      У нас 12 AI-агентов, каждый со своей моделью, промптом и зоной ответственности.
+      Вики растёт &mdash; уже 35 статей, и каждую нужно писать, редактировать, проверять на
+      консистентность терминологии. Делать это вручную из основного Claude &mdash; значит постоянно переключать
+      контекст между кодом и документацией.
+    </p>
+
+    <p>
+      Литературный отдел &mdash; это выделенная команда, которая занимается <strong>только
+      контентом</strong>: статьи, README, CHANGELOG, docstrings. Отделяет документирование
+      от разработки, даёт каждому агенту чёткую роль.
+    </p>
+
+    <div class="highlight-block">
+      <strong>Ключевой вопрос дебатов:</strong> Достаточно ли двух агентов (writer + editor),
+      или нужны ещё research-agent, consistency-checker и content-planner?
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 2. Исходный состав                     -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>2. Исходный состав</h2>
+
+    <p>На момент дебатов литературный отдел состоял из двух агентов:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Агент</th>
+          <th>Модель</th>
+          <th>Роль</th>
+          <th>Режим</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>writer-agent</strong></td>
+          <td><code>claude-go-mimo-v2.5</code></td>
+          <td>Создание контента: статьи, README, CHANGELOG</td>
+          <td>Write (редактирует файлы)</td>
+        </tr>
+        <tr>
+          <td><strong>editor-agent</strong></td>
+          <td><code>claude-go-deepseek-v4-flash</code></td>
+          <td>Редактура: стиль, грамматика, факты, терминология</td>
+          <td>Read-only (только читает и комментирует)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart LR
+    W["writer-agent\n(mimo-v2.5)\nСоздаёт контент"] --> E["editor-agent\n(deepseek-v4-flash)\nRead-only ревью"]
+    E -->|"severity: CRITICAL\nили WARNING"| W
+
+    style W fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style E fill:#fbefff,stroke:#8250df,stroke-width:2px
+      </pre>
+    </div>
+
+    <p>
+      Workflow простой: writer пишет, editor проверяет, writer фиксит. Максимум 2 цикла.
+      Но вот что обсуждалось: хватает ли этого? Или нужны дополнительные агенты?
+    </p>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 3. Вопрос к дебатам                    -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>3. Вопрос к дебатам</h2>
+
+    <div class="card card-accent">
+      <p style="font-size:1.05rem;font-weight:600;margin-bottom:12px;">
+        Достаточно ли двух агентов, или нужно добавить:
+      </p>
+      <ul>
+        <li><strong>research-agent</strong> &mdash; сбор материалов и первичных источников перед написанием</li>
+        <li><strong>consistency-checker</strong> &mdash; глобальная проверка терминологии по всей вики</li>
+        <li><strong>content-planner</strong> &mdash; планирование контента, roadmap статей</li>
+      </ul>
+      <p style="margin-top:12px;margin-bottom:0;">
+        Запущены архитектурные дебаты (Triage) &mdash; 3 агента в 2 раунда.
+      </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 4. Участники                           -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>4. Участники дебатов</h2>
+
+    <div class="agents-grid">
+      <div class="agent-card innovator">
+        <div class="agent-name">Innovator</div>
+        <div class="agent-model">minimax-m3</div>
+        <ul>
+          <li>Смелые решения, новые технологии</li>
+          <li>RAG, knowledge graph, DAG</li>
+          <li>Эфемерные субагенты</li>
+          <li>Архитектура как система, не как набор</li>
+        </ul>
+      </div>
+      <div class="agent-card pragmatist">
+        <div class="agent-name">Pragmatist</div>
+        <div class="agent-model">deepseek-v4-pro</div>
+        <ul>
+          <li>Баланс cost / benefit</li>
+          <li>Триггерное расширение</li>
+          <li>0 токенов на необязательное</li>
+          <li>Таблица cost-покрытия на каждый вариант</li>
+        </ul>
+      </div>
+      <div class="agent-card conservative">
+        <div class="agent-name">Conservative</div>
+        <div class="agent-model">qwen3.7-plus</div>
+        <ul>
+          <li>Стабильность, минимум точек отказа</li>
+          <li>Простота отладки</li>
+          <li>Стратегия = человек</li>
+          <li>Расширение по фактическим болям</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 5. Раунд 1: три позиции                -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>5. Раунд 1: Три позиции</h2>
+
+    <p>
+      Каждый архитектор выдвинул свою стратегию. Разброс оказался значительным &mdash;
+      от 0 новых агентов до 3 сразу.
+    </p>
+
+    <!-- Innovator -->
+    <h3 style="color:var(--innovator);">Innovator: Adaptive Multi-Agent с RAG-консистентностью</h3>
+    <span class="round-label round-1">Раунд 1</span>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart TD
+    subgraph ARCH ["Архитектура Innovator"]
+        direction TB
+        PL["content-planner\n(always-on)\nРаз в неделю сканирует вики"] --> |"gap-ы"| TOPIC["Тема"]
+        TOPIC --> W["writer-agent\n(mimo-v2.5)"]
+        W -->|"спавнит до написания"| RA["research-agent\n(ephemeral)\nСбор материалов из вики + интернета"]
+        RA -->|"готовый бриф"| W
+        W -->|"черновик"| ED["editor-agent\n(deepseek-v4-flash)"]
+        ED -->|"есть термины\nиз других статей?"| CC["consistency-checker\n(ephemeral)\nRAG: топ-5 релевантных статей\nпо эмбеддинг-поиску"]
+        CC -->|"дифф терминологии"| ED
+    end
+
+    style PL fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style RA fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style CC fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style W fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style ED fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style TOPIC fill:#fff8c5,stroke:#9a6700,stroke-width:2px
+      </pre>
+    </div>
+
+    <div class="card">
+      <p><strong>Суть:</strong> Добавить всех трёх, но запускать on-demand через Task Tool.
+      Консистентность через RAG-индекс, а не отдельного агента.</p>
+      <p><strong>Логика:</strong> Эфемерные агенты умирают после задачи &mdash; контекст не раздувается.
+      RAG + knowledge graph решают то, что не может read-only editor. Масштабируется с 35 на 350 статей.</p>
+      <p><strong>Стоимость:</strong> Разовая инвестиция в векторный индекс. DAG сложнее отлаживать,
+      но research параллелится с write.</p>
+    </div>
+
+    <!-- Pragmatist -->
+    <h3 style="color:var(--pragmatist);">Pragmatist: Два агента + скрипт</h3>
+    <span class="round-label round-1">Раунд 1</span>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart TD
+    subgraph ARCH ["Архитектура Pragmatist"]
+        direction TB
+        W["writer-agent\n+ блок в промпте:\n'Перед написанием: собери\n3-5 источников через search_web'"]
+        W -->|"черновик"| ED["editor-agent\n(deepseek-v4-flash)"]
+        ED -->|"severity: CRITICAL"| W
+        W -->|"фикс"| ED
+        ED -->|"OK"| CS["consistency-скрипт\n5 строк bash + grep\nпо HTML-файлам"]
+        CS -->|"разночтения"| PUB["Публикация"]
+    end
+
+    style W fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style ED fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style CS fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style PUB fill:#f6f8fa,stroke:#1f2328,stroke-width:2px
+      </pre>
+    </div>
+
+    <div class="card">
+      <p><strong>Суть:</strong> 0 новых агентов. Research &mdash; чек-лист в промпте writer.
+      Consistency &mdash; bash-однострочник на grep.</p>
+      <p><strong>Логика:</strong> Каждый новый агент = N токенов на каждый запуск. Для китайских моделей
+      с ограниченным контекстом это критично. 35 статей &mdash; объём, который editor просматривает
+      за один проход.</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Решение</th>
+          <th>Cost/мес</th>
+          <th>Покрытие</th>
+          <th>Риски</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>2 агента + скрипт</strong></td>
+          <td>~0 доп.</td>
+          <td>90%</td>
+          <td>Скрипт тупой, false positives</td>
+        </tr>
+        <tr>
+          <td>+ research-agent</td>
+          <td>+5-10K токенов/статья</td>
+          <td>95%</td>
+          <td>Дублирует writer, лишний round-trip</td>
+        </tr>
+        <tr>
+          <td>+ все 3 агента</td>
+          <td>+15-30K токенов/статья</td>
+          <td>99%</td>
+          <td>Раздутие контекста, медленнее, дороже</td>
+        </tr>
+        <tr>
+          <td>Только 2 агента без скрипта</td>
+          <td>0</td>
+          <td>75%</td>
+          <td>Терминология расползается</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Conservative -->
+    <h3 style="color:var(--conservative);">Conservative: Минимальный отдел &mdash; 2 агента с чёткими ролями</h3>
+    <span class="round-label round-1">Раунд 1</span>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart TD
+    subgraph ARCH ["Архитектура Conservative"]
+        direction TB
+        W["writer-agent\n(mimo-v2.5)"]
+        W -->|"черновик"| ED["editor-agent\n(deepseek-v4-flash)\n+ poisk-mcp для фактов"]
+        ED -->|"severity: CRITICAL\nили WARNING"| W
+        W -->|"фикс"| ED
+        ED -->|"макс. 2 цикла"| DONE["Готово"]
+    end
+
+    style W fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style ED fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style DONE fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+      </pre>
+    </div>
+
+    <div class="card">
+      <p><strong>Суть:</strong> Ничего не добавлять. 2 агента, чёткие роли, Git workflow.
+      Editor уже имеет poisk-mcp &mdash; базовые потребности research покрываются post-hoc.</p>
+      <p><strong>Логика:</strong> Минимум точек отказа = предсказуемый workflow. 2 агента = легко дебажить.
+      Стратегия контента &mdash; задача человека, не делегируется слабым моделям.</p>
+      <p><strong>Расширение:</strong> Только при появлении конкретных болей. Не раньше.</p>
+    </div>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart LR
+    subgraph R1 ["Раунд 1: Разброс позиций"]
+        direction LR
+        I["Innovator\n+3 агента\n(RAG, DAG, ephemeral)"]
+        P["Pragmatist\n+0 агентов\n(grep-скрипт)"]
+        C["Conservative\n+0 агентов\n(ничего)"]
+    end
+
+    I -.->|"gap: 3 агента"| ANSWER["Разброс: от 0 до +3"]
+    P -.->|"gap: 0"| ANSWER
+    C -.->|"gap: 0"| ANSWER
+
+    style I fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style P fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style C fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style ANSWER fill:#fff8c5,stroke:#9a6700,stroke-width:2px
+      </pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 6. Раунд 2: контраргументы             -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>6. Раунд 2: Контраргументы и конвергенция</h2>
+
+    <p>
+      После прочтения позиций оппонентов каждый архитектор скорректировал свою позицию.
+      Разброс сужается &mdash; начинается конвергенция.
+    </p>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart TD
+    subgraph R1 ["Раунд 1"]
+        I1["Innovator\n+3 агента, RAG, DAG"]
+        P1["Pragmatist\n+0 агентов, grep"]
+        C1["Conservative\n+0 агентов, ничего"]
+    end
+
+    subgraph R2 ["Раунд 2"]
+        I2["Innovator\n+0 агентов\n2-фазный режим в writer"]
+        P2["Pragmatist\n+0 агентов, consistency-скрипт\n+ эфемерные для будущего"]
+        C2["Conservative\n+0 агентов\nумный consistency-скрипт"]
+    end
+
+    I1 -->|"смягчил: RAG откладывает,\nпринимает grep"| I2
+    P1 -->|"берёт эфемерные\nпаттерн от innovator"| P2
+    C1 -->|"принимает скрипт\nс фильтрацией"| C2
+
+    I2 -.->|"консенсус"| G["Общий знаменатель"]
+    P2 -.->|"консенсус"| G
+    C2 -.->|"консенсус"| G
+
+    style I1 fill:#ddf4ff,stroke:#0969da,stroke-width:1px,stroke-dasharray: 5 5
+    style P1 fill:#dafbe1,stroke:#1a7f37,stroke-width:1px,stroke-dasharray: 5 5
+    style C1 fill:#fbefff,stroke:#8250df,stroke-width:1px,stroke-dasharray: 5 5
+    style I2 fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style P2 fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style C2 fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style G fill:#f6f8fa,stroke:#1f2328,stroke-width:3px
+      </pre>
+    </div>
+
+    <!-- Innovator Rebuttal -->
+    <h3 style="color:var(--innovator);">Innovator: от RAG к двухфазному режиму</h3>
+    <span class="round-label round-2">Раунд 2</span>
+
+    <div class="card">
+      <p><strong>Принял от Pragmatist:</strong> grep-скрипт вместо RAG-агента для консистентности.
+      Триггер-ориентированный подход к добавлению агентов.</p>
+      <p><strong>Принял от Conservative:</strong> content-planner = человек. Стратегия не делегируется моделям.</p>
+      <p><strong>Оставил за собой:</strong> Research ДО написания принципиально важен. Но не отдельный агент &mdash;
+      а принудительный двухфазный режим внутри writer: <code>research-note</code> &rarr; <code>draft</code>.
+      Не чек-лист, а явная структура.</p>
+      <p><strong>Уточнил:</strong> consistency-скрипт вешать на PostToolUse хук writer-agent (после Write),
+      не на pre-commit.</p>
+    </div>
+
+    <div class="quote-block">
+      "Research ДО написания, а не ПОСЛЕ &mdash; это вопрос качества контента, а не удобства workflow."
+      <br>&mdash; Innovator, round-2 rebuttal
+    </div>
+
+    <!-- Pragmatist Rebuttal -->
+    <h3 style="color:var(--pragmatist);">Pragmatist: от "ничего" к "скрипт + эфемерные для будущего"</h3>
+    <span class="round-label round-2">Раунд 2</span>
+
+    <div class="card">
+      <p><strong>Принял от Conservative:</strong> 2 агента, content-planner = человек, расширение по триггерам.</p>
+      <p><strong>Взял от Innovator:</strong> Паттерн эфемерных субагентов через Task Tool &mdash; правильный формат
+      для будущего research-agent, когда сработает триггер.</p>
+      <p><strong>Настаивает:</strong> consistency-скрипт &mdash; must-have сейчас. Он бесплатный (0 токенов),
+      а проблему решает. RAG и векторный индекс для 35 статей &mdash; overengineering.</p>
+    </div>
+
+    <!-- Conservative Rebuttal -->
+    <h3 style="color:var(--conservative);">Conservative: от "ничего" к "умному скрипту"</h3>
+    <span class="round-label round-2">Раунд 2</span>
+
+    <div class="card">
+      <p><strong>Принял от Pragmatist:</strong> 2 агента, content-planner = человек, триггеры на расширение.</p>
+      <p><strong>Не согласен:</strong> grep-скрипт слишком тупой. <code>grep 'субагент|сабагент'</code> ловит совпадения,
+      но не контекст &mdash; цитата? код? название? Будет спамить false positives &mdash;
+      Андрей перестанет его запускать.</p>
+      <p><strong>Компромисс:</strong> Принимает скрипт, но с фильтрацией контекста &mdash;
+      исключать code blocks и цитаты. Плюс правка промпта writer на pre-write research &mdash; бесплатно.</p>
+      <p><strong>От Innovator:</strong> RAG откладывается до 100+ статей, не раньше.</p>
+    </div>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart LR
+    subgraph CROSS ["Скрещивание мнений"]
+        direction TB
+        I["Innovator"] -->|"принял"| Grep["grep-скрипт"]
+        I -->|"оставил"| PHASE["2-фазный режим"]
+        P["Pragmatist"] -->|"принял"| EPHEM["Эфемерные\nсубагенты"]
+        P -->|"настаивает"| Grep
+        C["Conservative"] -->|"принял"| Grep
+        C -->|"уточнил"| FILTER["Фильтрация\nконтекста"]
+        C -->|"принял"| TRIGGER["Триггеры\nрасширения"]
+    end
+
+    Grep -->|"консенсус"| OK["OK"]
+    PHASE -->|"принято всеми"| OK
+    EPHEM -->|"паттерн на будущее"| OK
+    FILTER -->|"усиление скрипта"| OK
+    TRIGGER -->|"единогласно"| OK
+
+    style I fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style P fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style C fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style OK fill:#dafbe1,stroke:#1a7f37,stroke-width:3px
+    style Grep fill:#dafbe1,stroke:#1a7f37
+    style PHASE fill:#ddf4ff,stroke:#0969da
+    style EPHEM fill:#dafbe1,stroke:#1a7f37
+    style FILTER fill:#fbefff,stroke:#8250df
+    style TRIGGER fill:#dafbe1,stroke:#1a7f37
+      </pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 7. Консенсус и вердикт                 -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>7. Консенсус и вердикт</h2>
+
+    <p>После двух раундов все трое сошлись по ключевым пунктам:</p>
+
+    <div class="card">
+      <div class="consensus-item">
+        <span class="badge badge-green">CONSENSUS</span>
+        <span><strong>2 агента &mdash; ядро</strong> (writer + editor). Никаких новых на старте.</span>
+      </div>
+      <div class="consensus-item">
+        <span class="badge badge-green">CONSENSUS</span>
+        <span><strong>content-planner = человек</strong> (не модель). Стратегия контента не делегируется.</span>
+      </div>
+      <div class="consensus-item">
+        <span class="badge badge-green">CONSENSUS</span>
+        <span><strong>Расширяться по триггерам</strong>, а не upfront. Не добавлять агентов «на вырост».</span>
+      </div>
+      <div class="consensus-item">
+        <span class="badge badge-green">CONSENSUS</span>
+        <span><strong>consistency-скрипт на grep</strong> вместо отдельного агента. Бесплатно (0 токенов).</span>
+      </div>
+      <div class="consensus-item">
+        <span class="badge badge-blue">NOVELTY</span>
+        <span><strong>Research-фаза внутри writer</strong> &mdash; принудительный двухфазный режим (research-note &rarr; draft).
+        Инициатива Innovator, принята всеми как бесплатное улучшение.</span>
+      </div>
+    </div>
+
+    <h3>Принятые решения</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Решение</th>
+          <th>Детали</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>2 агента сейчас</strong></td>
+          <td>writer-agent (mimo-v2.5) + editor-agent (deepseek-v4-flash). Без добавления новых.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>consistency-скрипт</strong></td>
+          <td>Grep с фильтрацией контекста (исключать code blocks, цитаты). Вешается на PostToolUse хук writer.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>Research-фаза</strong></td>
+          <td>Двухфазный режим в writer: research-note (poisk-mcp + search_web) &rarr; draft.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>Триггеры расширения</strong></td>
+          <td>См. таблицу ниже.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Триггеры расширения</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Агент</th>
+          <th>Триггер</th>
+          <th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>research-agent</strong> (эфемерный)</td>
+          <td>&ge;2 CRITICAL от editor за месяц по фактическим ошибкам</td>
+          <td><span class="badge badge-yellow">ОТЛОЖЕНО</span></td>
+        </tr>
+        <tr>
+          <td><strong>consistency-checker</strong> (агент)</td>
+          <td>100+ статей + терминологический хаос</td>
+          <td><span class="badge badge-yellow">ОТЛОЖЕНО</span></td>
+        </tr>
+        <tr>
+          <td><strong>content-planner</strong></td>
+          <td>Никогда не делегировать модели</td>
+          <td><span class="badge badge-red">ОТКЛЮЧЕНО</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Что отложено</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Предложение</th>
+          <th>Кто предлагал</th>
+          <th>Почему отложено</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>RAG + векторный индекс</td>
+          <td style="color:var(--innovator)">Innovator</td>
+          <td>Overengineering для 35 статей. Вернуться при 100+</td>
+        </tr>
+        <tr>
+          <td>Эфемерный research-agent</td>
+          <td style="color:var(--innovator)">Innovator</td>
+          <td>Заменён двухфазным режимом внутри writer</td>
+        </tr>
+        <tr>
+          <td>Полный отказ от consistency-скрипта</td>
+          <td style="color:var(--conservative)">Conservative</td>
+          <td>Принят скрипт с фильтрацией как компромисс</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 8. Итоговый workflow                   -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>8. Итоговый workflow</h2>
+
+    <p>После дебатов литературный отдел работает по такой схеме:</p>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart TD
+    START["writer-agent получает тему"] --> RNOTE["research-note\npoisk-mcp + search_web\nСбор 3-5 источников"]
+    RNOTE --> DRAFT["draft\nЧерновик статьи"]
+    DRAFT --> WRITE["Write: запись в файл"]
+    WRITE --> HOOK["PostToolUse хук\nconsistency-скрипт (grep)\nфильтрация: code blocks, цитаты"]
+    HOOK --> ED["editor-agent\nreview: стиль, факты, терминология"]
+    ED --> SEV{"severity?"}
+    SEV -->|"CRITICAL / WARNING"| FIX["writer-agent\nИсправления"]
+    FIX --> RE["editor-agent\nПовторная проверка (макс 2 цикла)"]
+    RE --> SEV
+    SEV -->|"SUGGESTION или OK"| PUB["Публикация"]
+
+    style START fill:#fff8c5,stroke:#9a6700,stroke-width:2px
+    style RNOTE fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style DRAFT fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style WRITE fill:#f6f8fa,stroke:#1f2328,stroke-width:1px
+    style HOOK fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style ED fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style FIX fill:#ddf4ff,stroke:#0969da,stroke-width:1px
+    style RE fill:#fbefff,stroke:#8250df,stroke-width:1px
+    style PUB fill:#dafbe1,stroke:#1a7f37,stroke-width:3px
+      </pre>
+    </div>
+
+    <div class="card card-accent">
+      <p><strong>Ключевые особенности workflow:</strong></p>
+      <ul>
+        <li><strong>Two-phase writer:</strong> research-note перед draft &mdash; принудительно, не по желанию</li>
+        <li><strong>PostToolUse hook:</strong> consistency-скрипт запускается после каждого Write, ловит разночтения</li>
+        <li><strong>Max 2 cycles:</strong> editor проверяет, writer фиксит, editor перепроверяет &mdash; не более 2 раз</li>
+        <li><strong>Read-only editor:</strong> editor не пишет файлы, только комментирует</li>
+      </ul>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 9. Что дальше                          -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>9. Что дальше</h2>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+gantt
+    title Дорожная карта литературного отдела
+    dateFormat X
+    axisFormat %s
+
+    section Сейчас
+    writer + editor (ядро)           :done, 0, 1
+    consistency-скрипт (grep)        :done, 0, 1
+    2-фазный режим research          :done, 0, 1
+
+    section Скоро
+    Мониторинг CRITICAL от editor    :active, 1, 3
+    Тестирование false positive rate :1, 3
+
+    section Потом
+    research-agent (эфемерный)       :2, 4
+    Consistency-агент                :3, 6
+
+    section Никогда
+    content-planner (автомат)        :done, 0, 0
+      </pre>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Срок</th>
+          <th>Действие</th>
+          <th>Условие</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Сейчас</strong></td>
+          <td>2 агента + скрипт + двухфазный режим</td>
+          <td>&mdash;</td>
+        </tr>
+        <tr>
+          <td><strong>1 месяц</strong></td>
+          <td>Мониторинг: сколько CRITICAL от editor по фактам</td>
+          <td>Если &ge;2 &rarr; запускать ephemeral research-agent</td>
+        </tr>
+        <tr>
+          <td><strong>3 месяца</strong></td>
+          <td>Оценка false positive rate в consistency-скрипте</td>
+          <td>Если &gt;30% &rarr; добавить фильтры контекста</td>
+        </tr>
+        <tr>
+          <td><strong>100+ статей</strong></td>
+          <td>Пересмотр: нужен ли consistency-checker как агент</td>
+          <td>Терминологический хаос стал проблемой</td>
+        </tr>
+        <tr>
+          <td><strong>Никогда</strong></td>
+          <td>content-planner = автомат</td>
+          <td>Стратегия контента всегда за человеком</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="quote-block">
+      "2 агента + один bash-скрипт на grep. Никаких новых субагентов, пока не стрельнёт триггер."
+      <br>&mdash; Итоговый вердикт
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- Файлы дебатов                          -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>10. Файлы дебатов</h2>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Раунд</th>
+            <th>Файл</th>
+            <th>Автор</th>
+            <th>Позиция</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><a href="../../.triage/literary-department/round-1/01-innovator.md"><code>round-1/01-innovator.md</code></a></td>
+            <td style="color:var(--innovator)">Innovator</td>
+            <td>+3 агента, RAG, DAG, ephemeral</td>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td><a href="../../.triage/literary-department/round-1/02-pragmatist.md"><code>round-1/02-pragmatist.md</code></a></td>
+            <td style="color:var(--pragmatist)">Pragmatist</td>
+            <td>+0 агентов, grep-скрипт</td>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td><a href="../../.triage/literary-department/round-1/03-conservative.md"><code>round-1/03-conservative.md</code></a></td>
+            <td style="color:var(--conservative)">Conservative</td>
+            <td>+0 агентов, 2 с чёткими ролями</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><a href="../../.triage/literary-department/round-2/01-innovator-rebuttal.md"><code>round-2/01-innovator-rebuttal.md</code></a></td>
+            <td style="color:var(--innovator)">Innovator</td>
+            <td>2-фазный режим, RAG откладывает</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><a href="../../.triage/literary-department/round-2/02-pragmatist-rebuttal.md"><code>round-2/02-pragmatist-rebuttal.md</code></a></td>
+            <td style="color:var(--pragmatist)">Pragmatist</td>
+            <td>скрипт + эфемерные на будущее</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><a href="../../.triage/literary-department/round-2/03-conservative-rebuttal.md"><code>round-2/03-conservative-rebuttal.md</code></a></td>
+            <td style="color:var(--conservative)">Conservative</td>
+            <td>умный скрипт с фильтрацией</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer>
+      Создано <strong>writer-agent</strong> через Workflow tool.
+      <br>Актуально на 2026-06-20.
+      <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+    </footer>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: { useMaxWidth: false },
+      sequence: { useMaxWidth: false },
+      gantt: { useMaxWidth: false }
+    });
+  </script>
+</body>
+</html>
