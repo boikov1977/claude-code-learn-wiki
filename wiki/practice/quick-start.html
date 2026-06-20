@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quick Start — с чего начать</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'base',
+  themeVariables: {
+    darkMode: false,
+    background: '#ffffff'
+  },
+  flowchart: { useMaxWidth: false },
+  sequence: { useMaxWidth: false }
+})
+</script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f5f7;
+    color: #1d1d1f;
+    padding: 40px 24px;
+    line-height: 1.6;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  header h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  header p {
+    font-size: 1.15rem;
+    color: #555;
+    margin-top: 8px;
+  }
+  section {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 36px 32px;
+    margin-bottom: 36px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 6px rgba(0,0,0,0.04);
+  }
+  section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #1e293b;
+  }
+  section .subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 24px;
+  }
+  section p {
+    font-size: 0.95rem;
+    color: #334155;
+    margin-bottom: 12px;
+  }
+
+  /* ====== Mermaid sizing fix ====== */
+  .diagram-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 16px 0;
+    margin: 0 -16px;
+  }
+  .diagram-wrapper svg {
+    max-width: none !important;
+    height: auto !important;
+    display: block;
+  }
+
+  ul.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 28px;
+    list-style: none;
+    margin-top: 16px;
+  }
+  ul.grid li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 0.95rem;
+    color: #334155;
+  }
+  ul.grid li::before {
+    content: "\2022";
+    position: absolute;
+    left: 4px;
+    color: #7c3aed;
+    font-weight: 700;
+  }
+  .highlight-box {
+    background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+    border-left: 4px solid #7c3aed;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+  .highlight-box h3 {
+    font-size: 1.1rem;
+    color: #4f46e5;
+    margin-bottom: 8px;
+  }
+  .highlight-box p {
+    margin-bottom: 0;
+  }
+  .tag {
+    display: inline-block;
+    background: #eef2ff;
+    color: #4f46e5;
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin: 2px 4px 2px 0;
+  }
+  .ref-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 10px 0;
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+  .ref-card:hover {
+    border-color: #7c3aed;
+  }
+  .ref-card .emoji {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+  .ref-card .text h4 {
+    font-size: 1rem;
+    color: #1e293b;
+    margin-bottom: 2px;
+  }
+  .ref-card .text p {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    body { padding: 20px 12px; }
+    section { padding: 24px 16px; }
+    header h1 { font-size: 1.8rem; }
+    ul.grid { grid-template-columns: 1fr; }
+    .diagram-wrapper { margin: 0 -8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <a href="../../index.html" class="back-link" style="display:inline-block; margin-bottom:16px; color:#4f46e5; text-decoration:none; font-size:0.95rem;">&larr; Назад к вики</a>
+
+  <h1>Quick Start</h1>
+  <p>Экосистема проекта: как всё устроено и с чего начать изучение</p>
+</header>
+
+<!-- ========== ЧТО ЭТО ЗА ПРОЕКТ ========== -->
+<section>
+  <h2>Что это за проект</h2>
+  <div class="subtitle">О чём этот сайт и кому он будет полезен</div>
+
+  <p>
+    Этот сайт — <strong>живая документация</strong> по построению multi-agent системы для разработки
+    на базе Claude Code. Мы не просто написали абстрактную статью — мы собрали команду из 13 субагентов
+    на китайских AI-моделях (DeepSeek, MiMo, MiniMax) и задокументировали каждый шаг.
+  </p>
+
+  <p>
+    Здесь ты найдёшь:
+  </p>
+  <ul class="grid">
+    <li>Архитектуру субагентов: писатель, редактор, кодеры, тестировщик, ревьюер, архитекторы</li>
+    <li>Схему работы литературного отдела: writer → editor → fix → publish</li>
+    <li>Архитектурные дебаты: как мы спорили, и к каким вердиктам пришли</li>
+    <li>Гайды по MCP, OpenCode-прокси, Workflow, Plan mode и другим концепциям</li>
+  </ul>
+
+  <div class="highlight-box">
+    <h3>Для кого это</h3>
+    <p>
+      Для разработчиков, которые хотят build из своих Claude Code не просто "помощника в терминале",
+      а полноценную команду AI-агентов. Если ты когда-нибудь думал «а пусть один агент пишет код,
+      второй ревьюит, третий документирует» — ты по адресу.
+    </p>
+  </div>
+</section>
+
+<!-- ========== АРХИТЕКТУРА ЭКОСИСТЕМЫ ========== -->
+<section>
+  <h2>Архитектура экосистемы</h2>
+  <div class="subtitle">Как связаны между собой компоненты</div>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {'darkMode': false, 'background': '#ffffff'}}}%%
+flowchart TD
+    DEV["👤 Разработчик<br>терминал / IDE"] --> CC["🧠 Claude Code<br>основной агент"]
+
+    CC --> OP["🔀 OpenCode-прокси<br>перенаправление к моделям"]
+    OP --> DF["⚡ DeepSeek-V4-Flash<br>быстрая, coding"]
+    OP --> DP["🔍 DeepSeek-V4-Pro<br>code review"]
+    OP --> MIMO["📝 MiMo-V2.5<br>документация, тесты"]
+    OP --> MM3["💡 MiniMax-M3<br>инновации"]
+
+    CC --> MCP["🔌 MCP-серверы"]
+    MCP --> P["poisk-mcp<br>веб-поиск"]
+    MCP --> C7["context7<br>API-документация"]
+
+    CC --> AGENTS["🤖 Субагенты<br>~/.claude/agents/"]
+    AGENTS --> CODING["coding-агенты<br>py-backend, frontend, android"]
+    AGENTS --> ARCH["архитекторы<br>innovator, pragmatist, conservative"]
+    AGENTS --> LIT["литературный отдел<br>writer, editor"]
+    AGENTS --> OTHER["code-reviewer, tester, explorer"]
+
+    CC --> FS[("📁 Файловая система<br>проекты, код, wiki")]
+
+    style DEV fill:#eef2ff,stroke:#4f46e5,stroke-width:2px
+    style CC fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px
+    style OP fill:#fef3c7,stroke:#d97706,stroke-width:2px
+    style MCP fill:#d1fae5,stroke:#065f46,stroke-width:2px
+    style AGENTS fill:#fce7f3,stroke:#db2777,stroke-width:2px
+    style FS fill:#f8fafc,stroke:#94a3b8,stroke-width:1px
+    </div>
+  </div>
+</section>
+
+<!-- ========== С ЧЕГО НАЧАТЬ ========== -->
+<section>
+  <h2>С чего начать</h2>
+  <div class="subtitle">Карта изучения: от концепций до практики</div>
+
+  <p>
+    Весь материал разбит на разделы. Вот рекомендуемый порядок чтения:
+  </p>
+
+  <h3 style="margin-top:20px; color:#4f46e5;">1. Понять базу — Concepts</h3>
+  <p>
+    Отсюда лучше всего начинать. Здесь объясняется, что такое субагенты, MCP, Workflow,
+    Plan mode и другие ключевые понятия.
+  </p>
+
+  <a href="../../wiki/concepts/subagent-vs-forked.html" class="ref-card">
+    <span class="emoji">🎭</span>
+    <div class="text">
+      <h4>Субагенты vs Forked-агенты</h4>
+      <p>Чем отличаются, когда что использовать, как работают изоляция и модель</p>
+    </div>
+  </a>
+  <a href="../../wiki/concepts/mcp.html" class="ref-card">
+    <span class="emoji">🔌</span>
+    <div class="text">
+      <h4>MCP — Model Context Protocol</h4>
+      <p>Как подключать внешние инструменты к Claude Code: поиск, файлы, API</p>
+    </div>
+  </a>
+  <a href="../../wiki/concepts/workflow.html" class="ref-card">
+    <span class="emoji">⚡</span>
+    <div class="text">
+      <h4>Workflow — мультиагентная оркестрация</h4>
+      <p>Как запускать несколько субагентов параллельно и собирать результаты</p>
+    </div>
+  </a>
+  <a href="../../wiki/concepts/claude-opencode.html" class="ref-card">
+    <span class="emoji">🔄</span>
+    <div class="text">
+      <h4>Claude + OpenCode-прокси</h4>
+      <p>Как работает связка Claude Code через OpenCode к DeepSeek и другим моделям</p>
+    </div>
+  </a>
+
+  <h3 style="margin-top:24px; color:#4f46e5;">2. Познакомиться с агентами — Agents</h3>
+  <p>
+    После концепций — посмотреть, какие агенты у нас есть и как они устроены.
+  </p>
+
+  <a href="../../wiki/agents/all-agents.html" class="ref-card">
+    <span class="emoji">🎭</span>
+    <div class="text">
+      <h4>Все агенты</h4>
+      <p>Обзор 13 субагентов: кто за что отвечает, на какой модели работает</p>
+    </div>
+  </a>
+  <a href="../../wiki/agents/agents-team-article.html" class="ref-card">
+    <span class="emoji">🏗️</span>
+    <div class="text">
+      <h4>Строим команду AI-агентов</h4>
+      <p>Полный разбор архитектуры, промптов, workflow. Как строили и что вышло</p>
+    </div>
+  </a>
+
+  <h3 style="margin-top:24px; color:#4f46e5;">3. Изучить процессы — Practice</h3>
+  <p>
+    После того, как понял концепции и агентов — посмотри, как это работает в реальных сценариях.
+  </p>
+
+  <a href="../../wiki/practice/research-workflow.html" class="ref-card">
+    <span class="emoji">🔬</span>
+    <div class="text">
+      <h4>Deep Research Workflow</h4>
+      <p>Автоматизированное исследование через MCP: поиск → верификация → синтез отчёта</p>
+    </div>
+  </a>
+  <a href="../../wiki/practice/code-review-workflow.html" class="ref-card">
+    <span class="emoji">🔍</span>
+    <div class="text">
+      <h4>Многоагентный Code Review</h4>
+      <p>Три агента, три взгляда: code review, который ловит больше багов</p>
+    </div>
+  </a>
+
+  <h3 style="margin-top:24px; color:#4f46e5;">4. Разобраться в архитектурных решениях — Architecture</h3>
+  <p>
+    Хочешь понять, почему мы выбрали именно такой подход? Тут дебаты и вердикты.
+  </p>
+
+  <a href="../../wiki/architecture/arch-dept-verdict.html" class="ref-card">
+    <span class="emoji">🏛️</span>
+    <div class="text">
+      <h4>Нужен ли архитектурный отдел?</h4>
+      <p>Дебаты трёх архитекторов: выделять ли отдельных агентов для архитектурных решений</p>
+    </div>
+  </a>
+
+  <div class="highlight-box" style="margin-top:24px;">
+    <h3>Не пытайся прочитать всё сразу</h3>
+    <p>
+      На сайте 37 статей. Это не книга — это справочник. Начни с Concepts, потом Agents,
+      потом Practice. Остальное — когда возникнет конкретный вопрос.
+    </p>
+  </div>
+</section>
+
+<!-- ========== ПОИСК ПО САЙТУ ========== -->
+<section>
+  <h2>Поиск по сайту</h2>
+  <div class="subtitle">Как найти нужную информацию</div>
+
+  <p>
+    Сайт статический (GitHub Pages), полнотекстового поиска нет. Но у нас есть
+    <strong>poisk-mcp</strong> — MCP-сервер для веб-поиска, которым мы пользуемся
+    внутри Claude Code. Если тебе нужно что-то найти на сайте:
+  </p>
+
+  <ol style="padding-left:20px; margin:10px 0;">
+    <li>Открой <a href="../../wiki/concepts/poisk-mcp.html" style="color:#4f46e5;">статью о poisk-mcp</a></li>
+    <li>Подключи его к своему Claude Code</li>
+    <li>Ищи: <code>search_web("quick start claude code site:boikov1977.github.io")</code></li>
+  </ol>
+
+  <p>
+    Или просто пользуйся <strong>главной страницей</strong> — там все разделы
+    с карточками и описаниями.
+  </p>
+</section>
+
+<!-- ========== КЛЮЧЕВЫЕ ПОНЯТИЯ ========== -->
+<section>
+  <h2>Ключевые понятия</h2>
+  <div class="subtitle">Шпаргалка по терминологии проекта</div>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {'darkMode': false, 'background': '#ffffff'}}}%%
+flowchart LR
+    CC["Claude Code"] -->|"вызывает"| SUB["Субагент<br>~/.claude/agents/*.md"]
+    SUB -->|"использует"| MCP["MCP-сервер<br>poisk-mcp / context7"]
+    SUB -->|"работает на"| MODEL["Модель<br>DeepSeek / MiMo / MiniMax"]
+    SUB -->|"получает доступ к"| TOOLS["Инструменты<br>Read / Write / Edit / Bash"]
+
+    CC -->|"может запускать"| WF["Workflow<br>multi-agent pipeline"]
+    CC -->|"планирует"| PLAN["Plan Mode<br>explore → design → plan"]
+    CC -->|"обращается к"| SKILL["Skills<br>deep-research / verify"]
+
+    style CC fill:#e0e7ff,stroke:#4f46e5,stroke-width:2px
+    style SUB fill:#fce7f3,stroke:#db2777,stroke-width:2px
+    style MCP fill:#d1fae5,stroke:#065f46,stroke-width:2px
+    style MODEL fill:#fef3c7,stroke:#d97706,stroke-width:2px
+    style TOOLS fill:#f8fafc,stroke:#94a3b8,stroke-width:1px
+    style WF fill:#ede9fe,stroke:#7c3aed,stroke-width:1px
+    style PLAN fill:#ede9fe,stroke:#7c3aed,stroke-width:1px
+    style SKILL fill:#f0fdf4,stroke:#16a34a,stroke-width:1px
+    </div>
+  </div>
+
+  <ul class="grid" style="margin-top:16px;">
+    <li><strong>Claude Code</strong> — основной AI-ассистент в терминале</li>
+    <li><strong>Субагент</strong> — специализированный AI-помощник со своей ролью и моделью</li>
+    <li><strong>MCP</strong> — протокол подключения внешних инструментов (поиск, БД, API)</li>
+    <li><strong>OpenCode</strong> — прокси для использования DeepSeek/MiMo/MiniMax вместо Claude</li>
+    <li><strong>Workflow</strong> — оркестрация нескольких субагентов в один пайплайн</li>
+    <li><strong>Plan Mode</strong> — режим проектирования: изучить → спроектировать → утвердить</li>
+    <li><strong>Skills</strong> — встроенные сценарии: deep-research, verify, simplify</li>
+    <li><strong>Frontmatter</strong> — YAML-шапка в файле агента: имя, модель, инструменты</li>
+  </ul>
+</section>
+
+<!-- ========== ВОПРОСЫ И ОТВЕТЫ ========== -->
+<section>
+  <h2>Частые вопросы</h2>
+  <div class="subtitle">Короткие ответы на то, что обычно спрашивают</div>
+
+  <p><strong>Нужна ли подписка Claude Pro?</strong></p>
+  <p>Нет. Проект построен на OpenCode-прокси, который перенаправляет запросы к DeepSeek, MiMo и MiniMax. Это бесплатные или условно-бесплатные модели.</p>
+
+  <p><strong>Можно ли использовать это без китайских моделей?</strong></p>
+  <p>Да. Архитектура субагентов не привязана к конкретному провайдеру. Если у тебя есть Claude Pro — просто убери прокси и поставь модели sonnet/opus в frontmatter агентов.</p>
+
+  <p><strong>Сколько это стоит?</strong></p>
+  <p>Зависит от используемых моделей. DeepSeek-V4-Flash стоит копейки, MiMo-V2.5 — дёшево для long-context задач. MiniMax-M3 — средняя цена. Если перейти на Claude API — будет дороже, но качественнее.</p>
+
+  <p><strong>Это только для кода?</strong></p>
+  <p>Нет. У нас есть литературный отдел (пишет и редактирует статьи), архитектурный отдел (дебаты и вердикты), исследователь (deep research). Сфера применения — любая работа с текстом.</p>
+
+  <p><strong>Как быстро можно собрать такую же команду?</strong></p>
+  <p>Базовую команду из 5-7 агентов можно настроить за день. Промпты — в файлах, копируй и адаптируй. Полный цикл с архитектурными дебатами и литературным отделом — неделя-две.</p>
+</section>
+
+<!-- ========== ФУТЕР ========== -->
+<footer style="text-align:center; color:#64748b; font-size:0.85rem; padding:28px 0; border-top:1px solid #e2e8f0; margin-top:40px;">
+  Создано writer-agent.
+  <br>Актуально на 2026-06-20.
+  <br><a href="../../index.html" style="color:#4f46e5;">Назад к вики</a>
+</footer>
+
+</div>
+</body>
+</html>
