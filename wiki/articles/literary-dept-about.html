@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Литературный отдел: как мы пишем и редактируем статьи</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --surface: #ffffff;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #656d76;
+      --accent: #6c5ce7;
+      --accent-light: #f1f0ff;
+      --green: #1a7f37;
+      --green-light: #dafbe1;
+      --red: #cf222e;
+      --red-light: #ffebe9;
+      --yellow: #9a6700;
+      --yellow-light: #fff8c5;
+      --purple: #8250df;
+      --purple-light: #fbefff;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    header .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    .meta-line {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 16px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin: 40px 0 16px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 24px 0 12px 0;
+    }
+
+    p, li {
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    p { margin-bottom: 12px; }
+
+    ul, ol {
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+    li { margin-bottom: 6px; }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    /* Agent profile cards */
+    .agent-profile {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      margin: 20px 0;
+      box-shadow: var(--shadow);
+    }
+
+    .agent-profile .agent-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .agent-profile .agent-icon {
+      font-size: 2rem;
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .agent-profile .agent-icon.writer { background: var(--accent-light); }
+    .agent-profile .agent-icon.editor { background: var(--purple-light); }
+
+    .agent-profile .agent-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .agent-profile .agent-model {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: monospace;
+      margin-top: 2px;
+    }
+
+    .agent-profile .agent-role {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .agent-profile ul {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0 0 0;
+    }
+
+    .agent-profile li {
+      padding: 6px 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      gap: 8px;
+    }
+
+    .agent-profile li:last-child { border-bottom: none; }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .tag-write { background: var(--accent-light); color: var(--accent); }
+    .tag-read { background: var(--purple-light); color: var(--purple); }
+    .tag-bash { background: var(--green-light); color: var(--green); }
+    .tag-mcp { background: var(--yellow-light); color: var(--yellow); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+
+    th {
+      background: #f6f8fa;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) td { background: #fafbfc; }
+
+    /* Severity badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-critical { background: var(--red-light); color: var(--red); }
+    .badge-warning { background: var(--yellow-light); color: var(--yellow); }
+    .badge-suggestion { background: #f0f0f0; color: var(--text-muted); }
+    .badge-green { background: var(--green-light); color: var(--green); }
+
+    /* Quote / highlight blocks */
+    .quote-block {
+      background: linear-gradient(135deg, #f6f8fa, #eef1f5);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-style: italic;
+      color: var(--text-muted);
+    }
+
+    .highlight-block {
+      background: var(--accent-light);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+
+    .callout {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+
+    .callout-info { background: var(--accent-light); border: 1px solid #c4b5fd; }
+    .callout-warning { background: var(--yellow-light); border: 1px solid #e5d47a; }
+
+    .callout-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .callout-text { font-size: 0.9rem; line-height: 1.55; }
+
+    /* Diagram wrapper */
+    .diagram-wrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px 0;
+      margin: 0 -16px;
+    }
+
+    .diagram-wrapper svg {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    /* Checklist */
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .checklist-item:last-child { border-bottom: none; }
+
+    .check-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Code */
+    code {
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      margin: 16px 0;
+    }
+
+    pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    /* Step counter */
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      font-size: 0.82rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Section dividers */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 40px 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      header h1 { font-size: 1.5rem; }
+      .container { padding: 24px 16px; }
+      .agent-profile .agent-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header>
+      <a href="../../index.html" class="back-link">&larr; Назад к вики</a>
+      <h1>Литературный отдел: как мы пишем и редактируем статьи</h1>
+      <p class="subtitle">Полный обзор pipeline от черновика до публикации: 2 агента, 1 bash-скрипт, 9 шагов</p>
+      <p class="meta-line">20 июня 2026 &middot; writer-agent + editor-agent &middot; workflow с 2 циклами ревью</p>
+    </header>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 1. Что такое литературный отдел        -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>1. Что такое литературный отдел</h2>
+
+    <p>
+      Литературный отдел &mdash; это выделенная команда AI-агентов, которая занимается <strong>только
+      контентом</strong>: статьи в вики, README, CHANGELOG, docstrings. Он отделён от основного
+      разработческого workflow, чтобы документирование не переключало контекст основного агента.
+    </p>
+
+    <p>
+      Отдел состоит из двух агентов и одного bash-скрипта. Больше не нужно &mdash; это результат
+      архитектурных дебатов трёх агентов-архитекторов (подробнее:
+      <a href="literary-dept-debates.html">Литературный отдел: дебаты архитекторов</a>).
+    </p>
+
+    <div class="highlight-block">
+      <strong>Принцип:</strong> Два агента + один bash-скрипт. Никаких новых субагентов, пока не сработает
+      триггер (2+ CRITICAL по фактам за месяц, или 100+ статей в вики).
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 2. Состав                               -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>2. Состав отдела</h2>
+
+    <!-- Writer Agent -->
+    <div class="agent-profile">
+      <div class="agent-header">
+        <div class="agent-icon writer">&#9998;</div>
+        <div>
+          <div class="agent-name">writer-agent</div>
+          <div class="agent-model">claude-go-mimo-v2.5</div>
+          <div class="agent-role">Агент-писатель: создаёт и обновляет контент</div>
+        </div>
+      </div>
+      <ul>
+        <li>
+          <span class="tag tag-write">Write</span>
+          Записывает и редактирует файлы (статьи, README, CHANGELOG)
+        </li>
+        <li>
+          <span class="tag tag-bash">Bash</span>
+          Запускает git, consistency-check.sh, проверяет diff
+        </li>
+        <li>
+          <span class="tag tag-mcp">poisk-mcp</span>
+          Поиск в интернете через search_web для research-фазы
+        </li>
+        <li>
+          <span class="tag tag-write">HTML + Mermaid</span>
+          Пишет статьи в формате HTML с интерактивными диаграммами
+        </li>
+      </ul>
+    </div>
+
+    <!-- Editor Agent -->
+    <div class="agent-profile">
+      <div class="agent-header">
+        <div class="agent-icon editor">&#128221;</div>
+        <div>
+          <div class="agent-name">editor-agent</div>
+          <div class="agent-model">claude-go-deepseek-v4-flash</div>
+          <div class="agent-role">Senior technical editor: ревью и редактура (read-only)</div>
+        </div>
+      </div>
+      <ul>
+        <li>
+          <span class="tag tag-read">Read-only</span>
+          Только читает и комментирует. Запрещены Write и Edit
+        </li>
+        <li>
+          <span class="tag tag-mcp">poisk-mcp</span>
+          Проверка фактов и терминов через search_web
+        </li>
+        <li>
+          <span class="tag tag-mcp">context7</span>
+          Проверка актуальности API библиотек
+        </li>
+        <li>
+          <span class="tag tag-bash">Bash</span>
+          Проверяет файловую структуру, ссылки, git
+        </li>
+      </ul>
+    </div>
+
+    <!-- Consistency Check -->
+    <div class="agent-profile">
+      <div class="agent-header">
+        <div class="agent-icon" style="background: var(--green-light);">&#128269;</div>
+        <div>
+          <div class="agent-name">consistency-check.sh</div>
+          <div class="agent-model">bash + grep</div>
+          <div class="agent-role">Проверка терминологии по всей вики (0 токенов)</div>
+        </div>
+      </div>
+      <ul>
+        <li>
+          <span class="tag tag-bash">grep -rPn</span>
+          Регулярные выражения по HTML-файлам вики
+        </li>
+        <li>
+          <span class="tag tag-bash">Filtering</span>
+          Исключает code blocks, цитаты и mermaid-диаграммы
+        </li>
+        <li>
+          <span class="tag tag-bash">Exit code</span>
+          Возвращает 1 при нарушениях (для автоматизации)
+        </li>
+      </ul>
+    </div>
+
+    <p>
+      Файлы конфигурации агентов хранятся в <code>~/.claude/agents/</code>:
+      <code>writer-agent.md</code>, <code>editor-agent.md</code>.
+      Скрипт &mdash; <code>scripts/consistency-check.sh</code>.
+    </p>
+
+    <hr class="section-divider">
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 3. Полный workflow                      -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>3. Полный workflow: от темы до публикации</h2>
+
+    <p>
+      Вот как проходит создание каждой статьи &mdash; от получения темы до коммита в Git. Workflow
+      включает 9 шагов с двумя циклами ревью от editor.
+    </p>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+flowchart TD
+    T["1. Тема / запрос"] --> R["2. Research-фаза\nwriter-agent\npoisk-mcp + search_web"]
+    R --> RN["research-note\n3-5 источников\nструктурированные заметки"]
+    RN --> D["3. Draft\nwriter-agent\nпишет черновик HTML"]
+    D --> W["4. Запись в файл\nWrite: wiki/articles/..."]
+    W --> CS["5. Consistency-check\nbash-скрипт (grep)\nпроверка терминологии"]
+    CS --> E1["6. Editor review (цикл 1)\neditor-agent\nревью по чек-листу"]
+    E1 --> SEV{"Есть CRITICAL\nили WARNING?"}
+    SEV -->|"Да"| FIX["7. Fix\nwriter-agent\nисправляет замечания"]
+    FIX --> E2["8. Editor review (цикл 2)\neditor-agent\nповторная проверка"]
+    E2 --> PUB["9. Публикация\nкоммит + push\nкарточка в index.html"]
+    SEV -->|"Нет, только SUGGESTION"| PUB
+
+    style T fill:#fff8c5,stroke:#9a6700,stroke-width:2px
+    style R fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style RN fill:#ddf4ff,stroke:#0969da,stroke-width:1px
+    style D fill:#f6f8fa,stroke:#1f2328,stroke-width:1px
+    style W fill:#f6f8fa,stroke:#1f2328,stroke-width:1px
+    style CS fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style E1 fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style SEV fill:#fff8c5,stroke:#9a6700,stroke-width:2px
+    style FIX fill:#ddf4ff,stroke:#0969da,stroke-width:1px
+    style E2 fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style PUB fill:#dafbe1,stroke:#1a7f37,stroke-width:3px
+      </pre>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#128161;</div>
+      <div class="callout-text">
+        <strong>Правило двух циклов:</strong> Максимум 2 цикла ревью. После второго &mdash; публикация,
+        даже если остались замечания уровня SUGGESTION. Это предотвращает бесконечные циклы
+        &laquo;почини-проверь-почини&raquo;.
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 4. Каждый шаг подробно                  -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>4. Каждый шаг подробно</h2>
+
+    <!-- Step 1 -->
+    <h3><span class="step-num">1</span> Тема / запрос</h3>
+    <p>
+      Человек формулирует тему статьи. Это может быть конкретный запрос
+      (&laquo;Напиши про MCP&raquo;) или результат дебатов архитекторов.
+      Человек всегда остаётся стратегом &mdash; content-planner не делегируется модели.
+    </p>
+
+    <!-- Step 2 -->
+    <h3><span class="step-num">2</span> Research-фаза</h3>
+    <p>
+      Writer-agent собирает материалы перед написанием. Это <strong>принудительная
+      двухфазная модель</strong> (research-note &rarr; draft), а не опциональный чек-лист.
+    </p>
+    <ul>
+      <li>Поиск через <code>search_web</code> из <code>poisk-mcp</code></li>
+      <li>Параллельный поиск: веерные запросы по аспектам темы</li>
+      <li>Чтение найденных источников</li>
+      <li>Верификация ключевых фактов</li>
+      <li>Запись <code>research-note</code> &mdash; структурированных заметок</li>
+    </ul>
+    <p>
+      Research-note содержит: найденные факты, источники, ключевые цитаты, структуру будущей статьи.
+      Это промежуточный артефакт, который не публикуется.
+    </p>
+
+    <!-- Step 3 -->
+    <h3><span class="step-num">3</span> Draft</h3>
+    <p>
+      На основе research-note writer-agent пишет черновик. Статьи всегда в формате HTML:
+      полная страница с DOCTYPE, стилями, Mermaid-диаграммами и карточками.
+    </p>
+    <ul>
+      <li>Русский язык по умолчанию</li>
+      <li>Цветовая схема проекта (светлая тема, акцент <code>#6c5ce7</code>)</li>
+      <li>Mermaid-диаграммы: flowchart, sequence, classDiagram, stateDiagram, gantt</li>
+      <li>Футер с датой и ссылкой на вики</li>
+    </ul>
+
+    <!-- Step 4 -->
+    <h3><span class="step-num">4</span> Запись в файл</h3>
+    <p>
+      Черновик записывается в <code>wiki/articles/</code> через Write/Edit.
+      Это единственный момент, когда writer-agent модифицирует файловую систему.
+    </p>
+
+    <!-- Step 5 -->
+    <h3><span class="step-num">5</span> Consistency-check</h3>
+    <p>
+      Bash-скрипт <code>scripts/consistency-check.sh</code> проверяет терминологию
+      по всей вики. Запускается writer-agent вручную после записи статьи,
+      перед публикацией.
+    </p>
+
+    <p>Что проверяет:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Паттерн</th>
+          <th>Правильно</th>
+          <th>Почему</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>сабагент</code></td>
+          <td>субагент</td>
+          <td>Единый термин в вики</td>
+        </tr>
+        <tr>
+          <td><code>Raунд</code> (лат. R)</td>
+          <td>Раунд</td>
+          <td>Кириллическая Р, не латинская R</td>
+        </tr>
+        <tr>
+          <td><code>writer.agent</code></td>
+          <td>writer-agent</td>
+          <td>Дефис, не точка</td>
+        </tr>
+        <tr>
+          <td><code>permission.mode</code></td>
+          <td>permissionMode</td>
+          <td>camelCase в коде</td>
+        </tr>
+        <tr>
+          <td><code>context.7</code></td>
+          <td>context7</td>
+          <td>Без точки</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      Скрипт фильтрует совпадения в <code>&lt;code&gt;</code>, <code>&lt;pre&gt;</code> и
+      mermaid-блоках &mdash; ловит ошибки только в прозе. При нарушениях возвращает exit code 1.
+    </p>
+
+    <!-- Step 6-7 -->
+    <h3><span class="step-num">6</span> Editor review</h3>
+    <p>
+      Editor-agent проверяет статью по расширенному чек-листу. Результат &mdash; отчёт
+      с findings, отсортированных по severity.
+    </p>
+
+    <div class="card">
+      <h3 style="margin-top:0;">Чек-лист editor-agent</h3>
+
+      <div class="checklist-item">
+        <span class="check-icon">&#128195;</span>
+        <div>
+          <strong>Structure & Organization</strong> &mdash; иерархия заголовков (h1 &rarr; h2 &rarr; h3),
+          логичная последовательность секций, нет &laquo;сиротских&raquo; подсекций
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon">&#9998;</span>
+        <div>
+          <strong>Writing Style</strong> &mdash; грамматика, орфография, тон, лаконичность,
+          активный залог, без канцелярита
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon">&#128269;</span>
+        <div>
+          <strong>Terminology</strong> &mdash; консистентность терминов (субагент/сабагент),
+          расшифровка аббревиатур, корректные названия технологий
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon">&#128187;</span>
+        <div>
+          <strong>Code Examples</strong> &mdash; форматирование, актуальность API,
+          осмысленные комментарии, языковые теги
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon">&#128279;</span>
+        <div>
+          <strong>Cross-references & Links</strong> &mdash; небитые ссылки,
+          консистентный формат, проверка файловой структуры
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon">&#127912;</span>
+        <div>
+          <strong>Visual & Formatting</strong> &mdash; выровненные таблицы,
+          единообразные списки, alt-тексты у изображений
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon">&#128214;</span>
+        <div>
+          <strong>Readability</strong> &mdash; абзацы по 3-5 предложений,
+          сложные концепции разбиты на шаги, нет &laquo;стены текста&raquo;
+        </div>
+      </div>
+    </div>
+
+    <h3>Severity levels</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Уровень</th>
+          <th>Значение</th>
+          <th>Блокирует публикацию?</th>
+          <th>Примеры</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-critical">CRITICAL</span></td>
+          <td>Фактическая ошибка, битая ссылка, латинская R в слове</td>
+          <td><strong>Да</strong></td>
+          <td>Не тот API, сломанный href, Raунд вместо Раунд</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-warning">WARNING</span></td>
+          <td>Терминология, капитализация, формат, структура</td>
+          <td>Требует исправления, но не блокирует</td>
+          <td>Сабагент, неправильный регистр model ID, нумерация</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-suggestion">SUGGESTION</span></td>
+          <td>Предложение по улучшению</td>
+          <td>Нет</td>
+          <td>Добавить диаграмму, сократить абзац, уточнить формулировку</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      Отчёт сохраняется в файл <code>_editor_review_&lt;target&gt;_&lt;cycle&gt;.md</code>
+      рядом со статьёй. Writer-agent читает отчёт и исправляет все CRITICAL и WARNING.
+    </p>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 5. Жизненный цикл статьи               -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>5. Жизненный цикл статьи</h2>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+stateDiagram-v2
+    [*] --> Research: Тема получена
+    Research --> Draft: research-note готов
+    Draft --> Written: Файл записан
+    Written --> ConsistencyCheck: ручной запуск
+    ConsistencyCheck --> EditorReview1: Термины ок / исправлены
+    EditorReview1 --> Fix: CRITICAL / WARNING
+    EditorReview1 --> Publish: Только SUGGESTION
+    Fix --> EditorReview2: Исправления применены
+    EditorReview2 --> Publish: Цикл 2 завершён
+    Publish --> [*]
+
+    state EditorReview1 {
+        [*] --> Structure
+        Structure --> Style
+        Style --> Terms
+        Terms --> Code
+        Code --> Links
+        Links --> Visual
+        Visual --> Readability
+        Readability --> Report
+    }
+      </pre>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 6. Реальный пример                     -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>6. Реальный пример: как это работало</h2>
+
+    <p>
+      Workflow уже отработан вживую на статье
+      <a href="literary-dept-debates.html">&laquo;Литературный отдел: дебаты архитекторов&raquo;</a>.
+      Вот как прошли два цикла ревью.
+    </p>
+
+    <h3>Раунд 1: первая проверка</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Severity</th>
+          <th>Что нашли</th>
+          <th>Как исправили</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-critical">CRITICAL</span></td>
+          <td>Битые ссылки на .triage/ файлы</td>
+          <td>Проверены пути, ссылки исправлены</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-critical">CRITICAL</span></td>
+          <td><code>Raунд</code> &mdash; латинская R вместо кириллической</td>
+          <td>Заменено на <code>Раунд</code></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-warning">WARNING</span></td>
+          <td>Модели без префикса <code>claude-go-</code></td>
+          <td>Добавлены полные ID моделей</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-warning">WARNING</span></td>
+          <td>Некорректная капитализация</td>
+          <td>Исправлен регистр</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-suggestion">SUGGESTION</span></td>
+          <td>Добавить больше диаграмм</td>
+          <td>Частично принято</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card card-accent">
+      <p style="margin-bottom:0;">
+        <strong>Итого Раунд 1:</strong> 2 CRITICAL, 2 WARNING, 1 SUGGESTION.
+        Все CRITICAL и WARNING исправлены writer-agent.
+      </p>
+    </div>
+
+    <h3>Раунд 2: повторная проверка</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Severity</th>
+          <th>Что нашли</th>
+          <th>Как исправили</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-critical">CRITICAL</span></td>
+          <td>&mdash;</td>
+          <td>0 критических замечаний</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-warning">WARNING</span></td>
+          <td>Капитализация, формат &laquo;Task Tool&raquo;, нумерация</td>
+          <td>3 WARNING исправлены</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#9989;</div>
+      <div class="callout-text">
+        <strong>Результат:</strong> 0 CRITICAL, 0 WARNING после Раунда 2.
+        Статья опубликована. Общее время: research + draft + 2 цикла ревью = 1 сессия.
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 7. Архитектура взаимодействия          -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>7. Архитектура взаимодействия</h2>
+
+    <p>
+      Агенты не общаются напрямую. Взаимодействие идёт через файлы: writer записывает статью,
+      editor читает и пишет отчёт, writer читает отчёт и правит. Это &laquo;файловый обмен&raquo;,
+      а не диалог.
+    </p>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+sequenceDiagram
+    actor User as Человек
+    participant W as writer-agent
+    participant F as Файловая система
+    participant CS as consistency-check.sh
+    participant E as editor-agent
+
+    User->>W: Тема статьи
+    W->>F: research-note (промежуточный)
+    W->>F: wiki/articles/target.html
+    F->>CS: consistency-check.sh
+    CS-->>W: Exit code + violations
+    W->>E: Файл target.html
+    E->>F: _editor_review_target_1.md
+    F-->>W: Отчёт ревью
+    W->>F: Исправленный target.html
+    W->>E: Файл target.html (v2)
+    E->>F: _editor_review_target_2.md
+    F-->>W: Финальный отчёт
+    W->>F: git commit + push
+    W-->>User: Статья опубликована
+      </pre>
+    </div>
+
+    <div class="card">
+      <p><strong>Ключевые особенности архитектуры:</strong></p>
+      <ul>
+        <li><strong>Нет прямой связи</strong> между writer и editor &mdash; только через файлы</li>
+        <li><strong>Read-only editor</strong> не может случайно переписать текст</li>
+        <li><strong>Ручной запуск</strong> consistency-check перед публикацией</li>
+        <li><strong>Файлы отчётов</strong> сохраняются рядом со статьёй для трассировки</li>
+      </ul>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 8. Почему именно 2 агента             -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>8. Почему именно 2 агента (а не больше)</h2>
+
+    <p>
+      В ходе архитектурных дебатов рассматривались три варианта: добавить 0, 1 или 3 новых агента.
+      Вердикт: 2 агента + bash-скрипт оптимальны для текущего масштаба.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Альтернатива</th>
+          <th>Стоимость</th>
+          <th>Покрытие</th>
+          <th>Почему нет</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Только writer без editor</strong></td>
+          <td>0</td>
+          <td>~75%</td>
+          <td>Терминология расползается, ошибки не ловятся</td>
+        </tr>
+        <tr>
+          <td><strong>2 агента + скрипт</strong> (текущий)</td>
+          <td>~0 доп.</td>
+          <td>~90%</td>
+          <td>&mdash;</td>
+        </tr>
+        <tr>
+          <td>+ research-agent</td>
+          <td>+5-10K токенов/статья</td>
+          <td>~95%</td>
+          <td>Дублирует writer, лишний проход</td>
+        </tr>
+        <tr>
+          <td>+ все 3 агента</td>
+          <td>+15-30K токенов/статья</td>
+          <td>~99%</td>
+          <td>Раздутие контекста, медленнее, дороже</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Триггеры расширения</h3>
+
+    <p>Новые агенты добавляются только при конкретных болях:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Агент</th>
+          <th>Триггер</th>
+          <th>Формат</th>
+          <th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>research-agent</strong></td>
+          <td>&ge;2 CRITICAL по фактам за месяц</td>
+          <td>Эфемерный (через Task Tool)</td>
+          <td><span class="badge badge-warning">Ожидание</span></td>
+        </tr>
+        <tr>
+          <td><strong>consistency-checker</strong></td>
+          <td>100+ статей + терминологический хаос</td>
+          <td>Постоянный агент</td>
+          <td><span class="badge badge-warning">Ожидание</span></td>
+        </tr>
+        <tr>
+          <td><strong>content-planner</strong></td>
+          <td>Никогда</td>
+          <td>&mdash;</td>
+          <td><span class="badge badge-critical">Отключено</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-warning">
+      <div class="callout-icon">&#9888;</div>
+      <div class="callout-text">
+        <strong>content-planner = всегда человек.</strong> Стратегия контента не делегируется
+        слабым моделям. Это единственное &laquo;никогда&raquo; в системе.
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 9. Советы для тех, кто строит свой    -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>9. Советы для тех, кто строит свой editorial pipeline</h2>
+
+    <div class="card">
+      <div class="checklist-item">
+        <span class="check-icon" style="color:var(--accent);">&#10004;</span>
+        <div>
+          <strong>Начни с 2 агентов.</strong> Writer (пишет) + editor (только читает). Read-only
+          для editor &mdash; принципиально. Это предотвращает случайную перезапись текста.
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon" style="color:var(--accent);">&#10004;</span>
+        <div>
+          <strong>Файловый обмен вместо диалога.</strong> Агенты не общаются напрямую &mdash;
+          пишут файлы (статьи, отчёты). Это проще дебажить и трассировать.
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon" style="color:var(--accent);">&#10004;</span>
+        <div>
+          <strong>Severity levels.</strong> CRITICAL / WARNING / SUGGESTION &mdash; простая
+          классификация, которая делает автоматизацию возможной. CRITICAL = блокирует,
+          WARNING = требует, SUGGESTION = опционально.
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon" style="color:var(--accent);">&#10004;</span>
+        <div>
+          <strong>Max 2 цикла.</strong> Не давай агентам зациклиться. Два прохода editor &mdash;
+          достаточно для 90% статей. Остальное &mdash; SUGGESTION на потом.
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon" style="color:var(--accent);">&#10004;</span>
+        <div>
+          <strong>Consistency на bash, не на LLM.</strong> Grep по HTML-файлам бесплатный (0 токенов)
+          и мгновенный. LLM-агент для проверки терминологии &mdash; overengineering до 100+ статей.
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon" style="color:var(--accent);">&#10004;</span>
+        <div>
+          <strong>Research перед написанием.</strong> Принудительная двухфазная модель
+          (research-note &rarr; draft) повышает качество контента. Не чек-лист, а явный шаг.
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <span class="check-icon" style="color:var(--accent);">&#10004;</span>
+        <div>
+          <strong>Расширяй по триггерам.</strong> Не добавляй агентов &laquo;на вырост&raquo;.
+          Определи конкретные триггеры (2+ CRITICAL/мес, 100+ статей) и расширяйся только когда
+          они сработают.
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- 10. Файлы и ссылки                     -->
+    <!-- ═══════════════════════════════════════ -->
+    <h2>10. Файлы и ссылки</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Артефакт</th>
+          <th>Путь</th>
+          <th>Назначение</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Конфиг writer-agent</td>
+          <td><code>~/.claude/agents/writer-agent.md</code></td>
+          <td>Промпт, модели, инструменты</td>
+        </tr>
+        <tr>
+          <td>Конфиг editor-agent</td>
+          <td><code>~/.claude/agents/editor-agent.md</code></td>
+          <td>Промпт, чек-лист, формат отчёта</td>
+        </tr>
+        <tr>
+          <td>Consistency-check</td>
+          <td><code>scripts/consistency-check.sh</code></td>
+          <td>Проверка терминологии (grep)</td>
+        </tr>
+        <tr>
+          <td>Статьи</td>
+          <td><code>wiki/articles/*.html</code></td>
+          <td>Опубликованный контент</td>
+        </tr>
+        <tr>
+          <td>Отчёты editor</td>
+          <td><code>_editor_review_*.md</code> (рядом со статьёй)</td>
+          <td>История ревью</td>
+        </tr>
+        <tr>
+          <td>Дебаты</td>
+          <td><code>.triage/literary-department/</code></td>
+          <td>Исходные позиции архитекторов</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="quote-block">
+      &laquo;Два агента, один bash-скрипт и чёткий workflow. Пишешь &mdash; проверяешь &mdash;
+      публикуешь. Больше ничего не нужно, пока не стрельнёт триггер.&raquo;
+    </div>
+
+    <footer style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.85em;text-align:center;">
+        Создано <strong>writer-agent</strong>.
+        Отредактировано <strong>editor-agent</strong>.
+        <br>Актуально на 2026-06-20.
+        <br><a href="../../index.html" style="color: var(--accent);">Назад к вики</a>
+    </footer>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      flowchart: { useMaxWidth: false },
+      sequence: { useMaxWidth: false },
+      stateDiagram: { useMaxWidth: false }
+    });
+  </script>
+</body>
+</html>
