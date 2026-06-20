@@ -306,6 +306,7 @@
 
   <div class="diagram-wrapper">
     <div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {'darkMode': false, 'background': '#ffffff'}}}%%
 flowchart TD
     CC["🧠 Claude Code"] -->|"stdio JSON-RPC"| MCP["🔧 server.py<br>MCP-сервер"]
 
@@ -405,6 +406,7 @@ web_research("MCP сервер лучшие практики 2026", depth=5)</co
 
   <div class="diagram-wrapper">
     <div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {'darkMode': false, 'background': '#ffffff'}}}%%
 flowchart LR
     A["1️⃣ Запрос<br>Claude отправляет<br>search_web()"] --> B["2️⃣ Кэш<br>Есть в кэше? &rarr; отдаём"]
     B --> C["3️⃣ Rate Limiter<br>Проверяем лимит<br>(30rpm)"]
@@ -704,15 +706,19 @@ mcpServers:
 <script>
   mermaid.initialize({
     startOnLoad: true,
-    theme: 'default',
+    theme: 'base',
+    themeVariables: {
+      darkMode: false,
+      background: '#ffffff'
+    },
     flowchart: { useMaxWidth: false }
   });
 </script>
-  <hr class="hr-dashed">
-  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
-    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
-      ✍️ Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) · июнь 2026
-    </p>
-  </div>
+  <footer style="text-align:center; color:#64748b; font-size:0.85rem; padding:28px 0; border-top:1px solid #e2e8f0; margin-top:40px;">
+    Создано writer-agent на основе документации poisk-mcp.
+    <br>Актуально на 2026-06-20.
+    <br><a href="../../index.html" style="color:#4f46e5;">Назад к вики</a>
+  </footer>
+
 </body>
 </html>
