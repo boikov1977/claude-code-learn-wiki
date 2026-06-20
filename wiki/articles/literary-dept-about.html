@@ -742,41 +742,9 @@ flowchart TD
     </p>
 
     <!-- ═══════════════════════════════════════ -->
-    <!-- 5. Жизненный цикл статьи               -->
+    <!-- 5. Реальный пример                     -->
     <!-- ═══════════════════════════════════════ -->
-    <h2>5. Жизненный цикл статьи</h2>
-
-    <div class="diagram-wrapper">
-      <pre class="mermaid">
-stateDiagram-v2
-    [*] --> Research: Тема получена
-    Research --> Draft: research-note готов
-    Draft --> Written: Файл записан
-    Written --> ConsistencyCheck: ручной запуск
-    ConsistencyCheck --> EditorReview1: Термины ок / исправлены
-    EditorReview1 --> Fix: CRITICAL / WARNING
-    EditorReview1 --> Publish: Только SUGGESTION
-    Fix --> EditorReview2: Исправления применены
-    EditorReview2 --> Publish: Цикл 2 завершён
-    Publish --> [*]
-
-    state EditorReview1 {
-        [*] --> Structure
-        Structure --> Style
-        Style --> Terms
-        Terms --> Code
-        Code --> Links
-        Links --> Visual
-        Visual --> Readability
-        Readability --> Report
-    }
-      </pre>
-    </div>
-
-    <!-- ═══════════════════════════════════════ -->
-    <!-- 6. Реальный пример                     -->
-    <!-- ═══════════════════════════════════════ -->
-    <h2>6. Реальный пример: как это работало</h2>
+    <h2>5. Реальный пример: как это работало</h2>
 
     <p>
       Workflow уже отработан вживую на статье
@@ -865,7 +833,7 @@ stateDiagram-v2
     <!-- ═══════════════════════════════════════ -->
     <!-- 7. Архитектура взаимодействия          -->
     <!-- ═══════════════════════════════════════ -->
-    <h2>7. Архитектура взаимодействия</h2>
+    <h2>6. Архитектура взаимодействия</h2>
 
     <p>
       Агенты не общаются напрямую. Взаимодействие идёт через файлы: writer записывает статью,
@@ -912,7 +880,7 @@ sequenceDiagram
     <!-- ═══════════════════════════════════════ -->
     <!-- 8. Почему именно 2 агента             -->
     <!-- ═══════════════════════════════════════ -->
-    <h2>8. Почему именно 2 агента (а не больше)</h2>
+    <h2>7. Почему именно 2 агента (а не больше)</h2>
 
     <p>
       В ходе архитектурных дебатов рассматривались три варианта: добавить 0, 1 или 3 новых агента.
@@ -1002,7 +970,7 @@ sequenceDiagram
     <!-- ═══════════════════════════════════════ -->
     <!-- 9. Советы для тех, кто строит свой    -->
     <!-- ═══════════════════════════════════════ -->
-    <h2>9. Советы для тех, кто строит свой editorial pipeline</h2>
+    <h2>8. Советы для тех, кто строит свой editorial pipeline</h2>
 
     <div class="card">
       <div class="checklist-item">
@@ -1069,7 +1037,7 @@ sequenceDiagram
     <!-- ═══════════════════════════════════════ -->
     <!-- 10. Файлы и ссылки                     -->
     <!-- ═══════════════════════════════════════ -->
-    <h2>10. Файлы и ссылки</h2>
+    <h2>9. Файлы и ссылки</h2>
 
     <table>
       <thead>
@@ -1130,6 +1098,11 @@ sequenceDiagram
     mermaid.initialize({
       startOnLoad: true,
       theme: 'default',
+      themeVariables: {
+        background: '#ffffff',
+        primaryColor: '#f1f0ff',
+        primaryBorderColor: '#6c5ce7'
+      },
       flowchart: { useMaxWidth: false },
       sequence: { useMaxWidth: false },
       stateDiagram: { useMaxWidth: false }
