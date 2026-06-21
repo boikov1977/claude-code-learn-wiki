@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(deep-research)",
+      "Bash(__HOME__/mcp/poisk-mcp/venv/bin/python __HOME__/mcp/poisk-mcp/server.py)",
+      "Skill(update-config)",
+      "Bash(__HOME__/mcp/poisk-mcp/venv/bin/python *)",
+      "Bash(env)",
+      "Bash(claude mcp *)",
+      "WebSearch",
+      "mcp__poisk-mcp__search_web",
+      "mcp__poisk-mcp__read_webpage",
+      "Bash(/usr/bin/python3 __HOME__/.config/opencode/anthropic-proxy.py)",
+      "Bash(openspec --version)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json,os,time; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); os.makedirs('/tmp/claude-backups',exist_ok=True); (fp.endswith(('.json','.jsonc','.yaml','.yml')) and os.path.isfile(fp)) and __import__('shutil').copy2(fp,f'/tmp/claude-backups/{int(time.time())}-{os.path.basename(fp)}')\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); fp=d.get('tool_response',{}).get('filePath','') or d.get('tool_input',{}).get('file_path',''); fp.endswith(('.json','.jsonc','.yaml','.yml')) and os.system(f'npx prettier --write \\\"{fp}\\\"')\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
