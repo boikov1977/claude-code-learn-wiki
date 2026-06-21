@@ -9,4 +9,4 @@ __pycache__/
 # Агенты и скиллы — глобальные, см. ~/.claude/agents/ и ~/.claude/skills/
 .claude/agents/
 .claude/skills/*
-!.claude/skills/sync-claude-config.md
+!.claude/skills/sync-claude-config/

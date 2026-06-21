@@ -17,7 +17,7 @@ model: inherit
 5. Читает `claude-config/settings.json`, заменяет `__HOME__`, записывает в `~/.claude/settings.json`
 6. Читает `claude-config/settings.local.json`, заменяет `__HOME__`, записывает в `~/.claude/settings.local.json`
 7. Копирует `claude-config/CLAUDE.md` в `~/CLAUDE.md`
-8. Копирует себя (`.claude/skills/sync-claude-config.md`) в `~/.claude/skills/sync-claude-config.md` — чтобы стал глобально доступен
+8. Копирует себя (`.claude/skills/sync-claude-config/`) в `~/.claude/skills/sync-claude-config/` — чтобы стал глобально доступен
 
 ## Особенности
 
