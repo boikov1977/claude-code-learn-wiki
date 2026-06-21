@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Как создать своего субагента</title>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>&#x1f916; Как создать своего субагента</h1>
+  <p class="subtitle">Пошаговый гайд: от файла .md до полноценного специалиста</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое субагент</a></li>
+      <li><a href="#skill-vs-agent">Skill vs Agent: в чём разница</a></li>
+      <li><a href="#structure">Структура файла агента</a></li>
+      <li><a href="#frontmatter">Frontmatter: все поля</a></li>
+      <li><a href="#system-prompt">Системный промпт</a></li>
+      <li><a href="#mcp">MCP-серверы для агента</a></li>
+      <li><a href="#example">Пример: code-reviewer</a></li>
+      <li><a href="#call">Как вызвать</a></li>
+      <li><a href="#tips">Советы</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ СУБАГЕНТ -->
+  <h2 id="what"><span class="emoji">&#x1f4a1;</span> Что такое субагент</h2>
+
+  <p>
+    Субагент &mdash; это <strong>специализированный AI-помощник</strong> со своей ролью,
+    инструментами и (опционально) своей моделью. Основной Claude Code может вызывать
+    субагента инструментом <code>Agent</code> и делегировать ему задачи.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Аналогия:</strong> Если Claude Code &mdash; это тимлид, то субагенты &mdash;
+    это его команда. Один специализируется на ревью кода, другой &mdash;
+    на документации, третий &mdash; на тестах. Каждый делает своё дело хорошо.</p>
+  </div>
+
+  <p>Субагенты живут в <code>~/.claude/agents/</code> как файлы <code>.md</code>
+  с YAML-шапкой (frontmatter).</p>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. SKILL VS AGENT -->
+  <h2 id="skill-vs-agent"><span class="emoji">&#x2694;&#xfe0f;</span> Skill vs Agent: в чём разница</h2>
+
+  <table>
+    <tr>
+      <th></th>
+      <th>Skill</th>
+      <th>Agent</th>
+    </tr>
+    <tr>
+      <td><strong>Файл</strong></td>
+      <td><code>~/.claude/skills/имя/SKILL.md</code></td>
+      <td><code>~/.claude/agents/имя.md</code></td>
+    </tr>
+    <tr>
+      <td><strong>Вызов</strong></td>
+      <td><code>/имя-скилла</code></td>
+      <td><code>@имя</code> или инструмент Agent</td>
+    </tr>
+    <tr>
+      <td><strong>Контекст</strong></td>
+      <td>Работает в контексте основной сессии</td>
+      <td>Изолированная песочница (новый контекст)</td>
+    </tr>
+    <tr>
+      <td><strong>Модель</strong></td>
+      <td>Может отличаться</td>
+      <td>Может отличаться</td>
+    </tr>
+    <tr>
+      <td><strong>Инструменты</strong></td>
+      <td>Ограниченные (tools)</td>
+      <td>Ограниченные (tools + disallowedTools)</td>
+    </tr>
+    <tr>
+      <td><strong>MCP</strong></td>
+      <td>Нет</td>
+      <td>Да (mcpServers)</td>
+    </tr>
+    <tr>
+      <td><strong>Когда использовать</strong></td>
+      <td>Многошаговые инструкции в контексте сессии</td>
+      <td>Специализированный эксперт с изоляцией</td>
+    </tr>
+  </table>
+
+  <div class="card card-green">
+    <p><strong>Простое правило:</strong></p>
+    <ul>
+      <li><strong>Skill</strong> = «сделай это, следуя инструкции» (в контексте сессии)</li>
+      <li><strong>Agent</strong> = «ты &mdash; эксперт по X, решай задачи в своей области» (изолированно)</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. СТРУКТУРА ФАЙЛА -->
+  <h2 id="structure"><span class="emoji">&#x1f4c1;</span> Структура файла агента</h2>
+
+  <div class="code-block">
+    <code><span class="yaml-comment">---</span>
+<span class="yaml-key">name:</span> <span class="yaml-val">my-agent</span>
+<span class="yaml-key">description:</span> <span class="yaml-val">Краткое описание роли агента</span>
+<span class="yaml-key">tools:</span>
+  <span class="yaml-val">- Read</span>
+  <span class="yaml-val">- Write</span>
+  <span class="yaml-key">disallowedTools:</span>
+  <span class="yaml-val">- Bash</span>
+<span class="yaml-key">mcpServers:</span>
+  <span class="yaml-val">[]</span>
+<span class="yaml-key">model:</span> <span class="yaml-val">claude-sonnet-4-20250514</span>
+<span class="yaml-comment">---</span>
+
+<span class="yaml-comment"># Системный промпт</span>
+
+Ты &mdash; эксперт по [области].
+
+Твоя задача:
+- [что делаешь]
+- [как делаешь]
+- [чего не делаешь]
+
+Формат ответа:
+- [какой формат]</code>
+  </div>
+
+  <p>Файл кладётся в <code>~/.claude/agents/имя.md</code>.</p>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. FRONTMATTER -->
+  <h2 id="frontmatter"><span class="emoji">&#x2699;&#xfe0f;</span> Frontmatter: все поля</h2>
+
+  <table>
+    <tr>
+      <th>Поле</th>
+      <th>Обязательно?</th>
+      <th>Тип</th>
+      <th>Описание</th>
+    </tr>
+    <tr>
+      <td><code>name</code></td>
+      <td><strong>Да</strong></td>
+      <td>string</td>
+      <td>Имя агента. Используется для вызова через <code>@имя</code>.</td>
+    </tr>
+    <tr>
+      <td><code>description</code></td>
+      <td><strong>Да</strong></td>
+      <td>string</td>
+      <td>Описание роли. Помогает Claude выбрать правильного агента.</td>
+    </tr>
+    <tr>
+      <td><code>tools</code></td>
+      <td>Нет</td>
+      <td>list</td>
+      <td>Какие инструменты доступны. По умолчанию &mdash; все.</td>
+    </tr>
+    <tr>
+      <td><code>disallowedTools</code></td>
+      <td>Нет</td>
+      <td>list</td>
+      <td>Какие инструменты <strong>запрещены</strong>. Переопределяет tools.</td>
+    </tr>
+    <tr>
+      <td><code>mcpServers</code></td>
+      <td>Нет</td>
+      <td>list</td>
+      <td>MCP-серверы, доступные агенту. Пустой список <code>[]</code> = изоляция.</td>
+    </tr>
+    <tr>
+      <td><code>model</code></td>
+      <td>Нет</td>
+      <td>string</td>
+      <td>Модель для агента. По умолчанию &mdash; основная модель сессии.</td>
+    </tr>
+  </table>
+
+  <div class="card card-orange">
+    <h3>tools vs disallowedTools</h3>
+    <p>
+      <code>tools</code> &mdash; белый список (что разрешено).
+      <code>disallowedTools</code> &mdash; чёрный список (что запрещено).
+      Если указаны оба &mdash; disallowedTools имеет приоритет.
+    </p>
+    <p>Пример: разрешить всё, кроме Bash:</p>
+    <div class="code-block">
+      <code><span class="yaml-key">tools:</span> <span class="yaml-val">all</span>
+<span class="yaml-key">disallowedTools:</span>
+  <span class="yaml-val">- Bash</span></code>
+    </div>
+  </div>
+
+  <div class="card card-red">
+    <h3>&#x26a0;&#xfe0f; disallowedTools критичен для безопасности</h3>
+    <p>Если агент не должен запускать команды &mdash; обязательно добавь
+    <code>disallowedTools: [Bash]</code>. Иначе агент сможет выполнить
+    любую shell-команду.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. СИСТЕМНЫЙ ПРОМПТ -->
+  <h2 id="system-prompt"><span class="emoji">&#x1f4dd;</span> Системный промпт</h2>
+
+  <p>
+    Всё, что идёт после <code>---</code> &mdash; это системный промпт.
+    Это «характер» и «экспертиза» агента.
+  </p>
+
+  <div class="card card-purple">
+    <h3>Что писать в системном промпте</h3>
+    <ul>
+      <li><strong>Кто ты:</strong> «Ты &mdash; эксперт по security review»</li>
+      <li><strong>Что делаешь:</strong> «Анализируешь код на уязвимости»</li>
+      <li><strong>Как делаешь:</strong> «Проверяешь OWASP Top 10, ищешь SQL injection, XSS»</li>
+      <li><strong>Чего не делаешь:</strong> «Не пишешь исправления &mdash; только отчёт»</li>
+      <li><strong>Формат:</strong> «Ответ в формате: Критично / Важно / Рекомендация»</li>
+      <li><strong>Ограничения:</strong> «Не трогай файлы в папке migrations»</li>
+    </ul>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Совет:</strong> Системный промпт для агента &mdash; это не то же самое,
+    что промпт для скилла. Агент работает в <strong>изолированном контексте</strong>:
+    он не видит историю основной сессии. Поэтому промпт должен содержать
+    <strong>всю необходимую информацию</strong> о роли и задаче.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. MCP-СЕРВЕРЫ -->
+  <h2 id="mcp"><span class="emoji">&#x1f50c;</span> MCP-серверы для агента</h2>
+
+  <p>Агент может подключать внешние MCP-серверы через поле <code>mcpServers</code>.</p>
+
+  <div class="card card-green">
+    <h3>Изоляция через mcpServers: []</h3>
+    <p>Если указать <code>mcpServers: []</code> (пустой список) &mdash; агент
+    <strong>не будет иметь доступа</strong> ни к каким MCP-серверам.
+    Это полезно для изоляции: агент работает только со встроенными инструментами.</p>
+    <div class="code-block">
+      <code><span class="yaml-key">mcpServers:</span> <span class="yaml-val">[]</span>  <span class="yaml-comment"># полная изоляция от MCP</span></code>
+    </div>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Подключение конкретных серверов</h3>
+    <p>Если агенту нужен доступ к конкретным MCP-серверам &mdash; перечисли их:</p>
+    <div class="code-block">
+      <code><span class="yaml-key">mcpServers:</span>
+  <span class="yaml-val">- poisk-mcp</span>      <span class="yaml-comment"># веб-поиск</span>
+  <span class="yaml-val">- context7</span>        <span class="yaml-comment"># API-документация</span></code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. ПРИМЕР -->
+  <h2 id="example"><span class="emoji">&#x1f469;&#x200d;&#x1f4bb;</span> Пример: code-reviewer</h2>
+
+  <p>Полный пример агента для код-ревью:</p>
+
+  <div class="code-block">
+    <code><span class="yaml-comment">---</span>
+<span class="yaml-key">name:</span> <span class="yaml-val">code-reviewer</span>
+<span class="yaml-key">description:</span> <span class="yaml-val">Эксперт по код-ревью. Анализирует изменения на баги, проблемы безопасности и архитектуру.</span>
+<span class="yaml-key">tools:</span>
+  <span class="yaml-val">- Read</span>
+  <span class="yaml-val">- Glob</span>
+  <span class="yaml-val">- Grep</span>
+<span class="yaml-key">disallowedTools:</span>
+  <span class="yaml-val">- Write</span>
+  <span class="yaml-val">- Edit</span>
+  <span class="yaml-val">- Bash</span>
+<span class="yaml-key">mcpServers:</span> <span class="yaml-val">[]</span>
+<span class="yaml-key">model:</span> <span class="yaml-val">claude-sonnet-4-20250514</span>
+<span class="yaml-comment">---</span>
+
+Ты &mdash; эксперт по код-ревью. Твоя задача &mdash; проанализировать
+текущие изменения (git diff) и дать структурированный отчёт.
+
+## Что проверять
+1. **Баги**: логические ошибки, off-by-one, null-доступ
+2. **Безопасность**: SQL injection, XSS, hardcode секретов
+3. **Стиль**: нарушения конвенций проекта, дублирование
+4. **Архитектура**: нарушение SRP, циклические зависимости
+
+## Формат отчёта
+Для каждого найденного вопроса:
+- **Уровень**: Критично / Важно / Рекомендация
+- **Файл**: путь и строка
+- **Описание**: что не так
+- **Рекомендация**: как исправить
+
+## Ограничения
+- Не изменяй файлы (у тебя нет Write/Edit/Bash)
+- Только анализ и рекомендации
+- Не комментируй стиль если нет серьёзных проблем</code>
+  </div>
+
+  <p>Сохрани как <code>~/.claude/agents/code-reviewer.md</code>.</p>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. КАК ВЫЗВАТЬ -->
+  <h2 id="call"><span class="emoji">&#x1f446;</span> Как вызвать</h2>
+
+  <p>Есть два способа:</p>
+
+  <h3>1. Через @имя</h3>
+  <div class="code-block">
+    <code><span style="color: var(--accent);">@code-reviewer</span> проанализируй текущий git diff</code>
+  </div>
+
+  <h3>2. Через инструмент Agent</h3>
+  <div class="code-block">
+    <code>Claude сам вызовет агента инструментом Agent, когда решит что задача
+подходит для специалиста. Ты можешь попросить явно:
+
+«Вызови code-reviewer для проверки изменений в auth.py»</code>
+  </div>
+
+  <div class="card card-green">
+    <h3>Проверка: что агент доступен</h3>
+    <p>Набери <code>@</code> в чате &mdash; Claude покажет список доступных
+    агентов. Твой субагент будет в списке, если файл лежит в правильной папке.</p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Важно:</strong> Субагент работает в <strong>изолированном контексте</strong>.
+    Он не видит историю твоего чата с Claude. Поэтому в вызове нужно
+    явно указать: что анализировать, где файлы, какая задача.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 9. СОВЕТЫ -->
+  <h2 id="tips"><span class="emoji">&#x1f4a1;</span> Советы</h2>
+
+  <div class="card card-accent">
+    <h3>Одна роль &mdash; один агент</h3>
+    <p>Не пытайся сделать «универсального агента». Лучше 3 специалиста:
+    code-reviewer, security-auditor, doc-writer. Каждый делает своё дело хорошо.</p>
+  </div>
+
+  <div class="card card-green">
+    <h3>Изоляция через mcpServers: []</h3>
+    <p>Для агентов, которые только анализируют &mdash; отключи MCP.
+    Это гарантия безопасности: агент не сможет обратиться к внешним сервисам.</p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>disallowedTools для безопасности</h3>
+    <p>Если агент не должен писать код &mdash; отключи Write и Edit.
+    Если не должен запускать команды &mdash; отключи Bash.</p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Тестируй через @имя</h3>
+    <p>Вызови агента через <code>@имя</code> с простой задачей.
+    Если он работает как нужно &mdash; можно использовать в реальных сценариях.</p>
+  </div>
+
+  <div class="card card-yellow">
+    <h3>Используй разные модели</h3>
+    <p>Для простых задач (ревью стиля) &mdash; быстрая модель (Sonnet).
+    Для сложных (архитектурный анализ) &mdash; мощная (Opus).
+    Экономия на модели = экономия на токенах.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Субагент &mdash; это файл <code>.md</code> в
+      <code>~/.claude/agents/</code> с frontmatter (name, description, tools,
+      disallowedTools, mcpServers, model) и системным промптом.
+      Вызывается через <code>@имя</code>. Работает в изолированном контексте.
+    </p>
+  </div>
+
+  <div class="card" style="border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.92em; color: var(--text-muted); margin:0;">
+      Обзор всех субагентов &mdash; в статье
+      <a href="../agents/all-agents.html">Все агенты</a>.
+      Разница между субагентами и forked &mdash; в статье
+      <a href="subagent-vs-forked.html">Subagent vs Forked</a>.
+    </p>
+  </div>
+
+</div>
+
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      &#x270d;&#xfe0f; Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) &middot; июнь 2026
+    </p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Как написать свой Skill</title>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .yaml-key { color: var(--accent); font-weight: 600; }
+    .yaml-val { color: var(--green); }
+    .yaml-comment { color: var(--text-muted); font-style: italic; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>&#x1f9e9; Как написать свой Skill</h1>
+  <p class="subtitle">Пошаговый гайд: от простого скилла до полезного инструмента</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое кастомный скилл</a></li>
+      <li><a href="#structure">Структура файла SKILL.md</a></li>
+      <li><a href="#frontmatter">Frontmatter: обязательные и опциональные поля</a></li>
+      <li><a href="#instructions">Инструкции: тело скилла</a></li>
+      <li><a href="#example-simple">Пример: простой скилл</a></li>
+      <li><a href="#example-useful">Пример: полезный скилл</a></li>
+      <li><a href="#call">Как вызывать</a></li>
+      <li><a href="#tips">Советы</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ КАСТОМНЫЙ СКИЛЛ -->
+  <h2 id="what"><span class="emoji">&#x1f4a1;</span> Что такое кастомный скилл</h2>
+
+  <p>
+    Скилл &mdash; это <strong>готовая инструкция</strong> для Claude Code.
+    Ты пишешь в файле <code>SKILL.md</code>: что делать, какие инструменты использовать,
+    какой результат ожидать. Claude выполняет эту инструкцию, когда ты вызываешь
+    скилл через <code>/имя-скилла</code>.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Проще простого:</strong> Скилл &mdash; это промпт, который ты
+    сохранил в файле и можешь вызывать по имени. Вместо того чтобы каждый раз
+    писать длинную инструкцию &mdash; ты пишешь её один раз и вызываешь
+    одной командой.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. СТРУКТУРА ФАЙЛА -->
+  <h2 id="structure"><span class="emoji">&#x1f4c1;</span> Структура файла SKILL.md</h2>
+
+  <p>Каждый скилл &mdash; это один файл <code>SKILL.md</code> с двумя частями:</p>
+
+  <div class="code-block">
+    <code><span class="yaml-comment">---</span>
+<span class="yaml-key">name:</span> <span class="yaml-val">my-skill</span>
+<span class="yaml-key">description:</span> <span class="yaml-val">Краткое описание что делает скилл</span>
+<span class="yaml-comment">---</span>
+
+<span class="yaml-comment"># Инструкции для Claude</span>
+
+Здесь ты пишешь что именно Claude должен делать
+при вызове этого скилла. Подробно, конкретно,
+с примерами и ограничениями.</code>
+  </div>
+
+  <p><strong>Frontmatter</strong> (между <code>---</code>) &mdash; это YAML-конфиг.
+  <strong>Тело</strong> после второго <code>---</code> &mdash; это инструкции.</p>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. FRONTMATTER -->
+  <h2 id="frontmatter"><span class="emoji">&#x2699;&#xfe0f;</span> Frontmatter: обязательные и опциональные поля</h2>
+
+  <table>
+    <tr>
+      <th>Поле</th>
+      <th>Обязательно?</th>
+      <th>Тип</th>
+      <th>Описание</th>
+    </tr>
+    <tr>
+      <td><code>name</code></td>
+      <td><strong>Да</strong></td>
+      <td>string</td>
+      <td>Имя скилла для вызова через <code>/имя</code>. Без пробелов, дефисы.</td>
+    </tr>
+    <tr>
+      <td><code>description</code></td>
+      <td><strong>Да</strong></td>
+      <td>string</td>
+      <td>Краткое описание. Показывается в автодополнении.</td>
+    </tr>
+    <tr>
+      <td><code>model</code></td>
+      <td>Нет</td>
+      <td>string</td>
+      <td>Какую модель использовать. По умолчанию &mdash; основная модель сессии.</td>
+    </tr>
+    <tr>
+      <td><code>tools</code></td>
+      <td>Нет</td>
+      <td>list</td>
+      <td>Какие инструменты доступны скиллу. По умолчанию &mdash; все.</td>
+    </tr>
+  </table>
+
+  <div class="card card-purple">
+    <h3>Поле model</h3>
+    <p>Если скилл не требует мощной модели &mdash; можно указать более дешёвую:</p>
+    <div class="code-block">
+      <code><span class="yaml-key">model:</span> <span class="yaml-val">claude-sonnet-4-20250514</span>  <span class="yaml-comment"># быстрая модель</span></code>
+    </div>
+    <p>Или наоборот &mdash; для сложных задач:</p>
+    <div class="code-block">
+      <code><span class="yaml-key">model:</span> <span class="yaml-val">claude-opus-4-20250514</span>  <span class="yaml-comment"># мощная модель</span></code>
+    </div>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Поле tools</h3>
+    <p>Можно ограничить доступные инструменты. Например, для скилла,
+    который только анализирует &mdash; разрешить только чтение:</p>
+    <div class="code-block">
+      <code><span class="yaml-key">tools:</span>
+  <span class="yaml-val">- Read</span>
+  <span class="yaml-val">- Glob</span>
+  <span class="yaml-val">- Grep</span></code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ИНСТРУКЦИИ -->
+  <h2 id="instructions"><span class="emoji">&#x1f4dd;</span> Инструкции: тело скилла</h2>
+
+  <p>
+    После второго <code>---</code> &mdash; это <strong>промпт для Claude</strong>.
+    Пиши как обычную инструкцию: конкретно, с примерами, с ограничениями.
+  </p>
+
+  <div class="card card-green">
+    <h3>Что писать в инструкциях</h3>
+    <ul>
+      <li><strong>Что делать:</strong> «Прочитай файл X, проанализируй Y, напиши Z»</li>
+      <li><strong>Как делать:</strong> «Используй формат RFC, добавь type hints»</li>
+      <li><strong>Чего не делать:</strong> «Не трогай файлы в папке migrations»</li>
+      <li><strong>Формат результата:</strong> «Выведи список из 5 пунктов»</li>
+      <li><strong>Примеры:</strong> Покажи идеальный результат</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ПРИМЕР: ПРОСТОЙ -->
+  <h2 id="example-simple"><span class="emoji">&#x1f467;</span> Пример: простой скилл</h2>
+
+  <p>Самый простой скилл &mdash; «приветствие с информацией о проекте»:</p>
+
+  <div class="code-block">
+    <code><span class="yaml-comment">---</span>
+<span class="yaml-key">name:</span> <span class="yaml-val">project-info</span>
+<span class="yaml-key">description:</span> <span class="yaml-val">Показывает информацию о проекте</span>
+<span class="yaml-comment">---</span>
+
+Прочитай файлы CLAUDE.md и package.json (или requirements.txt, Cargo.toml, go.mod)
+и кратко опиши проект:
+- Название и описание
+- Технологический стек
+- Как запускать
+- Как тестировать
+
+Выведи информацию в виде короткой сводки.</code>
+  </div>
+
+  <p>Сохрани как <code>~/.claude/skills/project-info/SKILL.md</code> и вызывай:</p>
+
+  <div class="code-block">
+    <code>/project-info</code>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. ПРИМЕР: ПОЛЕЗНЫЙ -->
+  <h2 id="example-useful"><span class="emoji">&#x1f6e0;&#xfe0f;</span> Пример: полезный скилл</h2>
+
+  <p>Скилл для генерации типизированных API-эндпоинтов:</p>
+
+  <div class="code-block">
+    <code><span class="yaml-comment">---</span>
+<span class="yaml-key">name:</span> <span class="yaml-val">gen-api-endpoint</span>
+<span class="yaml-key">description:</span> <span class="yaml-val">Генерирует REST API эндпоинт с тестами</span>
+<span class="yaml-key">model:</span> <span class="yaml-val">claude-sonnet-4-20250514</span>
+<span class="yaml-key">tools:</span>
+  <span class="yaml-val">- Read</span>
+  <span class="yaml-val">- Write</span>
+  <span class="yaml-val">- Edit</span>
+  <span class="yaml-val">- Bash</span>
+<span class="yaml-comment">---</span>
+
+Генерируй REST API эндпоинт по следующим правилам:
+
+## Формат входных данных
+Пользователь опишет: метод (GET/POST/PUT/DELETE), путь, тело запроса, ответ.
+
+## Что генерировать
+1. **Маршрут** в формате FastAPI:
+   - Pydantic-модель для request body (если есть)
+   - Pydantic-модель для response (если есть)
+   - Функция-обработчик с type hints
+   - Docstring с описанием
+
+2. **Тест** в файле `tests/test_{endpoint_name}.py`:
+   - Тест на успешный ответ (200/201)
+   - Тест на ошибку (404/422)
+   - Использование pytest + httpx AsyncClient
+
+## Ограничения
+- Не трогай существующие файлы маршрутов
+- Все модели клади в `schemas/`
+- Все маршруты в `routes/`
+- Форматирование: Black, линия до 88 символов
+
+## Пример результата
+Если просят `POST /api/users` с `{name: str, email: str}`:
+- Создай `schemas/user.py` с UserCreate и UserResponse
+- Создай `routes/user.py` с create_user
+- Создай `tests/test_user.py` с тестами</code>
+  </div>
+
+  <p>Сохрани как <code>~/.claude/skills/gen-api-endpoint/SKILL.md</code> и вызывай:</p>
+
+  <div class="code-block">
+    <code>/gen-api-endpoint POST /api/orders с {product_id: int, quantity: int}</code>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. КАК ВЫЗЫВАТЬ -->
+  <h2 id="call"><span class="emoji">&#x1f446;</span> Как вызывать</h2>
+
+  <ol>
+    <li>Сохрани файл <code>SKILL.md</code> в папку:
+    <code>~/.claude/skills/имя-скилла/SKILL.md</code></li>
+    <li>Перезапусти Claude Code (или начни новую сессию)</li>
+    <li>Набери <code>/имя-скилла</code> в чате</li>
+  </ol>
+
+  <div class="card card-accent">
+    <h3>Структура папок</h3>
+    <div class="code-block">
+      <code>~/.claude/skills/
+  my-skill/
+    SKILL.md
+  another-skill/
+    SKILL.md</code>
+    </div>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Подсказка:</strong> Набери <code>/</code> в чате и увидишь все
+    доступные скиллы с описаниями. Кастомные будут помечены как
+    «custom» (не «built-in»).</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 8. СОВЕТЫ -->
+  <h2 id="tips"><span class="emoji">&#x1f4a1;</span> Советы</h2>
+
+  <div class="card card-green">
+    <h3>Начни с простого</h3>
+    <p>Первый скилл &mdash; что-то тривиальное: «покажи инфо о проекте» или
+    «пробежись по коду и найди TODO». Потом усложняй.</p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Пиши инструкции как для стажёра</h3>
+    <p>Конкретно, без двусмысленностей. Claude &mdash; умная модель, но ей нужно
+    понимать контекст. Не «сделай хорошо», а «добавь type hints ко всем функциям
+    в папке src/».</p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Тестируй итеративно</h3>
+    <p>Написал скилл &mdash; попробуй вызвать. Видишь что Claude делает не то?
+    Правь инструкции и вызывай снова. Это цикл: написал &rarr; проверил &rarr; поправил.</p>
+  </div>
+
+  <div class="card card-accent">
+    <h3>Разделяй скиллы по назначению</h3>
+    <p>Один скилл &mdash; одна задача. Не пиши «сделай всё» &mdash; лучше
+    три отдельных скилла: «генерируй эндпоинты», «генерируй тесты», «генерируй
+    документацию».</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Кастомный скилл &mdash; это файл <code>SKILL.md</code>
+      с frontmatter (name, description, tools, model) и инструкциями.
+      Кладёшь в <code>~/.claude/skills/</code>, вызываешь через <code>/имя</code>.
+    </p>
+  </div>
+
+  <div class="card" style="border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.92em; color: var(--text-muted); margin:0;">
+      Разница между скиллами и слэш-командами &mdash; в статье
+      <a href="skill-vs-slash.html">Skill vs Slash Command</a>.
+    </p>
+  </div>
+
+</div>
+
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      &#x270d;&#xfe0f; Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) &middot; июнь 2026
+    </p>
+  </div>
+</body>
+</html>

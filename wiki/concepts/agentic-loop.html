@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Агентный цикл Claude Code</title>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.9em;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .step-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-content h4 {
+      font-size: 1.05em;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .step-content p {
+      margin-bottom: 0;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>&#x1f504; Агентный цикл</h1>
+  <p class="subtitle">Как Claude Code выполняет задачи: промпт &rarr; чтение &rarr; код &rarr; проверка &rarr; повтор</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что такое агентный цикл</a></li>
+      <li><a href="#phases">Фазы цикла</a></li>
+      <li><a href="#parts">Компоненты цикла</a></li>
+      <li><a href="#example">Пример: пошаговый разбор</a></li>
+      <li><a href="#limits">Ограничения</a></li>
+      <li><a href="#tips">Как управлять циклом</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ТАКОЕ АГЕНТНЫЙ ЦИКЛ -->
+  <h2 id="what"><span class="emoji">&#x1f4a1;</span> Что такое агентный цикл</h2>
+
+  <p>
+    Когда ты отправляешь промпт Claude Code &mdash; он не просто «отвечает».
+    Он <strong>запускает цикл</strong>, в котором последовательно выполняет шаги:
+    читает файлы, анализирует код, пишет изменения, запускает проверки и повторяет,
+    пока задача не будет решена.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Простыми словами:</strong> Агентный цикл &mdash; это рабочий процесс
+    «прочитал &rarr; подумал &rarr; сделал &rarr; проверил &rarr; повторил».
+    Одна задача может занимать от 5 до 50 итераций этого цикла. Ты видишь результат
+    в конце &mdash; Claude работает автономно, а ты контролируешь ключевые решения.</p>
+  </div>
+
+  <p>
+    Это то, что отличает Claude Code от обычного чата: в чате один вопрос &mdash; один ответ.
+    В агентном цикле один вопрос &mdash; серия действий, которая заканчивается готовым результатом.
+  </p>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ФАЗЫ ЦИКЛА -->
+  <h2 id="phases"><span class="emoji">&#x1f3af;</span> Фазы цикла</h2>
+
+  <p>Каждая итерация агентного цикла проходит через несколько фаз:</p>
+
+  <div class="step-row">
+    <span class="step-number">1</span>
+    <div class="step-content">
+      <h4>Приём промпта</h4>
+      <p>Пользователь отправляет задачу. Claude анализирует её и определяет стратегию:
+      какие файлы читать, какие команды запускать, что писать.</p>
+    </div>
+  </div>
+
+  <div class="step-row">
+    <span class="step-number">2</span>
+    <div class="step-content">
+      <h4>Исследование (чтение)</h4>
+      <p>Claude читает связанные файлы через инструменты <code>Read</code>, <code>Glob</code>,
+      <code>Grep</code>. Понимает структуру проекта, находит зависимости, определяет контекст.</p>
+    </div>
+  </div>
+
+  <div class="step-row">
+    <span class="step-number">3</span>
+    <div class="step-content">
+      <h4>Анализ и план</h4>
+      <p>На основе прочитанного Claude формулирует план действий: что именно нужно изменить,
+      в каких файлах, какими инструментами.</p>
+    </div>
+  </div>
+
+  <div class="step-row">
+    <span class="step-number">4</span>
+    <div class="step-content">
+      <h4>Выполнение (код)</h4>
+      <p>Claude применяет изменения: <code>Edit</code> для правок, <code>Write</code> для
+      новых файлов, <code>Bash</code> для команд. Может комбинировать несколько инструментов
+      в одной итерации.</p>
+    </div>
+  </div>
+
+  <div class="step-row">
+    <span class="step-number">5</span>
+    <div class="step-content">
+      <h4>Проверка</h4>
+      <p>Claude проверяет результат: запускает тесты, проверяет форматирование, читает
+      логи ошибок. Если что-то не так &mdash; возвращается к шагу 2.</p>
+    </div>
+  </div>
+
+  <div class="step-row">
+    <span class="step-number">6</span>
+    <div class="step-content">
+      <h4>Решение о повторе</h4>
+      <p>Claude решает: достаточно ли информации? Задача решена? Если да &mdash; отвечает
+      пользователю. Если нет &mdash; повторяет цикл с шага 2.</p>
+    </div>
+  </div>
+
+  <div class="card card-green">
+    <p><strong>Типичная длина:</strong> Простая задача (написать функцию) &mdash; 5&ndash;10
+    итераций. Средняя (исправить баг с тестами) &mdash; 10&ndash;25. Сложная (добавить
+    фичу с рефакторингом) &mdash; 25&ndash;50 итераций.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. КОМПОНЕНТЫ ЦИКЛА -->
+  <h2 id="parts"><span class="emoji">&#x1f9e9;</span> Компоненты цикла</h2>
+
+  <p>Три ключевых механизма, из которых состоит агентный цикл:</p>
+
+  <h3>Tool Use &mdash; инструменты</h3>
+
+  <div class="card card-purple">
+    <p>
+      <strong>Tool Use</strong> &mdash; это механизм, с помощью которого Claude вызывает внешние
+      инструменты. Каждое действие (прочитать файл, запустить команду, записать код)
+      &mdash; это вызов инструмента. Claude сам выбирает нужный инструмент и формирует
+      вызов в формате JSON.
+    </p>
+    <p>Основные инструменты:</p>
+    <ul>
+      <li><code>Read</code> &mdash; чтение файла</li>
+      <li><code>Write</code> &mdash; создание / перезапись файла</li>
+      <li><code>Edit</code> &mdash; точечное изменение файла</li>
+      <li><code>Bash</code> &mdash; запуск shell-команды</li>
+      <li><code>Glob</code> / <code>Grep</code> &mdash; поиск файлов и содержимого</li>
+      <li><code>Agent</code> &mdash; вызов субагента</li>
+    </ul>
+    <p style="color: var(--text-muted); font-size:0.92em; margin-top:8px;">
+      Подробнее &mdash; в статье <a href="tool-use.html">Tool Use</a>.
+    </p>
+  </div>
+
+  <h3>Context Window &mdash; рабочая память</h3>
+
+  <div class="card card-orange">
+    <p>
+      <strong>Context Window</strong> &mdash; это «рабочая память» Claude. Всё, что он
+      прочитал, написал и получил от системы &mdash; помещается в контекстное окно.
+      Каждый вызов инструмента и его результат расходуют токены.
+    </p>
+    <p>Когда контекст заполняется &mdash; Claude может начать «забывать» ранние шаги.
+    В этом случае помогает <code>/compact</code> (сжатие контекста).</p>
+    <p style="color: var(--text-muted); font-size:0.92em; margin-top:8px;">
+      Подробнее &mdash; в статье <a href="context-window.html">Context Window</a>.
+    </p>
+  </div>
+
+  <h3>Permissions &mdash; контроль доступа</h3>
+
+  <div class="card card-red">
+    <p>
+      <strong>Permissions</strong> &mdash; это система правил, которая определяет,
+      какие действия Claude может выполнять автоматически, а какие требуют
+      подтверждения. Read-only операции проходят свободно, Write/Edit/Bash &mdash;
+      обычно с вопросом.
+    </p>
+    <p>Ты можешь настроить правила (allow/deny/ask), чтобы Claude не спрашивал
+    разрешения на routine-действия, но сохранял контроль над опасными.</p>
+    <p style="color: var(--text-muted); font-size:0.92em; margin-top:8px;">
+      Подробнее &mdash; в статье <a href="permissions.html">Permissions</a>.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ПРИМЕР -->
+  <h2 id="example"><span class="emoji">&#x1f469;&#x200d;&#x1f4bb;</span> Пример: пошаговый разбор</h2>
+
+  <p>
+    Задача: <strong>«Напиши функцию для подсчёта строк в файле и тест к ней»</strong>.
+    Вот как проходит агентный цикл:
+  </p>
+
+  <table>
+    <tr>
+      <th>#</th>
+      <th>Итерация</th>
+      <th>Действие Claude</th>
+      <th>Инструмент</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Исследование</td>
+      <td>Claude смотрит структуру проекта: какие языки, фреймворки, система тестирования</td>
+      <td><code>Bash</code> (ls), <code>Glob</code></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Анализ</td>
+      <td>Находит существующие утилиты и модули. Решает: создать отдельный модуль <code>utils.py</code></td>
+      <td><code>Grep</code>, <code>Read</code></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Код: функция</td>
+      <td>Пишет функцию <code>count_lines(filepath)</code> в <code>utils.py</code></td>
+      <td><code>Write</code></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>Код: тест</td>
+      <td>Создаёт <code>test_utils.py</code> с тестом для функции</td>
+      <td><code>Write</code></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>Проверка</td>
+      <td>Запускает тесты: <code>pytest test_utils.py -v</code></td>
+      <td><code>Bash</code></td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>Решение</td>
+      <td>Тесты прошли. Claude отвечает: «Функция и тест готовы. Вот что я сделал: ...»</td>
+      <td>&mdash;</td>
+    </tr>
+  </table>
+
+  <div class="card card-green">
+    <h3>Если бы тесты упали...</h3>
+    <p>На шаге 5 Claude увидел бы ошибку. Он бы прочитал стектрейс (шаг 6), нашёл проблему
+    (шаг 7), исправил код (шаг 8), запустил тесты снова (шаг 9) &mdash; и повторял бы
+    до тех пор, пока тесты не пройдут. Ты бы увидел только финальный результат.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ОГРАНИЧЕНИЯ -->
+  <h2 id="limits"><span class="emoji">&#x26a0;&#xfe0f;</span> Ограничения</h2>
+
+  <table>
+    <tr>
+      <th>Ограничение</th>
+      <th>Значение</th>
+      <th>Что делать</th>
+    </tr>
+    <tr>
+      <td>Максимум итераций</td>
+      <td>Зависит от модели и провайдера (~60&ndash;80 tool-вызовов)</td>
+      <td>Если Claude «застрял» &mdash; <code>Esc</code> для прерывания</td>
+    </tr>
+    <tr>
+      <td>Context window</td>
+      <td>128K&ndash;200K токенов (зависит от модели)</td>
+      <td><code>/compact</code> для сжатия контекста</td>
+    </tr>
+    <tr>
+      <td>Таймаут Bash</td>
+      <td>120 секунд (по умолчанию)</td>
+      <td>Длинные команды: <code>--timeout 600</code></td>
+    </tr>
+    <tr>
+      <td>Память между сессиями</td>
+      <td>Нет: контекст не сохраняется между запусками</td>
+      <td>Используй <code>CLAUDE.md</code> для важных инструкций</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. КАК УПРАВЛЯТЬ ЦИКЛОМ -->
+  <h2 id="tips"><span class="emoji">&#x1f3d7;&#xfe0f;</span> Как управлять циклом</h2>
+
+  <div class="card card-accent">
+    <h3>Дай контекст в промпте</h3>
+    <p>
+      Чем точнее промпт &mdash; тем меньше итераций. Вместо
+      <code>исправь баг</code> &mdash; <code>в файле utils.py функция parse_json падает с
+      KeyError на строке 42 когда приходит пустой массив</code>.
+    </p>
+  </div>
+
+  <div class="card card-green">
+    <h3>Используй Plan Mode для сложных задач</h3>
+    <p>
+      Для крупных фичей сначала войди в <a href="plan-mode.html">Plan Mode</a> &mdash;
+      Claude исследует код и составит план <em>без изменения файлов</em>.
+      Потом одобри план и он начнёт выполнение.
+    </p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Следи за контекстом</h3>
+    <p>
+      Если задача большая и контекст заполняется &mdash; вызови <code>/compact</code>
+      или разбей задачу на подзадачи. Claude может «забыть» ранние шаги,
+      если контекст переполнен.
+    </p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Останавливай вовремя</h3>
+    <p>
+      Если Claude зациклился или делает лишнее &mdash; нажми <strong>Esc</strong>.
+      Ты ничего не потеряешь: все изменения уже применены, просто итерации прекратятся.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Агентный цикл &mdash; это ядро Claude Code.
+      Промпт &rarr; исследование &rarr; код &rarr; проверка &rarr; повтор.
+      5&ndash;50 итераций, всё автономно. Управляй через точные промпты,
+      Plan Mode и <code>/compact</code>.
+    </p>
+  </div>
+
+</div>
+
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      &#x270d;&#xfe0f; Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) &middot; июнь 2026
+    </p>
+  </div>
+</body>
+</html>

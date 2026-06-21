@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore &rarr; Plan &rarr; Code &rarr; Commit</title>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .card-yellow {
+      border-left: 4px solid var(--yellow);
+      background: #fffde6;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.9em;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .step-number.green { background: var(--green); }
+    .step-number.orange { background: var(--orange); }
+    .step-number.purple { background: var(--purple); }
+
+    .step-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-content h4 {
+      font-size: 1.05em;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .step-content p {
+      margin-bottom: 0;
+      font-size: 0.95em;
+    }
+
+    .flow-steps {
+      display: flex;
+      gap: 0;
+      align-items: center;
+      margin: 24px 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.95em;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .flow-step .emoji { font-size: 1.8em; }
+
+    .flow-arrow {
+      font-size: 1.5em;
+      color: var(--text-muted);
+      padding: 0 4px;
+    }
+
+    .flow-explore { background: #e8f5e9; color: #2e7d32; }
+    .flow-plan { background: #fff3e0; color: #e65100; }
+    .flow-code { background: #e3f2fd; color: #1565c0; }
+    .flow-commit { background: #f3e5f5; color: #7b1fa2; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>&#x1f5fa;&#xfe0f; Explore &rarr; Plan &rarr; Code &rarr; Commit</h1>
+  <p class="subtitle">Полный цикл работы с задачей: от исследования кодовой базы до коммита</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#overview">Обзор цикла</a></li>
+      <li><a href="#explore">Explore: изучить код</a></li>
+      <li><a href="#plan">Plan: составить план</a></li>
+      <li><a href="#code">Code: реализовать</a></li>
+      <li><a href="#commit">Commit: закоммитить</a></li>
+      <li><a href="#example">Пример: кнопка сброса</a></li>
+      <li><a href="#tips">Советы</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ОБЗОР -->
+  <h2 id="overview"><span class="emoji">&#x1f3af;</span> Обзор цикла</h2>
+
+  <p>
+    Explore &rarr; Plan &rarr; Code &rarr; Commit &mdash; это рекомендуемый workflow
+    для любой нетривиальной задачи. Каждый этап решает свою проблему:
+  </p>
+
+  <div class="flow-steps">
+    <div class="flow-step flow-explore">
+      <span class="emoji">&#x1f50d;</span>
+      Explore
+    </div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step flow-plan">
+      <span class="emoji">&#x1f4d0;</span>
+      Plan
+    </div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step flow-code">
+      <span class="emoji">&#x270f;&#xfe0f;</span>
+      Code
+    </div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step flow-commit">
+      <span class="emoji">&#x2705;</span>
+      Commit
+    </div>
+  </div>
+
+  <table>
+    <tr>
+      <th>Этап</th>
+      <th>Что делаем</th>
+      <th>Зачем</th>
+      <th>Инструменты Claude Code</th>
+    </tr>
+    <tr>
+      <td><strong>Explore</strong></td>
+      <td>Изучаем кодовую базу</td>
+      <td>Понять структуру, найти связанные файлы</td>
+      <td>Read, Glob, Grep</td>
+    </tr>
+    <tr>
+      <td><strong>Plan</strong></td>
+      <td>Составляем план действий</td>
+      <td>Продумать подход до написания кода</td>
+      <td><a href="../concepts/plan-mode.html">Plan Mode</a> (EnterPlanMode/ExitPlanMode)</td>
+    </tr>
+    <tr>
+      <td><strong>Code</strong></td>
+      <td>Реализуем изменения</td>
+      <td>Написать код, следуя плану</td>
+      <td>Write, Edit, Bash, <a href="../concepts/task-about.html">Task Tool</a></td>
+    </tr>
+    <tr>
+      <td><strong>Commit</strong></td>
+      <td>Фиксируем результат</td>
+      <td>Сохранить изменения в git</td>
+      <td>Bash (git add, git commit)</td>
+    </tr>
+  </table>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. EXPLORE -->
+  <h2 id="explore"><span class="emoji">&#x1f50d;</span> Explore: изучить код</h2>
+
+  <p>
+    Прежде чем что-то менять &mdash; пойми, что уже есть. Explore &mdash; это фаза
+    <strong>исследования без изменений</strong>.
+  </p>
+
+  <div class="card card-green">
+    <h3>Что Claude делает на этом этапе</h3>
+    <ul>
+      <li>Смотрит структуру проекта: <code>ls</code>, <code>Glob</code></li>
+      <li>Ищет связанные файлы: <code>Grep</code> по ключевым словам</li>
+      <li>Читает файлы: <code>Read</code> по одному или несколько</li>
+      <li>Анализирует зависимости и паттерны</li>
+      <li>Определяет, какие файлы нужно будет менять</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Типичные промпты для Explore:</span>
+
+<span style="color: var(--accent);">Изучи проект:</span> покажи структуру и ключевые файлы
+
+<span style="color: var(--accent);">Найди где реализована форма регистрации</span> &mdash; покажи файлы и их роль
+
+<span style="color: var(--accent);">Покажи как работает аутентификация</span> &mdash; от входа до проверки токена</code>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Совет:</strong> Explore полезен даже когда ты «знаешь проект».
+    Claude может найти файлы, которые ты забыл, или показать связи, которые ты
+    не видел.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. PLAN -->
+  <h2 id="plan"><span class="emoji">&#x1f4d0;</span> Plan: составить план</h2>
+
+  <p>
+    <strong>Plan Mode</strong> &mdash; это режим, в котором Claude <strong>только читает
+    и анализирует</strong>, не меняя файлы. Он составляет план: что, где, как менять.
+  </p>
+
+  <div class="card card-orange">
+    <h3>Как войти в Plan Mode</h3>
+    <p>В интерфейсе Claude Code нажми <code>Shift+Tab</code> или напиши
+    <code>включи Plan Mode</code>. Claude переключится в режим «только чтение».</p>
+    <p>План будет состоять из:</p>
+    <ul>
+      <li>Какие файлы нужно создать/изменить</li>
+      <li>Какой подход будет использован</li>
+      <li>Какие тесты нужно написать</li>
+      <li>Какие могут быть побочные эффекты</li>
+    </ul>
+  </div>
+
+  <div class="card card-purple">
+    <h3>EnterPlanMode / ExitPlanMode</h3>
+    <p>
+      Это внутренние инструменты Claude Code:
+    </p>
+    <ul>
+      <li><code>EnterPlanMode</code> &mdash; Claude входит в режим планирования
+      (read-only). Все write-инструменты отключены.</li>
+      <li><code>ExitPlanMode</code> &mdash; Claude выходит из режима планирования
+      и переходит к выполнению.</li>
+    </ul>
+    <p style="color: var(--text-muted); font-size:0.92em; margin-top:8px;">
+      Подробнее &mdash; в статье <a href="../concepts/plan-mode.html">Plan Mode</a>.
+    </p>
+  </div>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Типичный промпт для Plan:</span>
+
+<span style="color: var(--accent);">Составь план:</span> как добавить кнопку сброса в форму регистрации.
+Не пиши код &mdash; только опиши шаги.</code>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. CODE -->
+  <h2 id="code"><span class="emoji">&#x270f;&#xfe0f;</span> Code: реализовать</h2>
+
+  <p>
+    После утверждения плана Claude переходит к написанию кода. Это фаза
+    <strong>активных изменений</strong>: создание файлов, редактирование, запуск команд.
+  </p>
+
+  <div class="card card-accent">
+    <h3>Task Tool для отслеживания</h3>
+    <p>
+      Для задач, которые состоят из нескольких шагов, Claude использует
+      <strong>Task Tool</strong> &mdash; внутренний todo-лист. Он создаёт список задач
+      и отмечает выполненные.
+    </p>
+    <ul>
+      <li>Создаёт список: «Создать компонент кнопки», «Добавить обработчик», «Написать тест»</li>
+      <li>Отмечает задачу как «в процессе» когда начинает работу</li>
+      <li>Отмечает как «выполнено» когда закончил</li>
+      <li>Ты видишь прогресс в интерфейсе</li>
+    </ul>
+    <p style="color: var(--text-muted); font-size:0.92em; margin-top:8px;">
+      Подробнее &mdash; в статье <a href="../concepts/task-about.html">Task Tool</a>.
+    </p>
+  </div>
+
+  <div class="card card-green">
+    <h3>Что происходит во время Code</h3>
+    <ul>
+      <li>Claude создаёт/редактирует файлы по плану</li>
+      <li>Запускает тесты после каждого изменения</li>
+      <li>Если тесты упали &mdash; читает ошибку и исправляет</li>
+      <li>Повторяет, пока не добьётся успеха</li>
+      <li>Каждое действие видно и требует approve (если не настроен auto-approve)</li>
+    </ul>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. COMMIT -->
+  <h2 id="commit"><span class="emoji">&#x2705;</span> Commit: закоммитить</h2>
+
+  <p>
+    Когда все изменения готовы и тесты проходят &mdash; Claude делает коммит.
+  </p>
+
+  <div class="card card-purple">
+    <h3>Что делает Claude на этом этапе</h3>
+    <ol>
+      <li><code>git add</code> &mdash; добавляет изменённые файлы</li>
+      <li><code>git commit</code> &mdash; создаёт коммит с описательным сообщением</li>
+    </ol>
+    <p>Сообщение коммита обычно включает:</p>
+    <ul>
+      <li>Краткое описание что сделано</li>
+      <li>Ссылку на задачу (если была)</li>
+      <li>Список изменённых файлов</li>
+    </ul>
+  </div>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Типичный коммит от Claude:</span>
+
+<span style="color: var(--accent);">feat: add reset button to registration form</span>
+
+<span style="color: var(--text-muted);">- Add ResetButton component in src/components/ResetButton.tsx</span>
+<span style="color: var(--text-muted);">- Add handleReset handler in RegistrationForm.tsx</span>
+<span style="color: var(--text-muted);">- Add tests for reset functionality</span></code>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Совет:</strong> Если хочешь чтобы Claude сделал коммит &mdash;
+    скажи явно: «закоммить» или «сделай git commit». Claude не делает коммит
+    автоматически, пока ты не попросишь.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. ПРИМЕР -->
+  <h2 id="example"><span class="emoji">&#x1f469;&#x200d;&#x1f4bb;</span> Пример: кнопка сброса</h2>
+
+  <p>Полный цикл на примере: «Добавить кнопку сброса в форму регистрации».</p>
+
+  <h3>Step 1: Explore</h3>
+  <div class="card card-green">
+    <div class="code-block">
+      <code><span style="color: var(--accent);">Ты:</span> изучи проект и найди где реализована форма регистрации
+
+<span style="color: var(--green);">Claude:</span>
+<span style="color: var(--text-muted);">Читаю структуру проекта...</span>
+<span style="color: var(--text-muted);">Нашёл: src/components/RegistrationForm.tsx</span>
+<span style="color: var(--text-muted);">Зависимости: React, Formik, Yup</span>
+<span style="color: var(--text-muted);">Стили: CSS Modules</span></code>
+    </div>
+  </div>
+
+  <h3>Step 2: Plan</h3>
+  <div class="card card-orange">
+    <div class="code-block">
+      <code><span style="color: var(--accent);">Ты:</span> составь план: как добавить кнопку сброса. Не пиши код.
+
+<span style="color: var(--green);">Claude:</span>
+<span style="color: var(--text-muted);">План:</span>
+<span style="color: var(--text-muted);">1. Создать компонент ResetButton.tsx</span>
+<span style="color: var(--text-muted);">2. Добавить handleReset в RegistrationForm</span>
+<span style="color: var(--text-muted);">3. Вставить кнопку в JSX рядом с Submit</span>
+<span style="color: var(--text-muted);">4. Добавить тест для handleReset</span></code>
+    </div>
+  </div>
+
+  <h3>Step 3: Code</h3>
+  <div class="card card-accent">
+    <div class="code-block">
+      <code><span style="color: var(--accent);">Ты:</span> делай
+
+<span style="color: var(--green);">Claude:</span>
+<span style="color: var(--text-muted);">[Task 1/4] Создаю ResetButton.tsx...</span>
+<span style="color: var(--text-muted);">[Task 2/4] Добавляю handleReset...</span>
+<span style="color: var(--text-muted);">[Task 3/4] Вставляю кнопку в JSX...</span>
+<span style="color: var(--text-muted);">[Task 4/4] Запускаю тесты...</span>
+<span style="color: var(--green);">✓ Все тесты прошли</span></code>
+    </div>
+  </div>
+
+  <h3>Step 4: Commit</h3>
+  <div class="card card-purple">
+    <div class="code-block">
+      <code><span style="color: var(--accent);">Ты:</span> закоммить
+
+<span style="color: var(--green);">Claude:</span>
+<span style="color: var(--text-muted);">$ git add -A</span>
+<span style="color: var(--text-muted);">$ git commit -m "feat: add reset button to registration form"</span>
+<span style="color: var(--green);">[main abc1234] feat: add reset button to registration form</span></code>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 7. СОВЕТЫ -->
+  <h2 id="tips"><span class="emoji">&#x1f4a1;</span> Советы</h2>
+
+  <div class="card card-accent">
+    <h3>Не пропускай Explore</h3>
+    <p>Даже если ты уверен, что знаешь проект &mdash; дай Claude изучить его.
+    Он может найти файлы, которые ты забыл, или показать неочевидные зависимости.</p>
+  </div>
+
+  <div class="card card-green">
+    <h3>Plan Mode для крупных задач</h3>
+    <p>Для задач крупнее «напиши одну функцию» &mdash; обязательно используй Plan Mode.
+    Это сэкономит время: Claude продумает подход до того, как начнёт писать код.</p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>Task Tool для видимости прогресса</h3>
+    <p>Если задача из нескольких шагов &mdash; Claude автоматически создаст todo-лист.
+    Ты видишь прогресс и можешь остановить на любом шаге.</p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Коммит &mdash; отдельный шаг</h3>
+    <p>Claude не коммитит автоматически. Это даёт тебе контроль: можешь проверить
+    diff перед коммитом. Когда готов &mdash; скажи «закоммить».</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Explore (изучи) &rarr; Plan (спланируй) &rarr; Code (реализуй)
+      &rarr; Commit (закоммить). Четыре шага для любой задачи от простой до сложной.
+    </p>
+  </div>
+
+</div>
+
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      &#x270d;&#xfe0f; Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) &middot; июнь 2026
+    </p>
+  </div>
+</body>
+</html>

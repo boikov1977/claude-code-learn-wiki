@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Что такое Claude Code</title>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .comparison-grid .card {
+      margin: 0;
+    }
+
+    @media (max-width: 700px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>&#x1f916; Что такое Claude Code</h1>
+  <p class="subtitle">Агентный ИИ-ассистент для разработки &mdash; от первого запуска до полноценной рабочей сессии</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#what">Что это такое</a></li>
+      <li><a href="#vs-chat">Отличие от чата</a></li>
+      <li><a href="#vs-autocomplete">Отличие от автокомплита</a></li>
+      <li><a href="#where">Где работает</a></li>
+      <li><a href="#who">Кому нужен</a></li>
+      <li><a href="#how">Как начать</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. ЧТО ЭТО -->
+  <h2 id="what"><span class="emoji">&#x1f4a1;</span> Что это такое</h2>
+
+  <p>
+    Claude Code &mdash; это <strong>агентный ИИ-ассистент для разработки</strong> от Anthropic.
+    Он работает прямо в терминале, но также доступен как расширение для VS Code,
+    плагин для JetBrains и в веб-интерфейсе Claude.
+  </p>
+
+  <p>
+    В отличие от обычного чат-бота, Claude Code <strong>видит твой проект</strong>: читает файлы,
+    анализирует структуру, запускает команды, пишет код и проверяет результат. Он не просто
+    «отвечает на вопросы» &mdash; он <em>выполняет задачи</em>.
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Коротко:</strong> Claude Code &mdash; это как нанять джуниор-разработчика, который
+    работает в твоём терминале. Он видит твои файлы, понимает контекст проекта и делает
+    конкретную работу: пишет код, ищет баги, запускает тесты, документирует.
+    Только работает 24/7 и не забывает спросить, прежде чем что-то сломать.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ОТЛИЧИЕ ОТ ЧАТА -->
+  <h2 id="vs-chat"><span class="emoji">&#x2694;&#xfe0f;</span> Отличие от чата</h2>
+
+  <p>
+    Если ты пользовался ChatGPT, Claude.ai или аналогичными чат-ботами &mdash; ты знаешь
+    модель «я спрашиваю &mdash; он отвечает текстом». Claude Code работает иначе:
+  </p>
+
+  <table>
+    <tr>
+      <th></th>
+      <th>Обычный чат (ChatGPT, Claude.ai)</th>
+      <th>Claude Code</th>
+    </tr>
+    <tr>
+      <td><strong>Автономия</strong></td>
+      <td>Отвечает на вопросы. Ты копируешь код вручную.</td>
+      <td>Выполняет задачи: читает файлы, пишет код, запускает команды.</td>
+    </tr>
+    <tr>
+      <td><strong>Контекст проекта</strong></td>
+      <td>Ты копируешь релевантный код. Claude не видит весь проект.</td>
+      <td>Claude Code видит рабочую директорию проекта, может искать и читать что угодно.</td>
+    </tr>
+    <tr>
+      <td><strong>Цикл выполнения</strong></td>
+      <td>Один ответ. Если не получилось &mdash; переспрашивай.</td>
+      <td>Агентный цикл: 5&ndash;50 итераций чтение&rarr;код&rarr;проверка&rarr;исправление.</td>
+    </tr>
+    <tr>
+      <td><strong>Инструменты</strong></td>
+      <td>Текст (иногда генерация кода).</td>
+      <td>Read, Write, Edit, Bash, Glob, Grep, Agent, MCP-инструменты и др.</td>
+    </tr>
+    <tr>
+      <td><strong>Git-интеграция</strong></td>
+      <td>Нет.</td>
+      <td>Может делать коммиты, создавать ветки, запускать diff.</td>
+    </tr>
+  </table>
+
+  <div class="card card-green">
+    <h3>Autonomy &mdash; главная фишка</h3>
+    <p>
+      Ключевое отличие &mdash; <strong>автономность</strong>. Claude Code сам определяет,
+      какие шаги нужны для решения задачи. Он может прочитать 10 файлов, написать 3 новых,
+      запустить тесты и исправить ошибки &mdash; всё в рамках одного запроса. Ты не
+      копируешь код туда-сюда &mdash; ты ставишь задачу и контролируешь процесс.
+    </p>
+  </div>
+
+  <p>
+    Это <strong>project-level</strong> работа: Claude понимает структуру проекта, знает
+    зависимости, видит CLAUDE.md с инструкциями и следует им. Он не забывает контекст
+    между итерациями (в пределах одной сессии).
+  </p>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. ОТЛИЧИЕ ОТ АВТОКОМПЛЕТА -->
+  <h2 id="vs-autocomplete"><span class="emoji">&#x26a1;</span> Отличие от автокомплита</h2>
+
+  <p>
+    Copilot, Tabnine, Codeium и другие &ldquo;AI-автокомплеты&rdquo; &mdash; это другой
+    уровень абстракции. Они работают <em>построчно</em>, Claude Code &mdash; <em>задачами</em>.
+  </p>
+
+  <table>
+    <tr>
+      <th></th>
+      <th>Автокомплет (Copilot, Tabnine)</th>
+      <th>Claude Code</th>
+    </tr>
+    <tr>
+      <td><strong>Уровень</strong></td>
+      <td>Строка/блок кода</td>
+      <td>Задача/фича/файл</td>
+    </tr>
+    <tr>
+      <td><strong>Скорость</strong></td>
+      <td>Мгновенно (по нажатию Tab)</td>
+      <td>Секунды&ndash;минуты (агентный цикл)</td>
+    </tr>
+    <tr>
+      <td><strong>Контекст</strong></td>
+      <td>Текущий файл + открытые табы</td>
+      <td>Весь проект + git-история + CLAUDE.md</td>
+    </tr>
+    <tr>
+      <td><strong>Возможности</strong></td>
+      <td>Дописать строку, предложить параметр</td>
+      <td>Создать файл, запустить тесты, сделать коммит, написать документацию</td>
+    </tr>
+    <tr>
+      <td><strong>Цикл</strong></td>
+      <td>Нет: одна подсказка, одно действие</td>
+      <td>Да: анализ &rarr; план &rarr; код &rarr; проверка &rarr; повтор</td>
+    </tr>
+    <tr>
+      <td><strong>Для чего</strong></td>
+      <td>Ускорить набор кода</td>
+      <td>Выполнить задачу целиком</td>
+    </tr>
+  </table>
+
+  <div class="card card-orange">
+    <h3>Не заменяют, а дополняют</h3>
+    <p>
+      Claude Code и автокомплет &mdash; <strong>не конкуренты</strong>, а компаньоны.
+      Copilot помогает быстро набирать код, Claude Code выполняет целые задачи.
+      Можно использовать оба одновременно: Claude написал функцию &mdash; Copilot
+      помогает дописать вызов.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ГДЕ РАБОТАЕТ -->
+  <h2 id="where"><span class="emoji">&#x1f4bb;</span> Где работает</h2>
+
+  <p>Claude Code доступен в нескольких средах:</p>
+
+  <table>
+    <tr>
+      <th>Среда</th>
+      <th>Как запустить</th>
+      <th>Особенности</th>
+    </tr>
+    <tr>
+      <td><strong>Терминал</strong></td>
+      <td><code>claude</code></td>
+      <td>Основной способ. Полный доступ ко всем функциям.</td>
+    </tr>
+    <tr>
+      <td><strong>VS Code</strong></td>
+      <td>Расширение Claude Code</td>
+      <td>Интеграция с редактором, видит табы и текущий файл.</td>
+    </tr>
+    <tr>
+      <td><strong>JetBrains</strong></td>
+      <td>Плагин Claude Code</td>
+      <td>Для IntelliJ, PyCharm, WebStorm и др.</td>
+    </tr>
+    <tr>
+      <td><strong>Веб (claude.ai)</strong></td>
+      <td>claude.ai &rarr; Claude Code</td>
+      <td>Облачный режим, работает без установки.</td>
+    </tr>
+    <tr>
+      <td><strong>Claude Desktop</strong></td>
+      <td>Приложение Claude</td>
+      <td>Режим Claude Code внутри десктопного клиента.</td>
+    </tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Рекомендация:</strong> Если только начинаешь &mdash; начни с терминала.
+    Это самый быстрый способ почувствовать, как работает агентный цикл.
+    Потом подключи VS Code / JetBrains для комфортной интеграции.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. КОМУ НУЖЕН -->
+  <h2 id="who"><span class="emoji">&#x1f465;</span> Кому нужен</h2>
+
+  <div class="comparison-grid">
+    <div class="card card-green">
+      <h3>&#x2705; Подходит</h3>
+      <ul>
+        <li>Разработчикам, которые хотят автоматизировать рутину</li>
+        <li>Тем, кто работает с большими кодовыми базами</li>
+        <li>Командам, которые хотят AI-ревью кода</li>
+        <li>Тем, кто изучает новый проект и хочет быстрое погружение</li>
+        <li>DevOps и SRE для написания скриптов и документации</li>
+        <li>Любому, кто умеет формулировать задачи письменно</li>
+      </ul>
+    </div>
+
+    <div class="card card-red">
+      <h3>&#x274c; Может не подойти</h3>
+      <ul>
+        <li>Тем, кто работает только с GUI-инструментами и не использует терминал</li>
+        <li>Для задач, где нужна мгновенная обратная связь (IDE-автокомплет быстрее)</li>
+        <li>Для проектов с жёсткими ограничениями на передачу кода во внешние сервисы</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. КАК НАЧАТЬ -->
+  <h2 id="how"><span class="emoji">&#x1f680;</span> Как начать</h2>
+
+  <div class="card card-purple">
+    <h3>Быстрый старт за 3 шага</h3>
+    <ol>
+      <li><strong>Установи:</strong> <code>npm i -g @anthropic-ai/claude-code</code></li>
+      <li><strong>Запусти:</strong> <code>claude</code> в терминале</li>
+      <li><strong>Задай задачу:</strong> напиши что нужно сделать</li>
+    </ol>
+    <p style="margin-top:12px; color: var(--text-muted); font-size:0.92em;">
+      Подробная инструкция по установке и настройке &mdash; в статье
+      <a href="../practice/installation-setup.html">Установка и настройка</a>.
+    </p>
+  </div>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Первый промпт:</strong> Не знаешь с чего начать? Попробуй
+    <code>напиши Python-скрипт для подсчёта строк в файле</code> &mdash; это простая
+    задача, на которой увидишь как работает агентный цикл. Подробнее &mdash;
+    в статье <a href="../practice/first-prompt.html">Твой первый промпт</a>.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Claude Code &mdash; это не чат и не автокомплет.
+      Это агентный ИИ-ассистент, который видит твой проект и выполняет задачи целиком.
+      Установи, запусти, задай задачу &mdash; и увидишь разницу.
+    </p>
+  </div>
+
+</div>
+
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      &#x270d;&#xfe0f; Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) &middot; июнь 2026
+    </p>
+  </div>
+</body>
+</html>

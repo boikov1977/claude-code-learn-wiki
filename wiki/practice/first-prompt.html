@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Твой первый промпт</title>
+  <style>
+    :root {
+      --bg: #fafbfc;
+      --card-bg: #ffffff;
+      --border: #e1e4e8;
+      --text: #24292e;
+      --text-muted: #586069;
+      --accent: #0366d6;
+      --accent-light: #f1f8ff;
+      --code-bg: #f6f8fa;
+      --green: #28a745;
+      --orange: #e36209;
+      --red: #d73a49;
+      --purple: #6f42c1;
+      --teal: #008080;
+      --yellow: #b08800;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, "Helvetica Neue", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 0 16px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.15em;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    h2 .emoji { margin-right: 8px; }
+
+    h3 {
+      font-size: 1.15em;
+      margin: 24px 0 10px;
+      color: var(--accent);
+    }
+
+    p { margin-bottom: 14px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 20px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .card-accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .card-green {
+      border-left: 4px solid var(--green);
+      background: #f6fff8;
+    }
+
+    .card-orange {
+      border-left: 4px solid var(--orange);
+      background: #fff8f0;
+    }
+
+    .card-purple {
+      border-left: 4px solid var(--purple);
+      background: #f8f4ff;
+    }
+
+    .card-red {
+      border-left: 4px solid var(--red);
+      background: #fff5f5;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+      overflow-x: auto;
+      margin: 14px 0;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .yaml-comment {
+      font-style: italic;
+      color: var(--text-muted);
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    .code-block code {
+      background: none;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.92em;
+    }
+
+    th {
+      background: var(--accent-light);
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td {
+      background: #f9fbfd;
+    }
+
+    .tip {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #fffff0;
+      border: 1px solid #f0e68c;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 16px 0;
+      font-size: 0.95em;
+    }
+
+    .tip-icon { font-size: 1.2em; flex-shrink: 0; }
+
+    ul, ol { padding-left: 24px; margin: 10px 0; }
+    li { margin-bottom: 6px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .toc {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin: 24px 0;
+    }
+
+    .toc h3 { margin-top: 0; color: var(--text); }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+
+    .hr-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 40px 0;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.9em;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .step-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .step-content {
+      flex: 1;
+    }
+
+    .step-content h4 {
+      font-size: 1.05em;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .step-content p {
+      margin-bottom: 0;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <a class="back-link" href="../../index.html">&larr; Назад к вики</a>
+
+  <h1>&#x1f4ac; Твой первый промпт</h1>
+  <p class="subtitle">Как сформулировать задачу, что увидишь в ответе и как работает approve/reject цикл</p>
+
+  <!-- СОДЕРЖАНИЕ -->
+  <div class="toc">
+    <h3>Содержание</h3>
+    <ol>
+      <li><a href="#how-to">Как формулировать промпт</a></li>
+      <li><a href="#what-you-see">Что увидишь в ответе</a></li>
+      <li><a href="#approve-reject">Approve / Reject</a></li>
+      <li><a href="#example">Пример: скрипт на Python</a></li>
+      <li><a href="#bad-good">Плохой vs хороший промпт</a></li>
+      <li><a href="#tips">Советы</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. КАК ФОРМУЛИРОВАТЬ -->
+  <h2 id="how-to"><span class="emoji">&#x1f3af;</span> Как формулировать промпт</h2>
+
+  <p>
+    Claude Code работает лучше всего, когда ты даёшь <strong>конкретную задачу</strong>.
+    Не «сделай что-нибудь полезное», а «напиши функцию, которая делает X, с тестом Y».
+  </p>
+
+  <div class="card card-accent">
+    <p><strong>Формула хорошего промпта:</strong></p>
+    <p><strong>Что сделать</strong> + <strong>Где</strong> + <strong>Детали</strong></p>
+    <p style="margin-bottom:0;">
+      «Напиши функцию <code>parse_config(path: str) &rarr; dict</code> в файле
+      <code>utils.py</code>, которая читает YAML-файл и возвращает словарь.
+      Обработай ошибки: если файла нет &mdash; вернуть пустой dict.»
+    </p>
+  </div>
+
+  <p>Ключевые принципы:</p>
+
+  <ul>
+    <li><strong>Конкретика:</strong> Имя функции, файл, поведение при ошибках</li>
+    <li><strong>Границы:</strong> Что именно нужно сделать и что не нужно</li>
+    <li><strong>Контекст:</strong> Какой язык, фреймворк, стиль</li>
+    <li><strong>Критерий готовности:</strong> «Должен пройти тесты», «Должен работать с ...»</li>
+  </ul>
+
+  <hr class="hr-dashed">
+
+  <!-- 2. ЧТО УВИДИШЬ -->
+  <h2 id="what-you-see"><span class="emoji">&#x1f440;</span> Что увидишь в ответе</h2>
+
+  <p>Когда ты отправляешь промпт, Claude Code проходит три фазы:</p>
+
+  <div class="step-row">
+    <span class="step-number">1</span>
+    <div class="step-content">
+      <h4>Анализ</h4>
+      <p>Claude читает файлы проекта, понимает контекст, определяет структуру.
+      Ты видишь сообщения вроде «Читаю utils.py...», «Проверяю зависимости...».</p>
+    </div>
+  </div>
+
+  <div class="step-row">
+    <span class="step-number">2</span>
+    <div class="step-content">
+      <h4>План</h4>
+      <p>Claude описывает, что собирается сделать: «Создам функцию в utils.py,
+      напишу тест в test_utils.py, запущу pytest». Это можно одобрить или поправить.</p>
+    </div>
+  </div>
+
+  <div class="step-row">
+    <span class="step-number">3</span>
+    <div class="step-content">
+      <h4>Код</h4>
+      <p>Claude применяет изменения: создаёт/редактирует файлы, запускает команды.
+      Ты видишь каждый шаг: какой файл изменяется, какая команда запускается.</p>
+    </div>
+  </div>
+
+  <div class="card card-green">
+    <p><strong>Важно:</strong> Claude не делает ничего скрытно. Каждое действие видно
+    в интерфейсе: какой инструмент вызывается, какой файл меняется, какая команда
+    запускается. Ты контролируешь весь процесс.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 3. APPROVE / REJECT -->
+  <h2 id="approve-reject"><span class="emoji">&#x2705;</span> Approve / Reject</h2>
+
+  <p>
+    По умолчанию Claude Code <strong>спрашивает разрешения</strong> перед опасными
+    действиями: запись файлов, запуск команд, удаление. Ты видишь промпт:
+  </p>
+
+  <div class="code-block">
+    <code>Claude wants to Write to utils.py:
+--- (предпросмотр изменений) ---
+
+Allow? [Y/n/quit]</code>
+  </div>
+
+  <table>
+    <tr>
+      <th>Действие</th>
+      <th>Клавиша</th>
+      <th>Что происходит</th>
+    </tr>
+    <tr>
+      <td><strong>Approve</strong></td>
+      <td><code>Y</code> или <code>Enter</code></td>
+      <td>Действие выполняется. Claude продолжает цикл.</td>
+    </tr>
+    <tr>
+      <td><strong>Reject</strong></td>
+      <td><code>n</code></td>
+      <td>Действие отменяется. Claude ищет альтернативу или спрашивает уточнение.</td>
+    </tr>
+    <tr>
+      <td><strong>Quit</strong></td>
+      <td><code>q</code></td>
+      <td>Вся сессия останавливается. Внесённые изменения сохраняются.</td>
+    </tr>
+  </table>
+
+  <div class="card card-orange">
+    <h3>Approve для Read-only &mdash; автоматически</h3>
+    <p>Операции чтения (Read, Glob, Grep) проходят <strong>без вопросов</strong>.
+    Это безопасно: Claude просто смотрит на файлы. Подтверждение нужно только
+    для Write, Edit и Bash.</p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>Auto-approve настраивается</h3>
+    <p>
+      Если тебя достали подтверждения &mdash; настрой auto-approve для конкретных
+      инструментов. Подробнее &mdash; в статье
+      <a href="../concepts/permissions.html">Permissions</a>.
+    </p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 4. ПРИМЕР -->
+  <h2 id="example"><span class="emoji">&#x1f469;&#x200d;&#x1f4bb;</span> Пример: скрипт на Python</h2>
+
+  <p>Полный пример: от промпта до готового результата.</p>
+
+  <h3>Промпт</h3>
+
+  <div class="code-block">
+    <code>напиши Python-скрипт для подсчёта строк в файле.
+На входе — путь к файлу. На выходе — количество строк.
+Добавь обработку ошибок: если файл не найден — вывести сообщение.
+Напиши тест с использованием pytest.</code>
+  </div>
+
+  <h3>Что происходит</h3>
+
+  <div class="code-block">
+    <code><span class="yaml-comment"># Claude анализирует проект...</span>
+<span class="yaml-comment"># Читает существующие файлы</span>
+<span class="yaml-comment"># Определяет: Python проект, pytest для тестов</span>
+
+<span class="yaml-comment"># Claude создаёт функцию:</span>
+<span style="color: var(--green);"># utils.py</span>
+def count_lines(filepath: str) -> int:
+    """Подсчитывает количество строк в файле."""
+    try:
+        with open(filepath, 'r') as f:
+            return sum(1 for _ in f)
+    except FileNotFoundError:
+        print(f"Файл не найден: {filepath}")
+        return 0
+
+<span class="yaml-comment"># Claude создаёт тест:</span>
+<span style="color: var(--green);"># test_utils.py</span>
+from utils import count_lines
+import tempfile, os
+
+def test_count_lines():
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+        f.write("line1\nline2\nline3\n")
+        path = f.name
+    assert count_lines(path) == 3
+    os.unlink(path)
+
+def test_file_not_found():
+    assert count_lines("nonexistent.txt") == 0
+
+<span class="yaml-comment"># Claude запускает тесты:</span>
+<span style="color: var(--accent);">$ pytest test_utils.py -v</span>
+<span style="color: var(--green);">test_utils.py::test_count_lines PASSED</span>
+<span style="color: var(--green);">test_utils.py::test_file_not_found PASSED</span></code>
+  </div>
+
+  <div class="card card-green">
+    <p><strong>Результат:</strong> Два файла созданы, тесты прошли. Claude отвечает:
+    «Функция <code>count_lines</code> готова в <code>utils.py</code>. Тесты в
+    <code>test_utils.py</code> проходят. Функция обрабатывает случай отсутствия файла.»</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 5. ПЛОХОЙ VS ХОРОШИЙ -->
+  <h2 id="bad-good"><span class="emoji">&#x2694;&#xfe0f;</span> Плохой vs хороший промпт</h2>
+
+  <table>
+    <tr>
+      <th>&#x274c; Плохой промпт</th>
+      <th>&#x2705; Хороший промпт</th>
+    </tr>
+    <tr>
+      <td><code>сделай что-нибудь полезное</code></td>
+      <td><code>создай функцию для валидации email в utils.py с тестом</code></td>
+    </tr>
+    <tr>
+      <td><code>почини баг</code></td>
+      <td><code>в файле auth.py функция login падает с TypeError когда password=None</code></td>
+    </tr>
+    <tr>
+      <td><code>напиши документацию</code></td>
+      <td><code>обнови docstring для функции parse_config: добавь описание параметров и примеры</code></td>
+    </tr>
+    <tr>
+      <td><code>оптимизируй код</code></td>
+      <td><code>в functions.py функция find_users делает N+1 запрос к БД. Рефакторни на batch-запрос</code></td>
+    </tr>
+    <tr>
+      <td><code>добавь тесты</code></td>
+      <td><code>напиши тесты для edge cases в utils.py: пустой ввод, None, очень длинная строка</code></td>
+    </tr>
+  </table>
+
+  <div class="tip">
+    <span class="tip-icon">&#x1f4a1;</span>
+    <span><strong>Правило:</strong> Если ты не можешь написать конкретный промпт &mdash;
+    значит, ты сам не до конца понимаешь задачу. Сначала сформулируй для себя:
+    «что именно должно произойти?» &mdash; и только потом пиши Claude.</span>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <!-- 6. СОВЕТЫ -->
+  <h2 id="tips"><span class="emoji">&#x1f4a1;</span> Советы</h2>
+
+  <div class="card card-accent">
+    <h3>1. Начни с простой задачи</h3>
+    <p>Первый промпт не должен быть сложным. Попробуй что-то тривиальное:
+    «напиши функцию hello world с тестом». Цель &mdash; увидеть как работает
+    агентный цикл, а не решить реальную задачу.</p>
+  </div>
+
+  <div class="card card-green">
+    <h3>2. Не бойся отклонять</h3>
+    <p>Если Claude делает не то, что ты хотел &mdash; отклоняй (<code>n</code>)
+    и уточняй промпт. Claude запоминает контекст текущей сессии и адаптируется.</p>
+  </div>
+
+  <div class="card card-orange">
+    <h3>3. Следи за контекстом</h3>
+    <p>Если Claude начинает повторяться или «забывать» ранние шаги &mdash;
+    контекст заполнился. Вызови <code>/compact</code> или начни новую сессию.</p>
+  </div>
+
+  <div class="card card-purple">
+    <h3>4. Используй CLAUDE.md</h3>
+    <p>Для проекта создай <code>CLAUDE.md</code> с инструкциями. Тогда Claude
+    будет знать стек, конвенции и ограничения &mdash; и промпты можно писать короче.</p>
+  </div>
+
+  <hr class="hr-dashed">
+
+  <div class="card" style="text-align:center; border: 2px dashed var(--accent); background: var(--accent-light);">
+    <p style="font-size: 1.1em; margin:0;">
+      <strong>Итого:</strong> Хороший промпт = конкретная задача + где делать + детали.
+      Claude проходит три фазы: анализ &rarr; план &rarr; код. Ты контролируешь через
+      approve/reject. Начни с простой задачи и набирайся опыта.
+    </p>
+  </div>
+
+</div>
+
+  <hr class="hr-dashed">
+  <div class="card" style="text-align:center; border: 1px dashed var(--border); background: var(--card-bg);">
+    <p style="font-size: 0.85em; color: var(--text-muted); margin:0;">
+      &#x270d;&#xfe0f; Статья создана агентом <strong>writer-agent</strong> (claude-go-mimo-v2.5, effort: xhigh) &middot; июнь 2026
+    </p>
+  </div>
+</body>
+</html>
