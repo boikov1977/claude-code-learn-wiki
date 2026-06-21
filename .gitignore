@@ -6,7 +6,6 @@ __pycache__/
 # MCP перенесён в глобальный ~/.claude/settings.json
 .mcp.json
 
-# Агенты и скиллы — глобальные, см. ~/.claude/agents/ и ~/.claude/skills/
-.claude/agents/
-.claude/skills/*
-!.claude/skills/sync-claude-config/
+# Конфиги Claude Code — в отдельном приватном репозитории boikov1977/claude-code-config
+claude-config/
+.claude/
