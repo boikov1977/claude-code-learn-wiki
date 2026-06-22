@@ -6,6 +6,5 @@ __pycache__/
 # MCP перенесён в глобальный ~/.claude/settings.json
 .mcp.json
 
-# Конфиги Claude Code — в отдельном приватном репозитории boikov1977/claude-code-config
-claude-config/
+# runtime-директории
 .claude/
